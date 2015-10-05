@@ -8,7 +8,7 @@
         <table class="table">
         {% for pmgr in pmgrs %}
             <tr><td><a href="{{ path ('formalibreBulletinListEleveProf', {'periode' : periode.id(), 'group' : pmgr.getGroup().id(), 'matiere' : pmgr.getMatiere().id()}) }}">
-                        {{ pmgr.getGroup().Name() }} [{{ pmgr.getMatiere().getViewName() }}]</a> </td></tr>
+                        {{ pmgr.getGroup().Name() }} [{{ pmgr.getMatiere().getCourse().getName() }}]</a> </td></tr>
         {% endfor %}
         </table>
     </div>

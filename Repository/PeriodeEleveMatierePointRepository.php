@@ -5,7 +5,7 @@ namespace FormaLibre\BulletinBundle\Repository;
 use Doctrine\ORM\EntityRepository;
 use Claroline\CoreBundle\Entity\User;
 use FormaLibre\BulletinBundle\Entity\Periode;
-use Laurent\SchoolBundle\Entity\Matiere;
+use Claroline\CursusBundle\Entity\CourseSession;
 
 class PeriodeEleveMatierePointRepository extends EntityRepository
 {
@@ -24,7 +24,7 @@ class PeriodeEleveMatierePointRepository extends EntityRepository
         return $results = $query->getResult();
     }
 
-    public function findPeriodeMatiereEleve(Periode $periode, User $user, Matiere $matiere)
+    public function findPeriodeMatiereEleve(Periode $periode, User $user, CourseSession $matiere)
     {
         $em = $this->getEntityManager();
         $qb = $em->createQueryBuilder();

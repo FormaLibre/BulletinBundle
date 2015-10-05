@@ -15,7 +15,7 @@ use JMS\DiExtraBundle\Annotation as DI;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CoreBundle\Entity\User;
 use FormaLibre\BulletinBundle\Entity\Periode;
-use Laurent\SchoolBundle\Entity\Matiere;
+use Claroline\CursusBundle\Entity\CourseSession;
 
 /**
  * @DI\Service("laurent.manager.totaux_manager")
@@ -134,7 +134,7 @@ class TotauxManager
                 
                 if (!isset($totaux[$matiereId])) {
                     $totaux[$matiereId] = array();
-                    $totaux[$matiereId]['name'] = $matiere->getName();
+                    $totaux[$matiereId]['name'] = $matiere->getCourse()->getName();
                     $totaux[$matiereId]['pourcentage'] = 0;
                     $totaux[$matiereId]['nbPeriodes'] = 0;
                     $totaux[$matiereId]['color'] = $matiere->getColor();
@@ -175,8 +175,9 @@ class TotauxManager
 
         foreach ($pemps as $pemp) {
             $matiere = $pemp->getMatiere();
-            $matiereName = $matiere->getName();
-            $matiereColor = $matiere->getColor();
+            $matiereName = $matiere->getCourse()->getName();
+//            $matiereColor = $matiere->getColor();
+            $matiereColor = '#7BE0A3';
             $pempInCeb = in_array($matiereName, $matCeb) ? true: false;
             $object = new \StdClass();
             $object->label = $matiereName;
@@ -215,7 +216,7 @@ class TotauxManager
         return json_encode($data);
     }
 
-    private function getPourcentageMatierePeriode(Matiere $matiere, User $eleve)
+    private function getPourcentageMatierePeriode(CourseSession $matiere, User $eleve)
     {
         $periodes = $this->periodeRepo->findAll();
         $pourcPeriode = array();
@@ -248,7 +249,7 @@ class TotauxManager
 
             if (!isset($results[$matiereId])) {
                 $results[$matiereId] = array();
-                $results[$matiereId]['matiere'] = $matiere->getName();
+                $results[$matiereId]['matiere'] = $matiere->getCourse()->getName();
                 $results[$matiereId]['presence'] = $presence;
             } else {
                 $results[$matiereId]['presence'] += $presence;
@@ -278,7 +279,7 @@ class TotauxManager
 
             if (!isset($results[$matiereId])) {
                 $results[$matiereId] = array();
-                $results[$matiereId]['matiere'] = $matiere->getName();
+                $results[$matiereId]['matiere'] = $matiere->getCourse()->getName();
                 $results[$matiereId]['comportement'] = $comportement;
             } else {
                 $results[$matiereId]['comportement'] += $comportement;

@@ -4,7 +4,6 @@ namespace FormaLibre\BulletinBundle\Form\Admin;
 
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -29,10 +28,10 @@ class UserDecisionEditType extends AbstractType
             'entity',
             array(
                 'label' => 'Matières',
-                'class' => 'LaurentSchoolBundle:Matiere',
+                'class' => 'ClarolineCursusBundle:CourseSession',
                 'choice_translation_domain' => true,
                 'choices' => $matieres,
-                'property' => 'officialName',
+                'property' => 'name',
                 'expanded' => true,
                 'multiple' => true,
                 'required' => false

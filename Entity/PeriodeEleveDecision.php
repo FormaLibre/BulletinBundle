@@ -3,11 +3,11 @@
 namespace FormaLibre\BulletinBundle\Entity;
 
 use Claroline\CoreBundle\Entity\User;
+use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use FormaLibre\BulletinBundle\Entity\Decision;
 use FormaLibre\BulletinBundle\Entity\Periode;
-use Laurent\SchoolBundle\Entity\Matiere;
 
 /**
  * @ORM\Entity(repositoryClass="FormaLibre\BulletinBundle\Repository\PeriodeEleveDecisionRepository")
@@ -48,7 +48,7 @@ class PeriodeEleveDecision
 
     /**
      * @ORM\ManyToMany(
-     *     targetEntity="Laurent\SchoolBundle\Entity\Matiere"
+     *     targetEntity="Claroline\CursusBundle\Entity\CourseSession"
      * )
      * @ORM\JoinTable(name="formalibre_bulletin_periode_eleve_decision_matieres")
      */
@@ -104,7 +104,7 @@ class PeriodeEleveDecision
         return $this->matieres->toArray();
     }
 
-    public function addMatiere(Matiere $matiere)
+    public function addMatiere(CourseSession $matiere)
     {
         if (!$this->matieres->contains($matiere)) {
             $this->matieres->add($matiere);
@@ -113,7 +113,7 @@ class PeriodeEleveDecision
         return $this;
     }
 
-    public function removeMatiere(Matiere $matiere)
+    public function removeMatiere(CourseSession $matiere)
     {
         if ($this->matieres->contains($matiere)) {
             $this->matieres->removeElement($matiere);

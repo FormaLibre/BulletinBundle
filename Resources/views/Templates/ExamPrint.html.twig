@@ -39,7 +39,7 @@
             {% for key, pemp in pemps[2] %}
                 {% if pemp.point == 999 %}
                     <tr>
-                        <td>{{ pemp.matiere.getOfficialName() }}</td>
+                        <td>{{ pemp.matiere.getCourse().getName() }}</td>
                         <td colspan="3" class="center">Non évalué</td>
                         <td class="center{% if pemps[0][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[0][key].getDisplayPourcentage() }}</td>
                         <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
@@ -47,7 +47,7 @@
                     </tr>
                 {% elseif pemp.point == 111 %}
                     <tr>
-                        <td>{{ pemp.matiere.getOfficialName() }}</td>
+                        <td>{{ pemp.matiere.getCourse().getName() }}</td>
                         <td colspan="3" class="center">Certificat médical</td>
                         <td class="center{% if pemps[0][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[0][key].getDisplayPourcentage() }}</td>
                         <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
@@ -55,7 +55,7 @@
                     </tr>
                 {% elseif pemp.point == 888 %}
                     <tr>
-                        <td>{{ pemp.matiere.getOfficialName() }}</td>
+                        <td>{{ pemp.matiere.getCourse().getName() }}</td>
                         <td colspan="3" class="center">Certificat médical</td>
                         <td class="center{% if pemps[0][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[0][key].getDisplayPourcentage() }}</td>
                         <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
@@ -63,7 +63,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td>{{ pemp.matiere.getOfficialName() }}</td>
+                        <td>{{ pemp.matiere.getCourse().getName() }}</td>
                         <td class="center point{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemp.point }}</td>
                         <td class="center total{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemp.total }}</td>
                         <td class="center{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemp.getDisplayPourcentage() }}</td>

@@ -19,14 +19,14 @@ class PeriodeEleveMatiereRemarque
 
     /**
      * @ORM\ManyToOne(
-     *      targetEntity="FormaLibre\BulletinBundle\Entity\Periode",
+     *      targetEntity="FormaLibre\BulletinBundle\Entity\Periode"
      * )
      */
     private $periode;
 
     /**
      * @ORM\ManyToOne(
-     *      targetEntity="Laurent\SchoolBundle\Entity\Matiere",
+     *      targetEntity="Claroline\CursusBundle\Entity\CourseSession"
      * )
      */
     private $matiere;

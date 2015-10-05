@@ -18,12 +18,14 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use FormaLibre\BulletinBundle\Entity\Decision;
+use FormaLibre\BulletinBundle\Entity\GroupeTitulaire;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use FormaLibre\BulletinBundle\Form\Admin\PeriodeType;
 use FormaLibre\BulletinBundle\Form\Admin\DecisionType;
+use FormaLibre\BulletinBundle\Form\Admin\GroupeTitulaireType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionCreateType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionEditType;
 use Claroline\CoreBundle\Entity\Group;
@@ -53,6 +55,7 @@ class BulletinAdminController extends Controller
     private $pemdRepo;
     private $decisionRepo;
     private $periodeEleveDecisionRepo;
+    private $groupeTitulaireRepo;
     private $om;
     private $em;
     /** @var  string */
@@ -97,14 +100,15 @@ class BulletinAdminController extends Controller
         $this->em                 = $em;
         $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
         $this->userRepo          = $om->getRepository('ClarolineCoreBundle:User');
-        $this->matiereRepo        = $om->getRepository('LaurentSchoolBundle:Matiere');
-        $this->classeRepo        = $om->getRepository('LaurentSchoolBundle:Classe');
+        $this->matiereRepo        = $om->getRepository('ClarolineCursusBundle:CourseSession');
+//        $this->classeRepo        = $om->getRepository('LaurentSchoolBundle:Classe');
         $this->diversRepo        = $om->getRepository('FormaLibreBulletinBundle:PointDivers');
         $this->periodeRepo        = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->pempRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
         $this->pemdRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
         $this->decisionRepo       = $om->getRepository('FormaLibreBulletinBundle:Decision');
         $this->periodeEleveDecisionRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveDecision');
+        $this->groupeTitulaireRepo = $om->getRepository('FormaLibreBulletinBundle:GroupeTitulaire');
     }
 
     /**
@@ -530,6 +534,147 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $this->om->remove($decision);
+        $this->om->flush();
+
+        return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/groupe/titulaires/list",
+     *     name="formalibreBulletinGroupeTitulairesList",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/groupeTitulairesList.html.twig")
+     */
+    public function groupeTitulairesListAction()
+    {
+        $this->checkOpen();
+        $groupeTitulaires = $this->groupeTitulaireRepo->findAll();
+        $titulaireGroups = array();
+
+        foreach ($groupeTitulaires as $groupeTitulaire) {
+            $user = $groupeTitulaire->getUser();
+            $group = $groupeTitulaire->getGroup();
+
+            if (!isset($titulaireGroups[$user->getId()])) {
+                $titulaireGroups[$user->getId()] = array();
+                $titulaireGroups[$user->getId()]['user'] = $user;
+                $titulaireGroups[$user->getId()]['groups'] = array();
+            }
+            $datas = array(
+                'group' => $group,
+                'groupeTitulaireId' => $groupeTitulaire->getId()
+            );
+            $titulaireGroups[$user->getId()]['groups'][] = $datas;
+        }
+
+        return array('titulaireGroups' => $titulaireGroups);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/groupe/titulaire/create/form",
+     *     name="formalibreBulletinGroupeTitulaireCreateForm",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/groupeTitulaireCreateModalForm.html.twig")
+     */
+    public function groupeTitulaireCreateFormAction()
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new GroupeTitulaireType(), new GroupeTitulaire());
+
+        return array('form' => $form->createView());
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/groupe/titulaire/create",
+     *     name="formalibreBulletinGroupeTitulaireCreate",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/groupeTitulaireCreateModalForm.html.twig")
+     */
+    public function groupeTitulaireCreateAction()
+    {
+        $this->checkOpen();
+        $groupeTitulaire = new GroupeTitulaire();
+        $form = $this->formFactory->create(new GroupeTitulaireType(), $groupeTitulaire);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->om->persist($groupeTitulaire);
+            $this->om->flush();
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array('form' => $form->createView());
+        }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/groupe/titulaire/{groupeTitulaire}/edit/form",
+     *     name="formalibreBulletinGroupeTitulaireEditForm",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/groupeTitulaireEditModalForm.html.twig")
+     */
+    public function groupeTitulaireEditFormAction(GroupeTitulaire $groupeTitulaire)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new GroupeTitulaireType(), $groupeTitulaire);
+
+        return array('form' => $form->createView(), 'groupeTitulaire' => $groupeTitulaire);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/groupe/titulaire/{groupeTitulaire}/edit",
+     *     name="formalibreBulletinGroupeTitulaireEdit",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/groupeTitulaireEditModalForm.html.twig")
+     */
+    public function groupeTitulaireEditAction(GroupeTitulaire $groupeTitulaire)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new GroupeTitulaireType(), $groupeTitulaire);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->om->persist($groupeTitulaire);
+            $this->om->flush();
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array(
+                'form' => $form->createView(),
+                'groupeTitulaire' => $groupeTitulaire
+            );
+        }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/groupe/titulaire/{groupeTitulaire}/delete",
+     *     name="formalibreBulletinGroupeTitulaireDelete",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     */
+    public function groupeTitulaireDeleteAction(GroupeTitulaire $groupeTitulaire)
+    {
+        $this->checkOpen();
+        $this->om->remove($groupeTitulaire);
         $this->om->flush();
 
         return new JsonResponse('success', 200);

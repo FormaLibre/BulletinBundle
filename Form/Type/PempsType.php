@@ -2,7 +2,6 @@
 
 namespace FormaLibre\BulletinBundle\Form\Type;
 
-use FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;

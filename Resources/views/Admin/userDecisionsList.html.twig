@@ -21,7 +21,7 @@
                                 {% if decision.getWithMatiere() %}
                                     {% if matieres|length > 0 %}
                                         {% for matiere in matieres %}
-                                            {{ matiere.getOfficialName() }}{% if not loop.last %},{% endif %}
+                                            {{ matiere.getCourse().getName() }}{% if not loop.last %},{% endif %}
                                         {% endfor %}
                                     {% else %}
                                         [ Cliquez sur le bouton <i class="fa fa-cogs btn btn-default disabled"></i> pour ajouter des matières ]

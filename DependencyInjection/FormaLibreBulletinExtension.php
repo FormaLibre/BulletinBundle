@@ -10,7 +10,7 @@ use Symfony\Component\Config\FileLocator;
 /**
  * Loads the core services configuration files.
  */
-class LaurentBulletinExtension extends Extension
+class FormaLibreBulletinExtension extends Extension
 {
     /**
      * {@inheritDoc}
