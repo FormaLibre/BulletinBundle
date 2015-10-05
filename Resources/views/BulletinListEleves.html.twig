@@ -1,0 +1,49 @@
+{% extends "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h1>Élèves du group {{ group.getName() }}</h1>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+        {% set periodeId = periode.getId() %}
+            
+        {% for eleve in eleves %}
+            {% set eleveId = eleve.getId() %}
+            <tr>
+                <td>
+                    <a href="{{ path ('formalibreBulletinEditEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
+                        {{ eleve.getFirstName() }} {{ eleve.getLastName() }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ path ('formalibreBulletinPrintEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
+                        Voir Bulletin officiel
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ path('formalibreBulletinPrintElevePdf', {'periode' : periodeId, 'user' : eleveId}) }}">
+                        Imprimer le bulletin
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ path ('formalibreBulletinShowEleveDataChart', {'eleve' : eleveId}) }}">
+                        Évolution
+                    </a>
+                </td>
+                
+                {% if periode.getOnlyPoint() %}
+                    <td>
+                        <a href="{{ path ('formalibreBulletinUserDecisionsList', {'user' : eleveId, 'periode': periodeId}) }}">
+                            Décisions
+                            {% if decisions[eleveId] is defined %}
+                                <span class="badge">{{ decisions[eleveId] }}</span>
+                            {% endif %}
+                        </a>
+                    </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </table>
+    </div>
+{% endblock %}

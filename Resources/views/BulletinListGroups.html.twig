@@ -1,0 +1,15 @@
+{% extends "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h1>Mes Groupes</h1>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+        {% for pmgr in pmgrs %}
+            <tr><td><a href="{{ path ('formalibreBulletinListEleveProf', {'periode' : periode.id(), 'group' : pmgr.getGroup().id(), 'matiere' : pmgr.getMatiere().id()}) }}">
+                        {{ pmgr.getGroup().Name() }} [{{ pmgr.getMatiere().getViewName() }}]</a> </td></tr>
+        {% endfor %}
+        </table>
+    </div>
+{% endblock %}

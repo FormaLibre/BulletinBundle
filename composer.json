@@ -1,0 +1,24 @@
+{
+    "name": "formalibre/bulletin-bundle",
+    "description": "Claroline plugin adding Bulletin",
+    "keywords": ["Claroline", "Plugin", "School", "Ecole", "Bulletin"],
+    "homepage": "http://www.claroline.net",
+    "type": "claroline-plugin",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Laurent Gruber",
+            "email": "laurent@sk1.be",
+            "homepage": "www.claroline.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.1",
+        "claroline/core-bundle": "~6.0",
+        "claroline/cursus-bundle": "~6.0"
+    },
+    "autoload": {
+        "psr-0": { "FormaLibre\\BulletinBundle": "" }
+    },
+    "target-dir": "FormaLibre/BulletinBundle"
+}

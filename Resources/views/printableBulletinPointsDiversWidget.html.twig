@@ -1,0 +1,14 @@
+{% if pointsDivers|length > 0 %}
+    <table class="table table-bordered table-striped">
+        <tr>
+            {% for points in pointsDivers %}
+                {% if points['withTotal'] %}
+                    <td>
+                        <b>{{ points['name'] }} :</b>
+                        {{ points['value'] }}
+                    </td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    </table>
+{% endif %}

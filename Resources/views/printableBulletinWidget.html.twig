@@ -1,0 +1,41 @@
+<div class="row">
+    {{ render(controller('FormaLibreBulletinBundle:Bulletin:showDataChart', { 'eleve': user.getId() } )) }}
+</div>
+<div class="row">
+
+    <div class="col-xs-6">
+        <small>
+            <table class="table table-bordered table-striped">
+                <tr>
+                    {% for totaux in totauxMatieresCeb %}
+                        {% if loop.index0 > 0 and loop.index0 is divisible by(3) %}
+                            </tr>
+                            <tr>
+                        {% endif %}
+                        <td style="background-color: {{ totaux['color'] }}">
+                            <b class="small">{{ totaux['name'] }}</b>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </small>
+    </div>
+
+    <div class="col-xs-6">
+        <small>
+            <table class="table table-bordered table-striped">
+                <tr>
+                    {% for totaux in totauxMatieresNoCeb %}
+                        {% if loop.index0 > 0 and loop.index0 is divisible by(3) %}
+                            </tr>
+                            <tr>
+                        {% endif %}
+                        <td style="background-color: {{ totaux['color'] }}">
+                            <b class="small">{{ totaux['name'] }}</b>
+                        </td>       
+                    {% endfor %}
+                </tr>
+            </table>
+        </small>
+    </div>
+</div>

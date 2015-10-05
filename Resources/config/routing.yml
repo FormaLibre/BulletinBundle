@@ -1,0 +1,7 @@
+formalibre_bulletin_controller:
+    resource: "@FormaLibreBulletinBundle/Controller/BulletinController.php"
+    type:     annotation
+
+formalibre_bulletin_admin_controller:
+    resource: "@FormaLibreBulletinBundle/Controller/BulletinAdminController.php"
+    type:     annotation

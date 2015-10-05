@@ -1,0 +1,20 @@
+<form
+        role="form"
+        id="Periode-form"
+        class="form-horizontal"
+        action="{{ action }}"
+        method="post"
+        {{ form_enctype(form) }}
+        >
+    <div class="panel-body">
+        {{ form_widget(form) }}
+    </div>
+    <div class="form-actions panel-footer">
+        <button id="form-Periode-ok-btn" type="submit" class="btn btn-primary">
+            {{ 'ok'|trans({}, 'platform') }}
+        </button>
+        <button id="form-cancel-btn" type="button" class="btn btn-default">
+            {{ 'cancel'|trans({}, 'platform') }}
+        </button>
+    </div>
+</form>

@@ -1,0 +1,31 @@
+{% extends "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h1>Bulletin</h1>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            {% for periode in periodes %}
+                <div class="col-xs-3">
+                    <div class="panel panel-default">
+                        <div class="panel-heading text-center"">
+                        {{ periode.Name }} - {{ attribute(periodeCompleted, periode.Id) }}
+                        </div>
+                    </div>
+                    <div class="panel-body text-center">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="{{ attribute(periodeCompleted, periode.Id) }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ attribute(periodeCompleted, periode.Id) }}%;">
+                                {{ attribute(periodeCompleted, periode.Id) }}%
+                            </div>
+                        </div>
+                        <div class="btn btn-default" role="button">
+                            <a href="{{ path('formalibreBulletinListMyGroup', {'periode' : periode.id()}) }}"> <i class="fa fa-search fa-3x "></i></a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

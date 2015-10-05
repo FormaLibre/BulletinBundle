@@ -1,0 +1,16 @@
+<span>
+    {% if comportements|length > 0 %}
+        <table class="table table-bordered table-striped">
+            {% for comportement in comportements %}
+                <tr>
+                    <td {% if comportement['comportement'] < 5 %}style="background-color: #F74747"{% endif %}>
+                        {{ comportement['matiere'] }}
+                    </td>
+                    <td {% if comportement['comportement'] < 5 %}style="background-color: #F74747"{% endif %}>
+                        {{ comportement['comportement'] }} / 10
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</span>

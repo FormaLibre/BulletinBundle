@@ -1,0 +1,30 @@
+<div id="modal-decision-create-form" class="modal-dialog" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                &times;
+            </button>
+            <h3 class="modal-title">
+                Ajouter une décision
+            </h3>
+        </div>
+        <div class="modal-body">
+            <form id="decision-create-form"
+                  action="{{ path('formalibreBulletinUserDecisionCreate', {'user': user.getId(), 'periode': periode.getId()}) }}"
+                  method="POST"
+                  {{ form_enctype(form) }}
+            > 
+                {% form_theme form 'ClarolineCoreBundle::form_theme_no_label.html.twig' %}
+                {{ form_widget(form) }}
+            </form>
+        </div>
+        <div class="modal-footer">
+            <span class="btn btn-default" data-dismiss="modal">
+                Annuler
+            </span>
+            <button type="submit" id='create-btn' class="btn btn-primary">
+                OK
+            </button>
+        </div>
+    </div>
+</div>

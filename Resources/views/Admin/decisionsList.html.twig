@@ -1,0 +1,55 @@
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h1>Liste des décisions</h1>
+    </div>
+    <div class="panel-body">
+        {% if decisions|length > 0 %}
+            <div class="table-responsive">
+                <table class="table">
+                    {% for decision in decisions %}
+                        <tr>
+                            <td>
+                                {{ decision.getContent() }}
+                                
+                                {% if decision.getWithMatiere() %}
+                                    [ Liste de matières ]
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="btn btn-default edit-decision-btn"
+                                      data-decision-id="{{ decision.getId() }}"
+                                >
+                                    <i class="fa fa-edit"></i>
+                                </span>
+                                <span class="btn btn-danger delete-decision-btn"
+                                      data-decision-id="{{ decision.getId() }}"
+                                >
+                                    <i class="fa fa-trash">
+                                    </i>
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                Aucune décision
+            </div>
+        {% endif %}
+        <br>
+        <span class="btn btn-primary" id="decision-create-btn">
+            <i class="fa fa-plus-circle"></i>
+            Ajouter une décision
+        </span>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src='{{ asset('bundles/formalibrebulletin/js/decisionsList.js') }}'
+            type="text/javascript">
+    </script>
+{% endblock %} 

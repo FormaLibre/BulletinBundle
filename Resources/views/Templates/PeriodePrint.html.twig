@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr" moznomarginboxes mozdisallowselectionprint>
+<head>
+    <meta charset="utf-8">
+    <title>Bulletin</title>
+    <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bootstrap.css')}}"/>
+    <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bulletin.css')}}"/>
+    <script type="text/javascript" src='{{ asset('bundles/frontend/jquery/jquery-2.1.0.min.js') }}'></script>
+    <script type="text/javascript" src='{{ asset('bundles/formalibrebulletin/js/bootstrap.js') }}'></script>
+    <script type="text/javascript" src='{{ asset('bundles/formalibrebulletin/js/bulletinPrint.js') }}'></script>
+</head>
+<body>
+<div class="container" id="content">
+    <div class="row">
+        <div class="col-xs-3"><img src="http://www.fransfischer.be/logoFFnb.png" height="150px"></div>
+        <div class="col-xs-7" id="title-box">
+            <h1>Bulletin</h1>
+            <h1><small>{{ periode.name }}</small></h1>
+        </div>
+        <div class="col-xs-2" id="NomEleve">
+            2014-2015<br>
+            {{ eleve.getLastName() }}<br>
+            {{ eleve.getFirstName() }}
+        </div>
+    </div> <!-- /row -->
+    <hr style="visibility: hidden;">
+    <div class="row">
+        <table id="TableauRes" class="table table-bordered">
+            <thead><tr>
+                <th>Intitulé matière</th>
+                <th class="center">Point</th>
+                <th class="center">Total</th>
+                <th class="center">%</th>
+                <th class="center">Comportement</th>
+                <th class="center">Présence</th>
+            </tr></thead>
+            <tbody>
+            {% for pemp in pemps %}
+            {% if pemp.point == 999 %}
+                <tr>
+                    <td>{{ pemp.matiere.getOfficialName() }}</td>
+                    <td colspan="5" class="center">Non évalué</td>
+                </tr>
+            {% elseif pemp.point == 111 %}
+                <tr>
+                    <td>{{ pemp.matiere.getOfficialName() }}</td>
+                    <td colspan="5" class="center">Certificat médical</td>
+                </tr>
+            {% elseif pemp.point == 888 %}
+                <tr>
+                    <td>{{ pemp.matiere.getOfficialName() }}</td>
+                    <td colspan="5" class="center">Certificat médical</td>
+                </tr>
+            {% else %}
+                <tr class="">
+                    <td>{{ pemp.matiere.getOfficialName() }}</td>
+                    <td class="center point">{{ pemp.point }}</td>
+                    <td class="center total">{{ pemp.total }}</td>
+                    <td class="center pourcent" data="{{ pemp.total }}"></td>
+                    {% if pemp.comportement < 850 %}
+                        <td class="center">{{ pemp.comportement }} / 10</td>
+                    {% else %}
+                        <td class="center">NE</td>
+                    {% endif %}
+                    {% if pemp.comportement < 850 %}
+                        <td class="center">{{ pemp.presence }} %</td>
+                    {% else %}
+                        <td class="center">NE</td>
+                    {% endif %}
+                </tr>
+            {% endif %}
+            {% endfor %}
+            </tbody>
+            <thead><tr>
+                <th>Total</th>
+                <th class="center" id="totPoint"></th>
+                <th class="center" id="totTot"></th>
+                <th class="center" id="totPour"> %</th>
+                <th colspan="2"></th>
+            </tr></thead>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-xs-8" id="remarque">
+            <div class="panel panel-default" >
+                <div class="panel-heading">
+                    Remarques
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4" id="pointDivers">
+            <table class="table table-bordered">
+                {% for pemd in pemds %}
+                    <tr>
+                        <th>{{ pemd.divers.getName() }}</th>
+                        <td>{{ pemd.point }} {% if pemd.divers.getWithTotal() == 1 %} / {{ pemd.total }} {% endif %} </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="panel panel-default center" id="reunion">
+            {{ periode.ReunionParent|raw }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature du directeur
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature du titulaire
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature de l'élève
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature des parents
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- /container -->
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr" moznomarginboxes mozdisallowselectionprint>
+<head>
+    <meta charset="utf-8">
+    <title>Bulletin</title>
+    <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bootstrap.css')}}"/>
+    <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bulletin.css')}}"/>
+    <script type="text/javascript" src='{{ asset('bundles/frontend/jquery/jquery-2.1.0.min.js') }}'></script>
+    <script type="text/javascript" src='{{ asset('bundles/formalibrebulletin/js/bootstrap.js') }}'></script>
+    <script type="text/javascript" src='{{ asset('bundles/formalibrebulletin/js/bulletinPrint.js') }}'></script>
+</head>
+<body>
+<div class="container" id="content">
+    <div class="row">
+        <div class="col-xs-3"><img src="http://www.fransfischer.be/logoFFnb.png" height="130px"></div>
+        <div class="col-xs-7" id="title-box">
+            <h1>Bulletin</h1>
+            <h1><small>{{ periode.name }}</small></h1>
+        </div>
+        <div class="col-xs-2" id="NomEleve">
+            2014-2015<br>
+            {{ eleve.getLastName() }}<br>
+            {{ eleve.getFirstName() }}
+        </div>
+    </div> <!-- /row -->
+
+    <div class="row">
+        <table id="TableauRes" class="table table-bordered">
+            <thead><tr>
+                <th>Intitulé matière</th>
+                <th class="center">Point</th>
+                <th class="center">Total</th>
+                <th class="center">%</th>
+                <th class="center">Période 1</th>
+                <th class="center">Période 2</th>
+                <th class="center">Récapitulatif</th>
+            </tr></thead>
+            <tbody>
+            {% for key, pemp in pemps[2] %}
+                {% if pemp.point == 999 %}
+                    <tr>
+                        <td>{{ pemp.matiere.getOfficialName() }}</td>
+                        <td colspan="3" class="center">Non évalué</td>
+                        <td class="center{% if pemps[0][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[0][key].getDisplayPourcentage() }}</td>
+                        <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
+                        <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">{{ totauxMatieres[key] }} %</td>
+                    </tr>
+                {% elseif pemp.point == 111 %}
+                    <tr>
+                        <td>{{ pemp.matiere.getOfficialName() }}</td>
+                        <td colspan="3" class="center">Certificat médical</td>
+                        <td class="center{% if pemps[0][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[0][key].getDisplayPourcentage() }}</td>
+                        <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
+                        <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">{{ totauxMatieres[key] }} %</td>
+                    </tr>
+                {% elseif pemp.point == 888 %}
+                    <tr>
+                        <td>{{ pemp.matiere.getOfficialName() }}</td>
+                        <td colspan="3" class="center">Certificat médical</td>
+                        <td class="center{% if pemps[0][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[0][key].getDisplayPourcentage() }}</td>
+                        <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
+                        <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">{{ totauxMatieres[key] }} %</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>{{ pemp.matiere.getOfficialName() }}</td>
+                        <td class="center point{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemp.point }}</td>
+                        <td class="center total{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemp.total }}</td>
+                        <td class="center{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemp.getDisplayPourcentage() }}</td>
+                        <td class="center{% if pemps[0][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[0][key].getDisplayPourcentage() }}</td>
+                        <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
+                        <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">{{ totauxMatieres[key] }} %</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+            <thead><tr>
+                <th>Total</th>
+
+                        <th class="center{% if totaux[2].totalPourcentage < 50%} echec {% endif %}">{{ totaux[2].totalPoint }}</th>
+                        <th class="center{% if totaux[2].totalPourcentage < 50%} echec {% endif %}">{{ totaux[2].totalTotal }}</th>
+                        <th class="center{% if totaux[2].totalPourcentage < 50%} echec {% endif %}" >{{ totaux[2].totalPourcentage }}</th>
+                        <th class="center{% if totaux[0].totalPourcentage < 50%} echec {% endif %}">{{ totaux[0].totalPourcentage }}</th>
+                        <th class="center{% if totaux[1].totalPourcentage < 50%} echec {% endif %}">{{ totaux[1].totalPourcentage }}</th>
+                        <th class="center{% if recap < 50%} echec {% endif %}">{{ recap }} %</th>
+
+            </tr></thead>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 exam" id="remarque">
+            <div class="panel panel-default" >
+                <div class="panel-heading">
+                    Remarques
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="panel panel-default center" id="reunion">
+            {{ periode.ReunionParent|raw }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature du directeur
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature du titulaire
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature de l'élève
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature des parents
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- /container -->
+</body>
+</html>
