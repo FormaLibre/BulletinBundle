@@ -18,7 +18,7 @@ class FormaLibreBulletinBundle extends PluginBundle implements ConfigurationProv
 
     public function hasMigrations()
     {
-        return true;
+        return false;
     }
 
     public function getRequiredFixturesDirectory($env){
