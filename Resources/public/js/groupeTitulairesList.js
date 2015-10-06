@@ -3,22 +3,19 @@
     
     $('#groupe-titulaire-create-btn').on('click', function () {
         window.Claroline.Modal.displayForm(
-            Routing.generate(
-                'formalibreBulletinGroupeTitulaireCreateForm',
-                {'user': userId, 'periode': periodeId}
-            ),
+            Routing.generate('formalibreBulletinGroupeTitulaireCreateForm'),
             refreshPage,
             function() {}
         );
     });
     
     $('.edit-groupe-titulaire-btn').on('click', function () {
-        var groupTitulaireId = $(this).data('groupe-titulaire-id');
+        var groupeTitulaireId = $(this).data('groupe-titulaire-id');
         
         window.Claroline.Modal.displayForm(
             Routing.generate(
                 'formalibreBulletinGroupeTitulaireEditForm',
-                {'groupTitulaire': groupTitulaireId}
+                {'groupeTitulaire': groupeTitulaireId}
             ),
             refreshPage,
             function() {}
@@ -26,12 +23,12 @@
     });
     
     $('.delete-groupe-titulaire-btn').on('click', function () {
-        var groupTitulaireId = $(this).data('groupe-titulaire-id');
+        var groupeTitulaireId = $(this).data('groupe-titulaire-id');
 
         window.Claroline.Modal.confirmRequest(
             Routing.generate(
                 'formalibreBulletinGroupeTitulaireDelete',
-                {'groupTitulaire': groupTitulaireId}
+                {'groupeTitulaire': groupeTitulaireId}
             ),
             refreshPage,
             null,

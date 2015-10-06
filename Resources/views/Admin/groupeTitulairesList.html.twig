@@ -12,23 +12,26 @@
                 {% set user = titulaireGroup['user'] %}
                 <h4>{{ user.getFirstName() }} {{ user.getLastName() }}</h4>
                 
-                <ul class="list-unstyled">
+                <ul>
                     
                     {% for datas in titulaireGroup['groups'] %}
                         {% set group = datas['group'] %}
                         <li>
                             {{ group.getName() }}
-                            <i class="fa fa-edit edit-groupe-titulaire-btn pointer-hand"
-                               data-groupe-titulaire-id="{{ datas['groupeTitulaireId'] }}"
-                            >
-                            </i>
-                            <i class="fa fa-trash delete-groupe-titulaire-btn pointer-hand"
+                            <span class="btn btn-default btn-sm edit-groupe-titulaire-btn"
                                   data-groupe-titulaire-id="{{ datas['groupeTitulaireId'] }}"
                             >
-                            </i>
+                                <i class="fa fa fa-edit"></i>
+                            </span>
+                            <span class="btn btn-danger btn-sm delete-groupe-titulaire-btn"
+                                  data-groupe-titulaire-id="{{ datas['groupeTitulaireId'] }}"
+                            >
+                                <i class="fa fa-trash"></i>
+                            </span>
                         </li>
                     {% endfor %}
                 </ul>
+                <hr>
             {% endfor %}
         {% else %}
             <div class="alert alert-warning">
@@ -45,7 +48,7 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src='{{ asset('bundles/formalibrebulletin/js/groupTitulairesList.js') }}'
+    <script src='{{ asset('bundles/formalibrebulletin/js/groupeTitulairesList.js') }}'
             type="text/javascript">
     </script>
 {% endblock %} 
