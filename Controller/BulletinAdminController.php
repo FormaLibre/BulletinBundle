@@ -30,6 +30,7 @@ use FormaLibre\BulletinBundle\Form\Admin\UserDecisionCreateType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionEditType;
 use Claroline\CoreBundle\Entity\Group;
 use Claroline\CoreBundle\Entity\User;
+use Claroline\CursusBundle\Entity\CourseSession;
 
 class BulletinAdminController extends Controller
 {
@@ -239,7 +240,20 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $periode = new Periode();
-        $form = $this->createForm(new PeriodeType, $periode);
+        $sessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_OPEN);
+        $datas = array();
+
+        foreach ($sessions as $session) {
+            $course = $session->getCourse();
+            $courseName = $course->getTitle() . ' [' . $course->getCode() . ']';
+
+            if (!isset($datas[$courseName])) {
+                $datas[$courseName] = array();
+            }
+            $datas[$courseName][$session->getId()] = $session;
+        }
+
+        $form = $this->createForm(new PeriodeType($datas), $periode);
 
         if ($request->getMethod() === 'POST') {
             $form->handleRequest($request);
@@ -265,8 +279,20 @@ class BulletinAdminController extends Controller
     public function adminSchoolPeriodeEditAction(Request $request, Periode $periode)
     {
         $this->checkOpen();
+        $sessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_OPEN);
+        $datas = array();
 
-       $form = $this->createForm(new PeriodeType, $periode);
+        foreach ($sessions as $session) {
+            $course = $session->getCourse();
+            $courseName = $course->getTitle() . ' [' . $course->getCode() . ']';
+
+            if (!isset($datas[$courseName])) {
+                $datas[$courseName] = array();
+            }
+            $datas[$courseName][$session->getId()] = $session;
+        }
+
+        $form = $this->createForm(new PeriodeType($datas), $periode);
 
         if ($request->getMethod() === 'POST') {
             $form->handleRequest($request);

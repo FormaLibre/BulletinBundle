@@ -2,6 +2,8 @@
 
 namespace FormaLibre\BulletinBundle\Entity;
 
+use Claroline\CursusBundle\Entity\CourseSession;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -56,6 +58,19 @@ class Periode
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $onlyPoint;
+
+    /**
+     * @ORM\ManyToMany(
+     *     targetEntity="Claroline\CursusBundle\Entity\CourseSession"
+     * )
+     * @ORM\JoinTable(name="formalibre_bulletin_periode_matieres")
+     */
+    protected $matieres;
+
+    public function __construct()
+    {
+        $this->matieres = new ArrayCollection();
+    }
 
     /**
      * @return mixed
@@ -193,6 +208,26 @@ class Periode
         return $this->onlyPoint;
     }
 
+    public function getMatieres()
+    {
+        return $this->matieres->toArray();
+    }
 
+    public function addMatiere(CourseSession $matiere)
+    {
+        if (!$this->matieres->contains($matiere)) {
+            $this->matieres->add($matiere);
+        }
 
+        return $this;
+    }
+
+    public function removeMatiere(CourseSession $matiere)
+    {
+        if ($this->matieres->contains($matiere)) {
+            $this->matieres->removeElement($matiere);
+        }
+
+        return $this;
+    }
 }
