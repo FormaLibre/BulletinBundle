@@ -10,6 +10,13 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class GroupeTitulaireType extends AbstractType
 {
+    private $groups;
+
+    public function __construct(array $groups = array())
+    {
+        $this->groups = $groups;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add(
@@ -30,15 +37,17 @@ class GroupeTitulaireType extends AbstractType
             'entity',
             array(
                 'class' => 'ClarolineCoreBundle:Group',
-                'query_builder' => function (EntityRepository $er) {
-
-                    return $er->createQueryBuilder('g')
-                        ->orderBy('g.name', 'ASC');
-                },
+//                'query_builder' => function (EntityRepository $er) {
+//
+//                    return $er->createQueryBuilder('g')
+//                        ->orderBy('g.name', 'ASC');
+//                },
+                'choices' => $this->groups,
                 'property' => 'name',
                 'required' => true,
                 'multiple' => false,
-                'label' => 'Groupe'
+                'label' => 'Groupe',
+                'constraints' => new NotBlank()
             )
         );
     }

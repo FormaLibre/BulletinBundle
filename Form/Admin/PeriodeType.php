@@ -12,7 +12,7 @@ class PeriodeType extends AbstractType
 {
     private $datas;
 
-    public function __construct($datas)
+    public function __construct(array $datas = array())
     {
         $this->datas = $datas;
     }
