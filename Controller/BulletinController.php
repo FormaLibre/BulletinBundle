@@ -44,8 +44,6 @@ class BulletinController extends Controller
     private $userRepo;
     /** @var ClassRepository */
     private $classRepo;
-    /** @var ProfMatiereGroupRepository */
-    private $pmgrRepo;
     /** @var PeriodeRepository */
     private $periodeRepo;
     private $totauxManager;
@@ -86,7 +84,6 @@ class BulletinController extends Controller
         $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
         $this->userRepo           = $om->getRepository('ClarolineCoreBundle:User');
 //        $this->classeRepo         = $om->getRepository('LaurentSchoolBundle:Classe');
-//        $this->pmgrRepo           = $om->getRepository('LaurentSchoolBundle:ProfMatiereGroup');
         $this->periodeRepo        = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->totauxManager      = $totauxManager;
         $this->periodeEleveDecisionRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveDecision');
@@ -296,16 +293,16 @@ class BulletinController extends Controller
     public function listEleveProfAction(Periode $periode, Group $group, CourseSession $matiere)
     {
         $this->checkOpen();
+        $editMatiereUrl = $this->generateUrl(
+            'formalibreBulletinEditMatiere',
+            array(
+                'periode' => $periode->getId(),
+                'matiere' => $matiere->getId(),
+                'group' => $group->getId()
+            )
+        );
 
-        if ($matiere->getName() == 'Titulaire'){
-            $titulaireUrl = $this->generateUrl('formalibreBulletinListEleve', array('periode' => $periode->getId(), 'group' => $group->getId()));
-            return $this->redirect($titulaireUrl);
-        }
-        else {
-            $editMatiereUrl = $this->generateUrl('formalibreBulletinEditMatiere', array('periode' => $periode->getId(), 'matiere' => $matiere->getId(), 'group' => $group->getId()));
-            return $this->redirect($editMatiereUrl);
-        }
-
+        return $this->redirect($editMatiereUrl);
     }
 
     /**
