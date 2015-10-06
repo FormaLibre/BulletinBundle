@@ -336,8 +336,7 @@ class BulletinController extends Controller
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
-            //if ($form->isValid()) {
-              //  throw new \Exception('toto');
+
             foreach ($pempCollection as $pemp){
                 $this->em->persist($pemp);
             }
@@ -348,10 +347,6 @@ class BulletinController extends Controller
                 : $this->generateUrl('formalibreBulletinEditEleve', array('periode' => $periode->getId(), 'eleve' => $eleve->getId()));
 
                 return $this->redirect($nextAction);
-            //}
-           // else {
-           //     throw new \Exception('tata');
-           // }
         }
 
         return array('form' => $form->createView(), 'eleve' => $eleve, 'periode' => $periode);

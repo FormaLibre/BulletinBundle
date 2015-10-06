@@ -37,11 +37,6 @@ class GroupeTitulaireType extends AbstractType
             'entity',
             array(
                 'class' => 'ClarolineCoreBundle:Group',
-//                'query_builder' => function (EntityRepository $er) {
-//
-//                    return $er->createQueryBuilder('g')
-//                        ->orderBy('g.name', 'ASC');
-//                },
                 'choices' => $this->groups,
                 'property' => 'name',
                 'required' => true,
