@@ -22,13 +22,13 @@ use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Form\Type\PempsType;
 use FormaLibre\BulletinBundle\Form\Type\MatiereType;
+use FormaLibre\BulletinBundle\Manager\BulletinManager;
 use Claroline\CursusBundle\Entity\CourseSession;
-use Claroline\CoreBundle\Event\StrictDispatcher;
 
 class BulletinController extends Controller
 {
     private $authorization;
-    private $eventDispatcher;
+    private $bulletinManager;
     private $toolManager;
     private $roleManager;
     private $userManager;
@@ -51,23 +51,21 @@ class BulletinController extends Controller
     private $totauxManager;
     private $periodeEleveDecisionRepo;
 
-
     /**
      * @DI\InjectParams({
      *      "authorization"      = @DI\Inject("security.authorization_checker"),
-     *      "eventDispatcher"    = @DI\Inject("claroline.event.event_dispatcher"),
+     *      "bulletinManager"    = @DI\Inject("formalibre.manager.bulletin_manager"),
      *      "toolManager"        = @DI\Inject("claroline.manager.tool_manager"),
      *      "roleManager"        = @DI\Inject("claroline.manager.role_manager"),
      *      "userManager"        = @DI\Inject("claroline.manager.user_manager"),
      *      "em"                 = @DI\Inject("doctrine.orm.entity_manager"),
      *      "om"                 = @DI\Inject("claroline.persistence.object_manager"),
-     *      "totauxManager"      = @DI\Inject("laurent.manager.totaux_manager"),
+     *      "totauxManager"      = @DI\Inject("laurent.manager.totaux_manager")
      * })
      */
-
     public function __construct(
         AuthorizationCheckerInterface $authorization,
-        StrictDispatcher $eventDispatcher,
+        BulletinManager $bulletinManager,
         ToolManager $toolManager,
         RoleManager $roleManager,
         UserManager $userManager,
@@ -77,7 +75,7 @@ class BulletinController extends Controller
       )
     {
         $this->authorization      = $authorization;
-        $this->eventDispatcher    = $eventDispatcher;
+        $this->bulletinManager    = $bulletinManager;
         $this->toolManager        = $toolManager;
         $this->roleManager        = $roleManager;
         $this->userManager        = $userManager;
@@ -202,22 +200,7 @@ class BulletinController extends Controller
         $this->checkOpen();
         $groups = array();
         if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN')){
-            $params = array(
-                'tag' => 'Classe',
-                'strict' => true,
-                'class' => 'Claroline\CoreBundle\Entity\Group',
-                'object_response' => true,
-                'ordered_by' => 'name',
-                'order' => 'ASC'
-            );
-
-            $event = $this->eventDispatcher->dispatch(
-                'claroline_retrieve_tagged_objects',
-                'GenericDatas',
-                array($params)
-            );
-            $taggedGroups = $event->getResponse();
-            $groups = empty($taggedGroups) ? array() : $taggedGroups;
+            $groups = $this->bulletinManager->getTaggedGroups();
 
             $content = $this->renderView('FormaLibreBulletinBundle::Admin/BulletinListClasses.html.twig',
                 array('periode' => $periode, 'groups' => $groups)
@@ -226,9 +209,13 @@ class BulletinController extends Controller
         }
 
         elseif ($this->authorization->isGranted('ROLE_PROF')){
-            $pmgrs = $this->pmgrRepo->findByProf($user);
+            $myGroups = $this->bulletinManager->getGroupsByTitulaire($user);
+            $datas = $this->bulletinManager->getMatiereGroupsByUserAndPeriode(
+                $user,
+                $periode
+            );
             $content = $this->renderView('FormaLibreBulletinBundle::BulletinListGroups.html.twig',
-                array('periode' => $periode, 'pmgrs' => $pmgrs)
+                array('periode' => $periode, 'datas' => $datas, 'myGroups' => $myGroups)
                 );
             return new Response($content);
         }
@@ -256,12 +243,31 @@ class BulletinController extends Controller
     public function listMyGroupAction(Periode $periode, User $user)
     {
         $this->checkOpen();
-        $groups = array();
+        $datas = array();
+        $groups = $this->bulletinManager->getTaggedGroups();
+        $groupIds = array();
+
+        foreach ($groups as $group) {
+            $groupIds[] = $group->getId();
+        }
+        $matieres = $periode->getMatieres();
+
+        if (count($groupIds) > 0) {
+
+            foreach ($matieres as $matiere) {
+                $datas[$matiere->getId()] = array();
+            }
+        }
 
         if ($this->authorization->isGranted('ROLE_PROF')){
-            $pmgrs = $this->pmgrRepo->findByProf($user);
-            $content = $this->renderView('FormaLibreBulletinBundle::BulletinListGroups.html.twig',
-                array('periode' => $periode, 'pmgrs' => $pmgrs)
+            $myGroups = $this->bulletinManager->getGroupsByTitulaire($user);
+            $datas = $this->bulletinManager->getMatiereGroupsByUserAndPeriode(
+                $user,
+                $periode
+            );
+            $content = $this->renderView(
+                'FormaLibreBulletinBundle::BulletinListGroups.html.twig',
+                array('periode' => $periode, 'datas' => $datas, 'myGroups' => $myGroups)
             );
             return new Response($content);
         }

@@ -134,7 +134,7 @@ class TotauxManager
                 
                 if (!isset($totaux[$matiereId])) {
                     $totaux[$matiereId] = array();
-                    $totaux[$matiereId]['name'] = $matiere->getCourse()->getName();
+                    $totaux[$matiereId]['name'] = $matiere->getCourse()->getTitle();
                     $totaux[$matiereId]['pourcentage'] = 0;
                     $totaux[$matiereId]['nbPeriodes'] = 0;
                     $totaux[$matiereId]['color'] = $matiere->getColor();
@@ -175,7 +175,7 @@ class TotauxManager
 
         foreach ($pemps as $pemp) {
             $matiere = $pemp->getMatiere();
-            $matiereName = $matiere->getCourse()->getName();
+            $matiereName = $matiere->getCourse()->getTitle();
 //            $matiereColor = $matiere->getColor();
             $matiereColor = '#7BE0A3';
             $pempInCeb = in_array($matiereName, $matCeb) ? true: false;
@@ -249,7 +249,7 @@ class TotauxManager
 
             if (!isset($results[$matiereId])) {
                 $results[$matiereId] = array();
-                $results[$matiereId]['matiere'] = $matiere->getCourse()->getName();
+                $results[$matiereId]['matiere'] = $matiere->getCourse()->getTitle();
                 $results[$matiereId]['presence'] = $presence;
             } else {
                 $results[$matiereId]['presence'] += $presence;
@@ -279,7 +279,7 @@ class TotauxManager
 
             if (!isset($results[$matiereId])) {
                 $results[$matiereId] = array();
-                $results[$matiereId]['matiere'] = $matiere->getCourse()->getName();
+                $results[$matiereId]['matiere'] = $matiere->getCourse()->getTitle();
                 $results[$matiereId]['comportement'] = $comportement;
             } else {
                 $results[$matiereId]['comportement'] += $comportement;

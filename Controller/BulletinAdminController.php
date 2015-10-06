@@ -31,12 +31,12 @@ use FormaLibre\BulletinBundle\Form\Admin\UserDecisionEditType;
 use Claroline\CoreBundle\Entity\Group;
 use Claroline\CoreBundle\Entity\User;
 use Claroline\CursusBundle\Entity\CourseSession;
-use Claroline\CoreBundle\Event\StrictDispatcher;
+use FormaLibre\BulletinBundle\Manager\BulletinManager;
 
 class BulletinAdminController extends Controller
 {
     private $authorization;
-    private $eventDispatcher;
+    private $bulletinManager;
     private $toolManager;
     private $roleManager;
     private $userManager;
@@ -69,7 +69,7 @@ class BulletinAdminController extends Controller
     /**
      * @DI\InjectParams({
      *      "authorization"      = @DI\Inject("security.authorization_checker"),
-     *      "eventDispatcher"    = @DI\Inject("claroline.event.event_dispatcher"),
+     *      "bulletinManager"    = @DI\Inject("formalibre.manager.bulletin_manager"),
      *      "toolManager"        = @DI\Inject("claroline.manager.tool_manager"),
      *      "roleManager"        = @DI\Inject("claroline.manager.role_manager"),
      *      "userManager"        = @DI\Inject("claroline.manager.user_manager"),
@@ -82,7 +82,7 @@ class BulletinAdminController extends Controller
      */
     public function __construct(
         AuthorizationCheckerInterface $authorization,
-        StrictDispatcher $eventDispatcher,
+        BulletinManager $bulletinManager,
         ToolManager $toolManager,
         RoleManager $roleManager,
         UserManager $userManager,
@@ -94,7 +94,7 @@ class BulletinAdminController extends Controller
     )
     {
         $this->authorization      = $authorization;
-        $this->eventDispatcher    = $eventDispatcher;
+        $this->bulletinManager    = $bulletinManager;
         $this->toolManager        = $toolManager;
         $this->roleManager        = $roleManager;
         $this->userManager        = $userManager;
@@ -616,21 +616,7 @@ class BulletinAdminController extends Controller
     public function groupeTitulaireCreateFormAction()
     {
         $this->checkOpen();
-        $params = array(
-            'tag' => 'Classe',
-            'strict' => true,
-            'class' => 'Claroline\CoreBundle\Entity\Group',
-            'object_response' => true,
-            'ordered_by' => 'name',
-            'order' => 'ASC'
-        );
-        $event = $this->eventDispatcher->dispatch(
-            'claroline_retrieve_tagged_objects',
-            'GenericDatas',
-            array($params)
-        );
-        $taggedGroups = $event->getResponse();
-        $groups = empty($taggedGroups) ? array() : $taggedGroups;
+        $groups = $this->bulletinManager->getTaggedGroups();
         $form = $this->formFactory->create(new GroupeTitulaireType($groups), new GroupeTitulaire());
 
         return array('form' => $form->createView());
@@ -649,21 +635,7 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $groupeTitulaire = new GroupeTitulaire();
-        $params = array(
-            'tag' => 'Classe',
-            'strict' => true,
-            'class' => 'Claroline\CoreBundle\Entity\Group',
-            'object_response' => true,
-            'ordered_by' => 'name',
-            'order' => 'ASC'
-        );
-        $event = $this->eventDispatcher->dispatch(
-            'claroline_retrieve_tagged_objects',
-            'GenericDatas',
-            array($params)
-        );
-        $taggedGroups = $event->getResponse();
-        $groups = empty($taggedGroups) ? array() : $taggedGroups;
+        $groups = $this->bulletinManager->getTaggedGroups();
         $form = $this->formFactory->create(new GroupeTitulaireType($groups), $groupeTitulaire);
         $form->handleRequest($this->request);
 
@@ -690,21 +662,7 @@ class BulletinAdminController extends Controller
     public function groupeTitulaireEditFormAction(GroupeTitulaire $groupeTitulaire)
     {
         $this->checkOpen();
-        $params = array(
-            'tag' => 'Classe',
-            'strict' => true,
-            'class' => 'Claroline\CoreBundle\Entity\Group',
-            'object_response' => true,
-            'ordered_by' => 'name',
-            'order' => 'ASC'
-        );
-        $event = $this->eventDispatcher->dispatch(
-            'claroline_retrieve_tagged_objects',
-            'GenericDatas',
-            array($params)
-        );
-        $taggedGroups = $event->getResponse();
-        $groups = empty($taggedGroups) ? array() : $taggedGroups;
+        $groups = $this->bulletinManager->getTaggedGroups();
         $form = $this->formFactory->create(new GroupeTitulaireType($groups), $groupeTitulaire);
 
         return array('form' => $form->createView(), 'groupeTitulaire' => $groupeTitulaire);
@@ -722,21 +680,7 @@ class BulletinAdminController extends Controller
     public function groupeTitulaireEditAction(GroupeTitulaire $groupeTitulaire)
     {
         $this->checkOpen();
-        $params = array(
-            'tag' => 'Classe',
-            'strict' => true,
-            'class' => 'Claroline\CoreBundle\Entity\Group',
-            'object_response' => true,
-            'ordered_by' => 'name',
-            'order' => 'ASC'
-        );
-        $event = $this->eventDispatcher->dispatch(
-            'claroline_retrieve_tagged_objects',
-            'GenericDatas',
-            array($params)
-        );
-        $taggedGroups = $event->getResponse();
-        $groups = empty($taggedGroups) ? array() : $taggedGroups;
+        $groups = $this->bulletinManager->getTaggedGroups();
         $form = $this->formFactory->create(new GroupeTitulaireType($groups), $groupeTitulaire);
         $form->handleRequest($this->request);
 

@@ -38,22 +38,22 @@
             {% for pemp in pemps %}
             {% if pemp.point == 999 %}
                 <tr>
-                    <td>{{ pemp.matiere.getCourse().getName() }}</td>
+                    <td>{{ pemp.matiere.getCourse().getTitle() }}</td>
                     <td colspan="5" class="center">Non évalué</td>
                 </tr>
             {% elseif pemp.point == 111 %}
                 <tr>
-                    <td>{{ pemp.matiere.getCourse().getName() }}</td>
+                    <td>{{ pemp.matiere.getCourse().getTitle() }}</td>
                     <td colspan="5" class="center">Certificat médical</td>
                 </tr>
             {% elseif pemp.point == 888 %}
                 <tr>
-                    <td>{{ pemp.matiere.getCourse().getName() }}</td>
+                    <td>{{ pemp.matiere.getCourse().getTitle() }}</td>
                     <td colspan="5" class="center">Certificat médical</td>
                 </tr>
             {% else %}
                 <tr class="">
-                    <td>{{ pemp.matiere.getCourse().getName() }}</td>
+                    <td>{{ pemp.matiere.getCourse().getTitle() }}</td>
                     <td class="center point">{{ pemp.point }}</td>
                     <td class="center total">{{ pemp.total }}</td>
                     <td class="center pourcent" data="{{ pemp.total }}"></td>

@@ -42,7 +42,7 @@
                 {% if pemp.point == 999 %}
                     <tr>
                         <td>
-                            {{ pemp.matiere.getCourse().getName() }}
+                            {{ pemp.matiere.getCourse().getTitle() }}
                         </td>
                         <td colspan="3" class="center">
                             Non évalué
@@ -54,7 +54,7 @@
                 {% elseif pemp.point == 111 %}
                     <tr>
                         <td>
-                            {{ pemp.matiere.getCourse().getName() }}
+                            {{ pemp.matiere.getCourse().getTitle() }}
                         </td>
                         <td colspan="3" class="center">
                             Certificat médical
@@ -66,7 +66,7 @@
                 {% elseif pemp.point == 888 %}
                     <tr>
                         <td>
-                            {{ pemp.matiere.getCourse().getName() }}
+                            {{ pemp.matiere.getCourse().getTitle() }}
                         </td>
                         <td colspan="3" class="center">
                             Certificat médical
@@ -78,7 +78,7 @@
                 {% else %}
                     <tr>
                         <td>
-                            {{ pemp.matiere.getCourse().getName() }}
+                            {{ pemp.matiere.getCourse().getTitle() }}
                         </td>
                         <td class="center point{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">
                             {{ pemp.getPoint() }}
@@ -132,7 +132,7 @@
 
                                     {% if decision.getWithMatiere() and matieres|length > 0 %}
                                         {% for matiere in matieres %}
-                                            {{ matiere.getCourse().getName() }}{% if not loop.last %},{% endif %}
+                                            {{ matiere.getCourse().getTitle() }}{% if not loop.last %},{% endif %}
                                         {% endfor %}
                                     {% endif %}
                                 </li>
