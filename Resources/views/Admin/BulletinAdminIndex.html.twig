@@ -2,8 +2,29 @@
 
 {% block section_content %}
     <div class="panel-heading">
-        <i id="groupe-titulaires-list-btn" class="fa fa-user pointer-hand pull-right"></i>
-        <i id="decisions-list-btn" class="fa fa-cog pointer-hand pull-right"></i>
+        <div class="dropdown pull-right">
+            <i class="fa fa-cogs dropdown-toggle"
+               data-toggle="dropdown"
+            >
+            </i>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="{{ path('formalibreBulletinDecisionsList') }}">
+                        Gestion des décisions
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibreBulletinGroupeTitulairesList') }}">
+                        Gestion des titulaires
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibre_bulletin_point_divers_management') }}">
+                        Gestion des points divers
+                    </a>
+                </li>
+            </ul>
+        </div>
         <h1>Admin Bulletin</h1>
     </div>
     <div class="panel-body">
@@ -12,10 +33,17 @@
             {% for periode in periodes %}
                 <div class="col-xs-3">
                 <div class="panel panel-default">
-                    <div class="panel-heading text-center"">
-                    {{ periode.Name }} - {{ attribute(periodeCompleted, periode.Id) }}
-                        <div class="btn btn-default editPeriodeBtn" role="button" data-periode-id="{{ periode.Id }}">
-                            <i class="fa fa-edit"></i>
+                    <div class="panel-heading text-center">
+                        {{ periode.Name }} - {{ attribute(periodeCompleted, periode.Id) }}
+                        <div class="btn-group">
+                            <div class="btn btn-default btn-sm editPeriodeBtn" role="button" data-periode-id="{{ periode.Id }}">
+                                <i class="fa fa-edit"></i>
+                            </div>
+                            <a href="#"
+                               class="btn btn-default btn-sm"
+                            >
+                                <i class="fa fa-cog"></i>
+                            </a>
                         </div>
                     </div>
                     <div class="panel-body text-center">

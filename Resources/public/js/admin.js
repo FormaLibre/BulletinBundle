@@ -72,11 +72,3 @@ $('body').on('click', '#form-Periode-ok-btn', function (e) {
         }
     });
 });
-
-$('#decisions-list-btn').on('click', function () {
-    window.location = Routing.generate('formalibreBulletinDecisionsList');
-});
-
-$('#groupe-titulaires-list-btn').on('click', function () {
-    window.location = Routing.generate('formalibreBulletinGroupeTitulairesList');
-});

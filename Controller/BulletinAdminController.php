@@ -2,36 +2,38 @@
 
 namespace FormaLibre\BulletinBundle\Controller;
 
-use Symfony\Component\Form\FormFactory;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
-use JMS\DiExtraBundle\Annotation as DI;
-use Claroline\CoreBundle\Manager\ToolManager;
+use Claroline\CoreBundle\Entity\Group;
+use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Manager\RoleManager;
+use Claroline\CoreBundle\Manager\ToolManager;
 use Claroline\CoreBundle\Manager\UserManager;
 use Claroline\CoreBundle\Persistence\ObjectManager;
+use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use FormaLibre\BulletinBundle\Entity\Decision;
 use FormaLibre\BulletinBundle\Entity\GroupeTitulaire;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
-use FormaLibre\BulletinBundle\Form\Admin\PeriodeType;
+use FormaLibre\BulletinBundle\Entity\PointDivers;
 use FormaLibre\BulletinBundle\Form\Admin\DecisionType;
 use FormaLibre\BulletinBundle\Form\Admin\GroupeTitulaireType;
+use FormaLibre\BulletinBundle\Form\Admin\PeriodeType;
+use FormaLibre\BulletinBundle\Form\Admin\PointDiversType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionCreateType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionEditType;
-use Claroline\CoreBundle\Entity\Group;
-use Claroline\CoreBundle\Entity\User;
-use Claroline\CursusBundle\Entity\CourseSession;
 use FormaLibre\BulletinBundle\Manager\BulletinManager;
+use JMS\DiExtraBundle\Annotation as DI;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\FormFactory;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class BulletinAdminController extends Controller
 {
@@ -715,6 +717,130 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $this->om->remove($groupeTitulaire);
+        $this->om->flush();
+
+        return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/point/divers/management",
+     *     name="formalibre_bulletin_point_divers_management",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/pointDiversManagement.html.twig")
+     */
+    public function pointDiversManagementAction()
+    {
+        $this->checkOpen();
+        $allPointDivers = $this->bulletinManager->getAllPointDivers();
+
+        return array('allPointDivers' => $allPointDivers);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/point/divers/create/form",
+     *     name="formalibre_bulletin_point_divers_create_form",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/pointDiversCreateModalForm.html.twig")
+     */
+    public function pointDiversCreateFormAction()
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new PointDiversType(), new PointDivers());
+
+        return array('form' => $form->createView());
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/point/divers/create",
+     *     name="formalibre_bulletin_point_divers_create",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/pointDiversCreateModalForm.html.twig")
+     */
+    public function pointDiversCreateAction()
+    {
+        $this->checkOpen();
+        $pointDivers = new PointDivers();
+        $form = $this->formFactory->create(new PointDiversType(), $pointDivers);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->om->persist($pointDivers);
+            $this->om->flush();
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array('form' => $form->createView());
+        }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/point/divers/{pointDivers}/edit/form",
+     *     name="formalibre_bulletin_point_divers_edit_form",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/pointDiversEditModalForm.html.twig")
+     */
+    public function pointDiversEditFormAction(PointDivers $pointDivers)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new PointDiversType(), $pointDivers);
+
+        return array('form' => $form->createView(), 'pointDivers' => $pointDivers);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/point/divers/{pointDivers}/edit",
+     *     name="formalibre_bulletin_point_divers_edit",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/pointDiversModalEditForm.html.twig")
+     */
+    public function pointDiversEditAction(PointDivers $pointDivers)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new PointDiversType(), $pointDivers);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->om->persist($pointDivers);
+            $this->om->flush();
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array(
+                'form' => $form->createView(),
+                'pointDivers' => $pointDivers
+            );
+        }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/point/divers/{pointDivers}/delete",
+     *     name="formalibre_bulletin_point_divers_delete",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     */
+    public function pointDiversDeleteAction(PointDivers $pointDivers)
+    {
+        $this->checkOpen();
+        $this->om->remove($pointDivers);
         $this->om->flush();
 
         return new JsonResponse('success', 200);

@@ -21,6 +21,7 @@ class BulletinManager
     private $om;
 
     private $groupeTitulaireRepo;
+    private $pointDiversRepo;
 
     /**
      * @DI\InjectParams({
@@ -40,6 +41,7 @@ class BulletinManager
         $this->om = $om;
 
         $this->groupeTitulaireRepo = $om->getRepository('FormaLibreBulletinBundle:GroupeTitulaire');
+        $this->pointDiversRepo = $om->getRepository('FormaLibreBulletinBundle:PointDivers');
     }
 
     public function getTaggedGroups()
@@ -159,5 +161,10 @@ class BulletinManager
         }
 
         return $group;
+    }
+
+    public function getAllPointDivers()
+    {
+        return $this->pointDiversRepo->findAll();
     }
 }
