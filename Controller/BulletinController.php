@@ -42,8 +42,6 @@ class BulletinController extends Controller
     private $groupRepo;
     /** @var UserRepository */
     private $userRepo;
-    /** @var ClassRepository */
-    private $classRepo;
     /** @var PeriodeRepository */
     private $periodeRepo;
     private $totauxManager;
@@ -323,7 +321,8 @@ class BulletinController extends Controller
     {
         $this->checkOpen();
 
-        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+        $pemps = $this->bulletinManager->getPemps($eleve, $periode);
+//        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
         $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
 
         $pempCollection = new Pemps;

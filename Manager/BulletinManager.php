@@ -8,6 +8,7 @@ use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Entity\Periode;
+use FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use JMS\DiExtraBundle\Annotation as DI;
 //use Claroline\CursusBundle\Entity\CourseSession;
 
@@ -21,6 +22,7 @@ class BulletinManager
     private $om;
 
     private $groupeTitulaireRepo;
+    private $pempRepo;
     private $pointDiversRepo;
 
     /**
@@ -41,6 +43,7 @@ class BulletinManager
         $this->om = $om;
 
         $this->groupeTitulaireRepo = $om->getRepository('FormaLibreBulletinBundle:GroupeTitulaire');
+        $this->pempRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
         $this->pointDiversRepo = $om->getRepository('FormaLibreBulletinBundle:PointDivers');
     }
 
@@ -182,6 +185,33 @@ class BulletinManager
         $query = $qb->getQuery();
 
         return $query->getResult();
+    }
 
+    public function getPemps(User $eleve, Periode $periode)
+    {
+        $matieres = $periode->getMatieres();
+        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+        $matiereIds = array();
+
+        foreach ($pemps as $pemp) {
+            $matiereIds[] = $pemp->getMatiere()->getId();
+        }
+
+        foreach ($matieres as $matiere) {
+            $matiereId = $matiere->getId();
+
+            if (!in_array($matiereId, $matiereIds)) {
+                $pemp = new PeriodeEleveMatierePoint();
+                $pemp->setEleve($eleve);
+                $pemp->setMatiere($matiere);
+                $pemp->setTotal(0);
+                $pemp->setPeriode($periode);
+                $pemp->setPosition(1);
+                $this->om->persist($pemp);
+                $pemps[] = $pemp;
+            }
+        }
+
+        return $pemps;
     }
 }

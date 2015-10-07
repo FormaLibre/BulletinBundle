@@ -9,7 +9,17 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 class PeriodeEleveMatierePointType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options){
-        $builder->add('matiere', 'entity', array('required' => false, 'disabled' => true, 'read_only' => true, 'class' => 'Claroline\CursusBundle\Entity\CourseSession'));
+        $builder->add(
+            'matiere',
+            'entity',
+            array(
+                'required' => false,
+                'disabled' => true,
+                'read_only' => true,
+                'class' => 'Claroline\CursusBundle\Entity\CourseSession',
+                'property' => 'courseTitle'
+            )
+        );
         $builder->add('point', 'text', array('required'  => false));
         $builder->add('total', 'text', array('required'  => false, 'read_only' => True));
         $builder->add('comportement', 'text', array('required'  => false));
