@@ -251,7 +251,7 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $periode = new Periode();
-        $form = $this->createForm(new PeriodeType(), $periode);
+        $form = $this->createForm(new PeriodeType(1), $periode);
 
         if ($request->getMethod() === 'POST') {
             $form->handleRequest($request);

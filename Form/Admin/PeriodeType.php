@@ -2,18 +2,43 @@
 
 namespace FormaLibre\BulletinBundle\Form\Admin;
 
-use Claroline\CursusBundle\Entity\CourseSession;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class PeriodeType extends AbstractType
 {
+    private $type;
+
+    public function __construct($type = 0)
+    {
+        $this->type = $type;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        if ($this->type === 1) {
+            $templateOptions = array(
+                'label' => 'Template',
+                'constraints' => new NotBlank(),
+                'data' => 'PeriodePrint'
+            );
+        } else {
+            $templateOptions = array(
+                'label' => 'Template',
+                'constraints' => new NotBlank()
+            );
+        }
         $builder
-            ->add('name', 'text', array('label' => 'name'))
+            ->add(
+                'name',
+                'text',
+                array(
+                    'label' => 'name',
+                    'constraints' => new NotBlank()
+                )
+            )
             ->add(
                 'start',
                 'datepicker',
@@ -37,7 +62,11 @@ class PeriodeType extends AbstractType
                 )
             )
             ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
-            ->add('template', 'text', array('label' => 'Template'))
+            ->add(
+                'template',
+                'text',
+                $templateOptions
+            )
             ->add('onlyPoint', 'checkbox', array('label' => 'Uniquement des points'));
     }
 
