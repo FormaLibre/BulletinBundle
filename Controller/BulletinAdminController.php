@@ -46,8 +46,6 @@ class BulletinAdminController extends Controller
     private $userRepo;
     /** @var MatiereRepository */
     private $matiereRepo;
-    /** @var ClasseRepository */
-    private $classeRepo;
     /** @var DiversRepository */
     private $diversRepo;
     /** @var PeriodeRepository */
@@ -107,7 +105,6 @@ class BulletinAdminController extends Controller
         $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
         $this->userRepo          = $om->getRepository('ClarolineCoreBundle:User');
         $this->matiereRepo        = $om->getRepository('ClarolineCursusBundle:CourseSession');
-//        $this->classeRepo        = $om->getRepository('LaurentSchoolBundle:Classe');
         $this->diversRepo        = $om->getRepository('FormaLibreBulletinBundle:PointDivers');
         $this->periodeRepo        = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->pempRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
@@ -217,12 +214,16 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
 
-        $classe = $this->classeRepo->findUserClasse($user);
+        $classe = $this->bulletinManager->getClasseByEleve($user);
+        $dirName = is_null($classe) ? 'CLASSE_INDEFINIE' : $classe->getName();
+
         $filename = $user->getLastName() . $user->getFirstName(). '-'. date("Y-m-d-H-i-s") . '.pdf';
-        $dir = $this->pdfDir . $classe->getName() . '/' . $filename;
+        $dir = $this->pdfDir . $dirName . '/' . $filename;
 
-        $eleveUrl = $this->generateUrl('formalibreBulletinPrintEleve', array('periode' => $periode->getId(), 'eleve' => $user->getId()), true);
-
+        $eleveUrl = $this->generateUrl(
+            'formalibreBulletinPrintEleve',
+            array('periode' => $periode->getId(), 'eleve' => $user->getId()), true
+        );
 
         $this->get('knp_snappy.pdf')->generate($eleveUrl, $dir);
 
@@ -245,7 +246,9 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $periode = new Periode();
-        $sessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_OPEN);
+        $unstartedSessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_NOT_STARTED);
+        $openSessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_OPEN);
+        $sessions = array_merge($unstartedSessions, $openSessions);
         $datas = array();
 
         foreach ($sessions as $session) {
@@ -284,7 +287,9 @@ class BulletinAdminController extends Controller
     public function adminSchoolPeriodeEditAction(Request $request, Periode $periode)
     {
         $this->checkOpen();
-        $sessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_OPEN);
+        $unstartedSessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_NOT_STARTED);
+        $openSessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_OPEN);
+        $sessions = array_merge($unstartedSessions, $openSessions);
         $datas = array();
 
         foreach ($sessions as $session) {

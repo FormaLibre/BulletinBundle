@@ -140,4 +140,24 @@ class BulletinManager
 
         return $groups;
     }
+
+    public function getClasseByEleve(User $eleve)
+    {
+        $group = null;
+        $taggedGroups = $this->getTaggedGroups();
+
+        if (count($taggedGroups) > 0) {
+            $userGroups = $eleve->getGroups();
+
+            foreach ($userGroups as $userGroup) {
+
+                if (in_array($userGroup, $taggedGroups)) {
+                    $group = $userGroup;
+                    break;
+                }
+            }
+        }
+
+        return $group;
+    }
 }

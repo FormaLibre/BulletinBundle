@@ -83,7 +83,6 @@ class BulletinController extends Controller
         $this->pemdRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
         $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
         $this->userRepo           = $om->getRepository('ClarolineCoreBundle:User');
-//        $this->classeRepo         = $om->getRepository('LaurentSchoolBundle:Classe');
         $this->periodeRepo        = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->totauxManager      = $totauxManager;
         $this->periodeEleveDecisionRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveDecision');
