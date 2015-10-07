@@ -10,13 +10,6 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class PeriodeType extends AbstractType
 {
-    private $datas;
-
-    public function __construct(array $datas = array())
-    {
-        $this->datas = $datas;
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -45,19 +38,7 @@ class PeriodeType extends AbstractType
             )
             ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
             ->add('template', 'text', array('label' => 'Template'))
-            ->add('onlyPoint', 'checkbox', array('label' => 'Uniquement des points'))
-            ->add(
-                'matieres',
-                'entity',
-                array(
-                    'class' => 'ClarolineCursusBundle:CourseSession',
-                    'choices' => $this->datas,
-                    'property' => 'name',
-                    'required' => false,
-                    'multiple' => true,
-                    'label' => 'Matières'
-                )
-            );
+            ->add('onlyPoint', 'checkbox', array('label' => 'Uniquement des points'));
     }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
@@ -71,5 +52,4 @@ class PeriodeType extends AbstractType
     {
         return 'PeriodeForm';
     }
-
 }

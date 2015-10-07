@@ -1,0 +1,87 @@
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h1>Gestion des options de la période [{{ periode.getName() }}]</h1>
+    </div>
+    <form action="{{ path('formalibre_bulletin_periode_options_edit', {'periode': periode.getId()}) }}"
+          method="POST"
+          {{ form_enctype(form) }}
+          novalidate
+    >
+        <div class="panel-body">
+            <h3>Matières</h3>
+            <div class="col-md-offset-1">
+                <label class="checkbox" for="all_matieres_checkbox">
+                    [ Tout sélectionner ]
+                    <input type="checkbox"
+                           id="all_matieres_checkbox"
+                    >
+                </label>
+            </div>
+            
+            {% for courseName, sessions in datas %}
+                <div class="col-md-offset-1">
+
+                    {% for session in sessions %}
+                        {% set sessionId = session.getId() %}
+                        <label class="checkbox" for="periode_options_form_matieres_{{ sessionId }}">
+                            {{ courseName }}
+                            <span class="label label-default">
+                                {{ session.getName() }}
+                            </span>
+                            <input type="checkbox"
+                                   id="periode_options_form_matieres_{{ sessionId }}"
+                                   name="periode_options_form[matieres][]"
+                                   value="{{ sessionId }}"
+                                   class="periode_matiere_checkbox"
+                                   {% if sessionId in matiereIds %}checked="checked"{% endif %}
+                            >
+                        </label>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <br>
+            <h3>Point divers</h3>
+            
+            <div class="col-md-offset-1">
+                
+                {% for pointDivers in allPointDivers %}
+                    {% set pointDiversId = pointDivers.getId() %}
+                    <label class="checkbox" for="periode_options_form_pointDivers_{{ pointDiversId }}">
+                        {{ pointDivers.getName() }}
+                        <input type="checkbox"
+                               id="periode_options_form_pointDivers_{{ pointDiversId }}"
+                               name="periode_options_form[pointDivers][]"
+                               value="{{ pointDiversId }}"
+                               {% if pointDiversId in pointDiversIds %}checked="checked"{% endif %}
+                        >
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button type="submit" class="btn btn-primary">
+                {{ 'ok'|trans({}, 'platform') }}
+            </button>
+            <a href="{{ path('formalibreBulletinAdminIndex') }}"
+               class="btn btn-default"
+            >
+                {{ 'cancel'|trans({}, 'platform') }}
+            </a>
+        </div>
+    </form>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+        $('#all_matieres_checkbox').on('change', function () {
+            var checked = $(this).prop('checked');
+            $('.periode_matiere_checkbox').prop('checked', checked);
+        });
+    </script>
+    {#{{ parent() }}
+    <script src='{{ asset('bundles/formalibrebulletin/js/pointDiversManagement.js') }}'
+            type="text/javascript">
+    </script>#}
+{% endblock %} 

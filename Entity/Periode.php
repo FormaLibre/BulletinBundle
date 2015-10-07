@@ -67,9 +67,18 @@ class Periode
      */
     protected $matieres;
 
+    /**
+     * @ORM\ManyToMany(
+     *     targetEntity="FormaLibre\BulletinBundle\Entity\PointDivers"
+     * )
+     * @ORM\JoinTable(name="formalibre_bulletin_periode_point_divers")
+     */
+    protected $pointDivers;
+
     public function __construct()
     {
         $this->matieres = new ArrayCollection();
+        $this->pointDivers = new ArrayCollection();
     }
 
     /**
@@ -226,6 +235,29 @@ class Periode
     {
         if ($this->matieres->contains($matiere)) {
             $this->matieres->removeElement($matiere);
+        }
+
+        return $this;
+    }
+
+    public function getPointDivers()
+    {
+        return $this->pointDivers->toArray();
+    }
+
+    public function addPointDiver(PointDivers $pointDivers)
+    {
+        if (!$this->pointDivers->contains($pointDivers)) {
+            $this->pointDivers->add($pointDivers);
+        }
+
+        return $this;
+    }
+
+    public function removePointDiver(PointDivers $pointDivers)
+    {
+        if ($this->pointDivers->contains($pointDivers)) {
+            $this->pointDivers->removeElement($pointDivers);
         }
 
         return $this;

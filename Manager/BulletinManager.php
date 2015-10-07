@@ -167,4 +167,21 @@ class BulletinManager
     {
         return $this->pointDiversRepo->findAll();
     }
+
+    public function getAvailableSessions()
+    {
+        $status = array(CourseSession::SESSION_NOT_STARTED, CourseSession::SESSION_OPEN);
+
+        $qb = $this->em->createQueryBuilder();
+        $qb->select('cs')
+            ->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
+            ->join('cs.course', 'c')
+            ->where('cs.sessionStatus IN (:status)')
+            ->setParameter('status', $status)
+            ->orderBy('c.title', 'ASC');
+        $query = $qb->getQuery();
+
+        return $query->getResult();
+
+    }
 }

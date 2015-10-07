@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/10/06 10:51:33
+ * Generation date: 2015/10/07 02:10:30
  */
-class Version20151006105131 extends AbstractMigration
+class Version20151007141028 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -92,6 +92,15 @@ class Version20151006105131 extends AbstractMigration
                 INDEX IDX_5A2D5E9EF384C1CF (periode_id), 
                 INDEX IDX_5A2D5E9EAE020D6E (coursesession_id), 
                 PRIMARY KEY(periode_id, coursesession_id)
+            ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
+        ");
+        $this->addSql("
+            CREATE TABLE formalibre_bulletin_periode_point_divers (
+                periode_id INT NOT NULL, 
+                pointdivers_id INT NOT NULL, 
+                INDEX IDX_ECA7F0A7F384C1CF (periode_id), 
+                INDEX IDX_ECA7F0A7209EBB93 (pointdivers_id), 
+                PRIMARY KEY(periode_id, pointdivers_id)
             ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
         ");
         $this->addSql("
@@ -187,6 +196,18 @@ class Version20151006105131 extends AbstractMigration
             ON DELETE CASCADE
         ");
         $this->addSql("
+            ALTER TABLE formalibre_bulletin_periode_point_divers 
+            ADD CONSTRAINT FK_ECA7F0A7F384C1CF FOREIGN KEY (periode_id) 
+            REFERENCES formalibre_bulletin_periode (id) 
+            ON DELETE CASCADE
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre_bulletin_periode_point_divers 
+            ADD CONSTRAINT FK_ECA7F0A7209EBB93 FOREIGN KEY (pointdivers_id) 
+            REFERENCES formalibre_bulletin_pointDivers (id) 
+            ON DELETE CASCADE
+        ");
+        $this->addSql("
             ALTER TABLE formalibre_bulletin_periode_eleve_decision 
             ADD CONSTRAINT FK_2B83F4D5F384C1CF FOREIGN KEY (periode_id) 
             REFERENCES formalibre_bulletin_periode (id) 
@@ -236,6 +257,10 @@ class Version20151006105131 extends AbstractMigration
     public function down(Schema $schema)
     {
         $this->addSql("
+            ALTER TABLE formalibre_bulletin_periode_point_divers 
+            DROP FOREIGN KEY FK_ECA7F0A7209EBB93
+        ");
+        $this->addSql("
             ALTER TABLE formalibre_bulletin_periode_eleve_pointdivers_point 
             DROP FOREIGN KEY FK_134BF6F89C3BA491
         ");
@@ -254,6 +279,10 @@ class Version20151006105131 extends AbstractMigration
         $this->addSql("
             ALTER TABLE formalibre_bulletin_periode_matieres 
             DROP FOREIGN KEY FK_5A2D5E9EF384C1CF
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre_bulletin_periode_point_divers 
+            DROP FOREIGN KEY FK_ECA7F0A7F384C1CF
         ");
         $this->addSql("
             ALTER TABLE formalibre_bulletin_periode_eleve_decision 
@@ -287,6 +316,9 @@ class Version20151006105131 extends AbstractMigration
         ");
         $this->addSql("
             DROP TABLE formalibre_bulletin_periode_matieres
+        ");
+        $this->addSql("
+            DROP TABLE formalibre_bulletin_periode_point_divers
         ");
         $this->addSql("
             DROP TABLE formalibre_bulletin_periode_eleve_decision

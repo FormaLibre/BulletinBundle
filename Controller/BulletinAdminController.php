@@ -20,6 +20,7 @@ use FormaLibre\BulletinBundle\Entity\PointDivers;
 use FormaLibre\BulletinBundle\Form\Admin\DecisionType;
 use FormaLibre\BulletinBundle\Form\Admin\GroupeTitulaireType;
 use FormaLibre\BulletinBundle\Form\Admin\PeriodeType;
+use FormaLibre\BulletinBundle\Form\Admin\PeriodeOptionsType;
 use FormaLibre\BulletinBundle\Form\Admin\PointDiversType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionCreateType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionEditType;
@@ -29,9 +30,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -39,32 +42,31 @@ class BulletinAdminController extends Controller
 {
     private $authorization;
     private $bulletinManager;
-    private $toolManager;
-    private $roleManager;
-    private $userManager;
-    /** @var GroupRepository */
-    private $groupRepo;
-    /** @var UserRepository */
-    private $userRepo;
-    /** @var MatiereRepository */
-    private $matiereRepo;
-    /** @var DiversRepository */
-    private $diversRepo;
-    /** @var PeriodeRepository */
-    private $periodeRepo;
-    /** @var PeriodeEleveMatierePointRepository */
-    private $pempRepo;
-    /** @var PeriodeElevePointDiversPointRepository */
-    private $pemdRepo;
-    private $decisionRepo;
-    private $periodeEleveDecisionRepo;
-    private $groupeTitulaireRepo;
-    private $om;
     private $em;
+    private $formFactory;
+    private $om;
     /** @var  string */
     private $pdfDir;
-    private $formFactory;
     private $request;
+    private $roleManager;
+    private $router;
+    private $toolManager;
+    private $userManager;
+
+    private $decisionRepo;
+    private $groupeTitulaireRepo;
+    /** @var MatiereRepository */
+    private $matiereRepo;
+    /** @var PeriodeElevePointDiversPointRepository */
+    private $pemdRepo;
+    /** @var PeriodeEleveMatierePointRepository */
+    private $pempRepo;
+    private $periodeEleveDecisionRepo;
+    /** @var PeriodeRepository */
+    private $periodeRepo;
+    /** @var UserRepository */
+    private $userRepo;
+
 
     /**
      * @DI\InjectParams({
@@ -77,43 +79,44 @@ class BulletinAdminController extends Controller
      *      "em"                 = @DI\Inject("doctrine.orm.entity_manager"),
      *      "pdfDir"             = @DI\Inject("%laurent.directories.pdf%"),
      *      "formFactory"        = @DI\Inject("form.factory"),
-     *      "requestStack"       = @DI\Inject("request_stack")
+     *      "requestStack"       = @DI\Inject("request_stack"),
+     *     "router"              = @DI\Inject("router"),
      * })
      */
     public function __construct(
         AuthorizationCheckerInterface $authorization,
         BulletinManager $bulletinManager,
-        ToolManager $toolManager,
-        RoleManager $roleManager,
-        UserManager $userManager,
-        ObjectManager $om,
         EntityManager $em,
-        $pdfDir,
         FormFactory $formFactory,
-        RequestStack $requestStack
+        ObjectManager $om,
+        $pdfDir,
+        RequestStack $requestStack,
+        RoleManager $roleManager,
+        RouterInterface $router,
+        ToolManager $toolManager,
+        UserManager $userManager
     )
     {
-        $this->authorization      = $authorization;
-        $this->bulletinManager    = $bulletinManager;
-        $this->toolManager        = $toolManager;
-        $this->roleManager        = $roleManager;
-        $this->userManager        = $userManager;
-        $this->pdfDir             = $pdfDir;
-        $this->formFactory        = $formFactory;
-        $this->request            = $requestStack->getCurrentRequest();
+        $this->authorization = $authorization;
+        $this->bulletinManager = $bulletinManager;
+        $this->em = $em;
+        $this->formFactory = $formFactory;
+        $this->om = $om;
+        $this->pdfDir = $pdfDir;
+        $this->request = $requestStack->getCurrentRequest();
+        $this->roleManager = $roleManager;
+        $this->router = $router;
+        $this->toolManager = $toolManager;
+        $this->userManager = $userManager;
 
-        $this->om                 = $om;
-        $this->em                 = $em;
-        $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
-        $this->userRepo          = $om->getRepository('ClarolineCoreBundle:User');
-        $this->matiereRepo        = $om->getRepository('ClarolineCursusBundle:CourseSession');
-        $this->diversRepo        = $om->getRepository('FormaLibreBulletinBundle:PointDivers');
-        $this->periodeRepo        = $om->getRepository('FormaLibreBulletinBundle:Periode');
-        $this->pempRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
-        $this->pemdRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
-        $this->decisionRepo       = $om->getRepository('FormaLibreBulletinBundle:Decision');
-        $this->periodeEleveDecisionRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveDecision');
+        $this->decisionRepo = $om->getRepository('FormaLibreBulletinBundle:Decision');
         $this->groupeTitulaireRepo = $om->getRepository('FormaLibreBulletinBundle:GroupeTitulaire');
+        $this->matiereRepo = $om->getRepository('ClarolineCursusBundle:CourseSession');
+        $this->pemdRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
+        $this->pempRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
+        $this->periodeEleveDecisionRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveDecision');
+        $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
+        $this->userRepo = $om->getRepository('ClarolineCoreBundle:User');
     }
 
     /**
@@ -248,22 +251,7 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $periode = new Periode();
-        $unstartedSessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_NOT_STARTED);
-        $openSessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_OPEN);
-        $sessions = array_merge($unstartedSessions, $openSessions);
-        $datas = array();
-
-        foreach ($sessions as $session) {
-            $course = $session->getCourse();
-            $courseName = $course->getTitle() . ' [' . $course->getCode() . ']';
-
-            if (!isset($datas[$courseName])) {
-                $datas[$courseName] = array();
-            }
-            $datas[$courseName][$session->getId()] = $session;
-        }
-
-        $form = $this->createForm(new PeriodeType($datas), $periode);
+        $form = $this->createForm(new PeriodeType(), $periode);
 
         if ($request->getMethod() === 'POST') {
             $form->handleRequest($request);
@@ -289,22 +277,7 @@ class BulletinAdminController extends Controller
     public function adminSchoolPeriodeEditAction(Request $request, Periode $periode)
     {
         $this->checkOpen();
-        $unstartedSessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_NOT_STARTED);
-        $openSessions = $this->matiereRepo->findBySessionStatus(CourseSession::SESSION_OPEN);
-        $sessions = array_merge($unstartedSessions, $openSessions);
-        $datas = array();
-
-        foreach ($sessions as $session) {
-            $course = $session->getCourse();
-            $courseName = $course->getTitle() . ' [' . $course->getCode() . ']';
-
-            if (!isset($datas[$courseName])) {
-                $datas[$courseName] = array();
-            }
-            $datas[$courseName][$session->getId()] = $session;
-        }
-
-        $form = $this->createForm(new PeriodeType($datas), $periode);
+        $form = $this->createForm(new PeriodeType(), $periode);
 
         if ($request->getMethod() === 'POST') {
             $form->handleRequest($request);
@@ -844,6 +817,117 @@ class BulletinAdminController extends Controller
         $this->om->flush();
 
         return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/options/edit/form",
+     *     name="formalibre_bulletin_periode_options_edit_form",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @param Periode $periode
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodeOptionsEditForm.html.twig")
+     */
+    public function adminPeriodeOptionsEditFormAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $matieres = $periode->getMatieres();
+        $matiereIds = array();
+
+        foreach ($matieres as $matiere) {
+            $matiereIds[] = $matiere->getId();
+        }
+        $pointsDivers = $periode->getPointDivers();
+        $pointDiversIds = array();
+
+        foreach ($pointsDivers as $pointDivers) {
+            $pointDiversIds[] = $pointDivers->getId();
+        }
+        $allPointDivers = $this->bulletinManager->getAllPointDivers();
+        $sessions = $this->bulletinManager->getAvailableSessions();
+        $datas = array();
+
+        foreach ($sessions as $session) {
+            $course = $session->getCourse();
+            $courseName = $course->getTitle() . ' [' . $course->getCode() . ']';
+
+            if (!isset($datas[$courseName])) {
+                $datas[$courseName] = array();
+            }
+            $datas[$courseName][$session->getId()] = $session;
+        }
+        $form = $this->createForm(new PeriodeOptionsType(), $periode);
+
+        return array(
+            'form' => $form->createView(),
+            'periode' => $periode,
+            'datas' => $datas,
+            'matiereIds' => $matiereIds,
+            'allPointDivers' => $allPointDivers,
+            'pointDiversIds' => $pointDiversIds
+        );
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/options/form",
+     *     name="formalibre_bulletin_periode_options_edit",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @param Periode $periode
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodeOptionsEditForm.html.twig")
+     */
+    public function adminPeriodeOptionsEditAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $form = $this->createForm(new PeriodeOptionsType(), $periode);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->om->persist($periode);
+            $this->om->flush();
+
+            return new RedirectResponse(
+                $this->router->generate('formalibreBulletinAdminIndex')
+            );
+        } else {
+            $matieres = $periode->getMatieres();
+            $matiereIds = array();
+
+            foreach ($matieres as $matiere) {
+                $matiereIds[] = $matiere->getId();
+            }
+            $pointsDivers = $periode->getPointDivers();
+            $pointDiversIds = array();
+
+            foreach ($pointsDivers as $pointDivers) {
+                $pointDiversIds[] = $pointDivers->getId();
+            }
+            $allPointDivers = $this->bulletinManager->getAllPointDivers();
+            $sessions = $this->bulletinManager->getAvailableSessions();
+            $datas = array();
+
+            foreach ($sessions as $session) {
+                $course = $session->getCourse();
+                $courseName = $course->getTitle() . ' [' . $course->getCode() . ']';
+
+                if (!isset($datas[$courseName])) {
+                    $datas[$courseName] = array();
+                }
+                $datas[$courseName][$session->getId()] = $session;
+            }
+
+            return array(
+                'form' => $form->createView(),
+                'periode' => $periode,
+                'datas' => $datas,
+                'matiereIds' => $matiereIds,
+                'allPointDivers' => $allPointDivers,
+                'pointDiversIds' => $pointDiversIds
+            );
+        }
     }
 
     private function checkOpen()
