@@ -247,7 +247,7 @@ class BulletinAdminController extends Controller
     /**
      * @EXT\Route("/admin/periode/add", name="formalibreBulletinPeriodeAdd", options = {"expose"=true})
      *
-     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodeForm.html.twig")
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodeModalForm.html.twig")
      */
     public function adminSchoolPeriodeAddAction(Request $request)
     {
@@ -261,9 +261,16 @@ class BulletinAdminController extends Controller
             if ($form->isValid()) {
                 $this->em->persist($periode);
                 $this->em->flush();
+
+                return new JsonResponse('success', 200);
             }
         }
-        return array('form' => $form->createView(), 'action' => $this->generateUrl('formalibreBulletinPeriodeAdd'));
+
+        return array(
+            'form' => $form->createView(),
+            'action' => $this->generateUrl('formalibreBulletinPeriodeAdd'),
+            'title' => 'Ajouter une période'
+        );
     }
 
     /**
@@ -274,7 +281,7 @@ class BulletinAdminController extends Controller
      * )
      *
      * @param Periode $periode
-     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodeForm.html.twig")
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodeModalForm.html.twig")
      */
     public function adminSchoolPeriodeEditAction(Request $request, Periode $periode)
     {
@@ -287,9 +294,19 @@ class BulletinAdminController extends Controller
             if ($form->isValid()) {
                 $this->em->persist($periode);
                 $this->em->flush();
+
+                return new JsonResponse('success', 200);
             }
         }
-        return array('form' => $form->createView(), 'action' => $this->generateUrl('formalibreBulletinPeriodeEdit', array('periode' => $periode->getId())));
+
+        return array(
+            'form' => $form->createView(),
+            'action' => $this->generateUrl(
+                'formalibreBulletinPeriodeEdit',
+                array('periode' => $periode->getId())
+            ),
+            'title' => 'Modifier une période'
+        );
     }
 
     /**
