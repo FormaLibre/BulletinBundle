@@ -18,7 +18,7 @@ class MatiereOptionsType extends AbstractType
                 'disabled' => true,
                 'read_only' => true,
                 'class' => 'Claroline\CursusBundle\Entity\CourseSession',
-                'property' => 'courseTitle'
+                'property' => 'shortNameWithCourse'
             )
         );
         $builder->add(

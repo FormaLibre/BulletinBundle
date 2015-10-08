@@ -15,7 +15,7 @@
     "require": {
         "php": ">=5.4.1",
         "claroline/core-bundle": "~6.0",
-        "claroline/cursus-bundle": ">=6.1.3,<7.0",
+        "claroline/cursus-bundle": ">=6.1.4,<7.0",
         "claroline/pdf-generator-bundle": "~6.0"
     },
     "autoload": {
