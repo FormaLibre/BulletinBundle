@@ -35,6 +35,11 @@ class MatiereOptions
      */
     private $position;
 
+    /**
+     * @ORM\Column(name="color", nullable=true)
+     */
+    protected $color;
+
     public function getId()
     {
         return $this->id;
@@ -73,5 +78,15 @@ class MatiereOptions
     public function setPosition($position)
     {
         $this->position = $position;
+    }
+
+    public function getColor()
+    {
+        return $this->color;
+    }
+
+    public function setColor($color)
+    {
+        $this->color = $color;
     }
 }

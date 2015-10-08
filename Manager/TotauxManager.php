@@ -134,6 +134,7 @@ class TotauxManager
 
             foreach ($pemps as $pemp){
                 $matiere = $pemp->getMatiere();
+                $matiereOptions = $this->bulletinManager->getOptionsByMatiere($matiere);
                 $matiereId = $matiere->getId();
                 
                 if (!isset($totaux[$matiereId])) {
@@ -141,7 +142,7 @@ class TotauxManager
                     $totaux[$matiereId]['name'] = $matiere->getCourse()->getTitle();
                     $totaux[$matiereId]['pourcentage'] = 0;
                     $totaux[$matiereId]['nbPeriodes'] = 0;
-                    $totaux[$matiereId]['color'] = $matiere->getColor();
+                    $totaux[$matiereId]['color'] = $matiereOptions->getColor();
                 }
                 
                 if ($pemp->getPourcentage() != 999){
@@ -179,9 +180,9 @@ class TotauxManager
 
         foreach ($pemps as $pemp) {
             $matiere = $pemp->getMatiere();
+            $matiereOptions = $this->bulletinManager->getOptionsByMatiere($matiere);
             $matiereName = $matiere->getCourse()->getTitle();
-//            $matiereColor = $matiere->getColor();
-            $matiereColor = '#7BE0A3';
+            $matiereColor = $matiereOptions->getColor();
             $pempInCeb = in_array($matiereName, $matCeb) ? true: false;
             $object = new \StdClass();
             $object->label = $matiereName;

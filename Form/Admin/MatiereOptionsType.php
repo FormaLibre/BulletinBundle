@@ -41,6 +41,14 @@ class MatiereOptionsType extends AbstractType
                 'attr' => array('min' => 0)
             )
         );
+        $builder->add(
+            'color',
+            'text',
+            array(
+                'required' => false,
+                'attr' => array('class' => 'color-field')
+            )
+        );
     }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver){
