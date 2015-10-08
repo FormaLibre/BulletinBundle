@@ -13,6 +13,7 @@
                         <th>Nom</th>
                         <th>Nom officiel</th>
                         <th class="text-center">Total</th>
+                        <th class="text-center">Position</th>
                         <th></th>
                     </tr>
                 
@@ -25,6 +26,20 @@
                                     <i class="fa fa-check-circle" style="color: #5CB85C"></i>
                                 {% else %}
                                     <i class="fa fa-times-circle" style="color: #D9534F"></i>
+                                {% endif %}
+                                [
+                                {% if pointDivers.getTotal() is empty %}
+                                    -
+                                {% else %}
+                                    {{ pointDivers.getTotal() }}
+                                {% endif %}
+                                ]
+                            </td>
+                            <td class="text-center">
+                                {% if pointDivers.getPosition() is empty %}
+                                    -
+                                {% else %}
+                                    {{ pointDivers.getPosition() }}
                                 {% endif %}
                             </td>
                             <td class="text-center">

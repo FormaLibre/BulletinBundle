@@ -75,6 +75,11 @@ class Periode
      */
     protected $pointDivers;
 
+    /**
+     * @ORM\Column(type="float", nullable=false)
+     */
+    private $coefficient = 1;
+
     public function __construct()
     {
         $this->matieres = new ArrayCollection();
@@ -261,5 +266,15 @@ class Periode
         }
 
         return $this;
+    }
+
+    public function getCoefficient()
+    {
+        return $this->coefficient;
+    }
+
+    public function setCoefficient($coefficient)
+    {
+        $this->coefficient = $coefficient;
     }
 }

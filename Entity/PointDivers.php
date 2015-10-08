@@ -32,6 +32,16 @@ class PointDivers{
     private $withTotal;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $total;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $position;
+
+    /**
      * @param mixed $id
      */
     public function setId($id)
@@ -95,9 +105,28 @@ class PointDivers{
         return $this->withTotal;
     }
 
+    public function getTotal()
+    {
+        return $this->total;
+    }
+
+    public function setTotal($total)
+    {
+        $this->total = $total;
+    }
+
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    public function setPosition($position)
+    {
+        $this->position = $position;
+    }
+
     public function __toString()
     {
         return (string) $this->getOfficialName();
     }
-
 }

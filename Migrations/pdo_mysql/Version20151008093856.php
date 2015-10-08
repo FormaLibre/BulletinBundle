@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated migration based on mapping information: modify it with caution
  *
- * Generation date: 2015/10/07 02:10:30
+ * Generation date: 2015/10/08 09:39:00
  */
-class Version20151007141028 extends AbstractMigration
+class Version20151008093856 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
@@ -25,6 +25,7 @@ class Version20151007141028 extends AbstractMigration
                 comportement DOUBLE PRECISION DEFAULT NULL, 
                 presence DOUBLE PRECISION DEFAULT NULL, 
                 position INT DEFAULT NULL, 
+                comment LONGTEXT DEFAULT NULL, 
                 INDEX IDX_FCB4A752F384C1CF (periode_id), 
                 INDEX IDX_FCB4A752F46CD258 (matiere_id), 
                 INDEX IDX_FCB4A752A6CC7B2 (eleve_id), 
@@ -37,6 +38,8 @@ class Version20151007141028 extends AbstractMigration
                 name VARCHAR(255) NOT NULL, 
                 officialName VARCHAR(255) NOT NULL, 
                 withTotal TINYINT(1) DEFAULT NULL, 
+                total INT DEFAULT NULL, 
+                position INT DEFAULT NULL, 
                 PRIMARY KEY(id)
             ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
         ");
@@ -72,6 +75,16 @@ class Version20151007141028 extends AbstractMigration
             ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
         ");
         $this->addSql("
+            CREATE TABLE formalibre_bulletin_matiere_options (
+                id INT AUTO_INCREMENT NOT NULL, 
+                matiere_id INT DEFAULT NULL, 
+                total INT DEFAULT NULL, 
+                position INT DEFAULT NULL, 
+                INDEX IDX_AEF04CC8F46CD258 (matiere_id), 
+                PRIMARY KEY(id)
+            ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
+        ");
+        $this->addSql("
             CREATE TABLE formalibre_bulletin_periode (
                 id INT AUTO_INCREMENT NOT NULL, 
                 name VARCHAR(255) NOT NULL, 
@@ -82,6 +95,7 @@ class Version20151007141028 extends AbstractMigration
                 ReunionParent VARCHAR(255) NOT NULL, 
                 template VARCHAR(255) NOT NULL, 
                 onlyPoint TINYINT(1) DEFAULT NULL, 
+                coefficient DOUBLE PRECISION NOT NULL, 
                 PRIMARY KEY(id)
             ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB
         ");
@@ -135,6 +149,7 @@ class Version20151007141028 extends AbstractMigration
                 total INT DEFAULT NULL, 
                 point DOUBLE PRECISION DEFAULT NULL, 
                 position INT DEFAULT NULL, 
+                comment LONGTEXT DEFAULT NULL, 
                 INDEX IDX_134BF6F8F384C1CF (periode_id), 
                 INDEX IDX_134BF6F89C3BA491 (divers_id), 
                 INDEX IDX_134BF6F8A6CC7B2 (eleve_id), 
@@ -182,6 +197,11 @@ class Version20151007141028 extends AbstractMigration
             ADD CONSTRAINT FK_7D44F3B3FE54D947 FOREIGN KEY (group_id) 
             REFERENCES claro_group (id) 
             ON DELETE CASCADE
+        ");
+        $this->addSql("
+            ALTER TABLE formalibre_bulletin_matiere_options 
+            ADD CONSTRAINT FK_AEF04CC8F46CD258 FOREIGN KEY (matiere_id) 
+            REFERENCES claro_cursusbundle_course_session (id)
         ");
         $this->addSql("
             ALTER TABLE formalibre_bulletin_periode_matieres 
@@ -310,6 +330,9 @@ class Version20151007141028 extends AbstractMigration
         ");
         $this->addSql("
             DROP TABLE formalibre_bulletin_groupe_titulaire
+        ");
+        $this->addSql("
+            DROP TABLE formalibre_bulletin_matiere_options
         ");
         $this->addSql("
             DROP TABLE formalibre_bulletin_periode

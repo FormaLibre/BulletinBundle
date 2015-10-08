@@ -2,21 +2,25 @@
 
 namespace FormaLibre\BulletinBundle\Form\Admin;
 
-use Claroline\CoreBundle\Persistence\ObjectManager;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
+use FormaLibre\BulletinBundle\Manager\BulletinManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class UserDecisionEditType extends AbstractType
 {
+    private $bulletinManager;
     private $decision;
     private $om;
 
-    public function __construct(PeriodeEleveDecision $decision, ObjectManager $om)
+    public function __construct(
+        PeriodeEleveDecision $decision,
+        BulletinManager $bulletinManager
+    )
     {
+        $this->bulletinManager = $bulletinManager;
         $this->decision = $decision;
-        $this->om = $om;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -53,8 +57,7 @@ class UserDecisionEditType extends AbstractType
         $matieres = array();
         $user = $this->decision->getUser();
         $periode = $this->decision->getPeriode();
-        $pempRepo = $this->om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
-        $pemps = $pempRepo->findPeriodeEleveMatiere($user, $periode);
+        $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($user, $periode);
         $temp = array();
 
         foreach ($pemps as $pemp) {

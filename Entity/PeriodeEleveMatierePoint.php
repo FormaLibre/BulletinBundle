@@ -65,6 +65,11 @@ class PeriodeEleveMatierePoint
     private $position;
 
     /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $comment;
+
+    /**
      * @param mixed $comportement
      */
     public function setComportement($comportement)
@@ -233,4 +238,13 @@ class PeriodeEleveMatierePoint
         return $pourcentage;
     }
 
+    public function getComment()
+    {
+        return $this->comment;
+    }
+
+    public function setComment($comment)
+    {
+        $this->comment = $comment;
+    }
 }

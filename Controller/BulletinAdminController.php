@@ -12,6 +12,7 @@ use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Entity\Decision;
 use FormaLibre\BulletinBundle\Entity\GroupeTitulaire;
+use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint;
@@ -19,6 +20,7 @@ use FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use FormaLibre\BulletinBundle\Entity\PointDivers;
 use FormaLibre\BulletinBundle\Form\Admin\DecisionType;
 use FormaLibre\BulletinBundle\Form\Admin\GroupeTitulaireType;
+use FormaLibre\BulletinBundle\Form\Admin\MatiereOptionsCollectionType;
 use FormaLibre\BulletinBundle\Form\Admin\PeriodeType;
 use FormaLibre\BulletinBundle\Form\Admin\PeriodeOptionsType;
 use FormaLibre\BulletinBundle\Form\Admin\PointDiversType;
@@ -497,7 +499,7 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $form = $this->formFactory->create(
-            new UserDecisionEditType($decision, $this->om),
+            new UserDecisionEditType($decision, $this->bulletinManager),
             $decision
         );
 
@@ -517,7 +519,7 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $form = $this->formFactory->create(
-            new UserDecisionEditType($decision, $this->om),
+            new UserDecisionEditType($decision, $this->bulletinManager),
             $decision
         );
         $form->handleRequest($this->request);
@@ -928,6 +930,44 @@ class BulletinAdminController extends Controller
                 'pointDiversIds' => $pointDiversIds
             );
         }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/matieres/options/management",
+     *     name="formalibre_bulletin_matieres_options_management",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/matieresOptionsManagement.html.twig")
+     */
+    public function matieresOptionsManagementAction()
+    {
+        $this->checkOpen();
+        $matieresOptions = $this->bulletinManager->getAllMatieresOptions();
+
+        $formCollection = new Pemps();
+
+        foreach ($matieresOptions as $matiereOptions) {
+            $formCollection->getPemps()->add($matiereOptions);
+        }
+        $form = $this->formFactory->create(new MatiereOptionsCollectionType(), $formCollection);
+
+        if ($this->request->isMethod('POST')) {
+            $form->handleRequest($this->request);
+            $this->om->startFlushSuite();
+
+            foreach ($formCollection as $matiereOptions){
+                $this->em->persist($matiereOptions);
+            }
+            $this->om->endFlushSuite();
+
+            return new RedirectResponse(
+                $this->router->generate('formalibreBulletinAdminIndex')
+            );
+        }
+
+        return array('form' => $form->createView());
     }
 
     private function checkOpen()

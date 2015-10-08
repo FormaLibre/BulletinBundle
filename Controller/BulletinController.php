@@ -321,9 +321,8 @@ class BulletinController extends Controller
     {
         $this->checkOpen();
 
-        $pemps = $this->bulletinManager->getPemps($eleve, $periode);
-//        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
-        $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+        $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+        $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
 
         $pempCollection = new Pemps;
         foreach ($pemps as $pemp) {
@@ -378,7 +377,13 @@ class BulletinController extends Controller
         $eleves = $this->userRepo->findByGroup($group);
         $pempCollection = new Pemps;
         foreach ( $eleves as $eleve){
-            $pempCollection->getPemps()->add($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere));
+            $pempCollection->getPemps()->add(
+                $this->bulletinManager->getPempByPeriodeAndUserAndMatiere(
+                    $periode,
+                    $eleve,
+                    $matiere
+                )
+            );
         }
 
         $form = $this->createForm(new MatiereType, $pempCollection);
@@ -392,7 +397,14 @@ class BulletinController extends Controller
             }
             $this->em->flush();
 
-            return $this->redirect($this->generateUrl('formalibreBulletinEditMatiere', array('periode' => $periode->getId(), 'matiere' => $matiere->getId(), 'group' => $group->getId())));
+            return $this->redirect($this->generateUrl(
+                'formalibreBulletinEditMatiere',
+                array(
+                    'periode' => $periode->getId(),
+                    'matiere' => $matiere->getId(),
+                    'group' => $group->getId()
+                )
+            ));
             //}
             // else {
             //     throw new \Exception('tata');
@@ -430,8 +442,8 @@ class BulletinController extends Controller
         $recap = 0;
 
         if (!$periode->getOnlyPoint()){
-            $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
-            $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+            $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+            $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
 
         } else {
             $pemps = array();
@@ -441,8 +453,8 @@ class BulletinController extends Controller
 
             foreach ($periodes as $per){
                 $periode = $this->periodeRepo->findOneById($per);
-                $pemps[] = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
-                $pemds[] = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+                $pemps[] = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+                $pemds[] = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
 
                 $totaux[] = $this->totauxManager->getTotalPeriode($periode, $eleve);
 
@@ -632,7 +644,7 @@ class BulletinController extends Controller
         $totaux = array();
         $recap = 0;
         $periodes = $this->periodeRepo->findAll();
-        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+        $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
 
         foreach ($periodes as $per){
             $periodeId = $per->getId();

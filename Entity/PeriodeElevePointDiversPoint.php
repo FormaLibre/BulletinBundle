@@ -55,6 +55,11 @@ class PeriodeElevePointDiversPoint
     private $position;
 
     /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $comment;
+
+    /**
      * @param mixed $divers
      */
     public function setDivers($divers)
@@ -166,5 +171,13 @@ class PeriodeElevePointDiversPoint
         return $this->position;
     }
 
+    public function getComment()
+    {
+        return $this->comment;
+    }
 
+    public function setComment($comment)
+    {
+        $this->comment = $comment;
+    }
 }

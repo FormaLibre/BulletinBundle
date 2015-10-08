@@ -1,0 +1,36 @@
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h1>Configuration des matières</h1>
+    </div>
+    <div class="panel-body">
+        <form action="" method="POST" {{ form_enctype(form) }} autocomplete="off">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Matière</th>
+                        <th>Total</th>
+                        <th>Position</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pemp in form.pemps %}
+                        <tr>
+                            <td class="matiere">{{ form_widget(pemp.matiere) }}</td>
+                            <td class="total">{{ form_widget(pemp.total) }}</td>
+                            <td class="total">{{ form_widget(pemp.position) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {{ form_widget(form.save) }}
+            <a href="{{ path('formalibreBulletinAdminIndex') }}"
+               class="btn btn-default"
+            >
+                Retour
+            </a>
+        </form>
+    </div>
+
+{% endblock %}

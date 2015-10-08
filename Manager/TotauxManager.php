@@ -22,6 +22,7 @@ use Claroline\CursusBundle\Entity\CourseSession;
  */
 class TotauxManager
 {
+    private $bulletinManager;
     private $om;
     private $pempRepo;
     private $pemdRepo;
@@ -29,20 +30,23 @@ class TotauxManager
 
     /**
      * @DI\InjectParams({
-     *     "om" = @DI\Inject("claroline.persistence.object_manager")
+     *     "bulletinManager" = @DI\Inject("formalibre.manager.bulletin_manager"),
+     *     "om"              = @DI\Inject("claroline.persistence.object_manager")
      * })
      */
-    public function __construct(ObjectManager $om)
+    public function __construct(BulletinManager $bulletinManager, ObjectManager $om)
     {
+        $this->bulletinManager = $bulletinManager;
         $this->om = $om;
-        $this->pempRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
-        $this->pemdRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
-        $this->periodeRepo        = $om->getRepository('FormaLibreBulletinBundle:Periode');
+
+        $this->pempRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
+        $this->pemdRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
+        $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
     }
 
-    public function getTotalPeriode(Periode $periode, User $eleve) {
-
-        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+    public function getTotalPeriode(Periode $periode, User $eleve)
+    {
+        $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
         $totalPoint = 0;
         $totalTotal = 0;
 
@@ -69,7 +73,7 @@ class TotauxManager
         $nbPeriodes = array();
 
         foreach ($periodes as $periode){
-            $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+            $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
 
             foreach ($pemps as $key => $pemp){
                 if (!isset($totaux[$key])) {
@@ -98,7 +102,7 @@ class TotauxManager
         $nbPeriodes = array();
 
         foreach ($periodes as $periode){
-            $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+            $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
 
             foreach ($pemps as $key => $pemp){
                 if (!isset($totaux[$key])) {
@@ -126,7 +130,7 @@ class TotauxManager
         $totaux = array();
         
         foreach ($periodes as $periode) {
-            $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+            $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
 
             foreach ($pemps as $pemp){
                 $matiere = $pemp->getMatiere();
@@ -171,7 +175,7 @@ class TotauxManager
 
         //créons les matières avec les moyens du bord !
         $periode = $this->periodeRepo->findOneById(1);
-        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+        $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
 
         foreach ($pemps as $pemp) {
             $matiere = $pemp->getMatiere();

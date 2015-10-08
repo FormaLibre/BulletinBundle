@@ -35,7 +35,7 @@ class PeriodeType extends AbstractType
                 'name',
                 'text',
                 array(
-                    'label' => 'name',
+                    'label' => 'Nom',
                     'constraints' => new NotBlank()
                 )
             )
@@ -67,7 +67,14 @@ class PeriodeType extends AbstractType
                 'text',
                 $templateOptions
             )
-            ->add('onlyPoint', 'checkbox', array('label' => 'Uniquement des points'));
+            ->add('onlyPoint', 'checkbox', array('label' => 'Uniquement des points'))
+            ->add(
+                'coefficient',
+                'number',
+                array(
+                    'label' => 'Coefficient'
+                )
+            );
     }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
