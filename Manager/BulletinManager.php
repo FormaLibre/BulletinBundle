@@ -227,7 +227,7 @@ class BulletinManager
 
     public function getPempsByEleveAndPeriode(User $eleve, Periode $periode)
     {
-        $matieres = $periode->getMatieres();
+        $matieres = $this->getMatieresByEleveAndPeriode($eleve, $periode);
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
         $matiereIds = array();
 
@@ -368,5 +368,31 @@ class BulletinManager
     public function setBulletinParameter($name, $value)
     {
         $this->platformConfigHandler->setParameter($name, $value);
+    }
+
+    public function getMatieresByEleveAndPeriode(User $eleve, Periode $periode)
+    {
+        $matieres = $periode->getMatieres();
+        $eleveMatieres = array();
+
+        if (count($matieres) > 0) {
+            $qb = $this->em->createQueryBuilder();
+            $qb->select('csu')
+                ->from('Claroline\CursusBundle\Entity\CourseSessionUser', 'csu')
+                ->where('csu.user = :user')
+                ->andWhere('csu.userType = :userType')
+                ->andWhere('csu.session IN (:sessions)')
+                ->setParameter('user', $eleve)
+                ->setParameter('userType', 0)
+                ->setParameter('sessions', $matieres);
+            $query = $qb->getQuery();
+            $sessionUsers = $query->getResult();
+
+            foreach ($sessionUsers as $sessionUser) {
+                $eleveMatieres[] = $sessionUser->getSession();
+            }
+        }
+
+        return $eleveMatieres;
     }
 }
