@@ -8,16 +8,14 @@ use Claroline\CoreBundle\Manager\RoleManager;
 use Claroline\CoreBundle\Manager\ToolManager;
 use Claroline\CoreBundle\Manager\UserManager;
 use Claroline\CoreBundle\Persistence\ObjectManager;
-use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Entity\Decision;
 use FormaLibre\BulletinBundle\Entity\GroupeTitulaire;
 use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
-use FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint;
-use FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use FormaLibre\BulletinBundle\Entity\PointDivers;
+use FormaLibre\BulletinBundle\Form\Admin\BulletinConfigurationType;
 use FormaLibre\BulletinBundle\Form\Admin\DecisionType;
 use FormaLibre\BulletinBundle\Form\Admin\GroupeTitulaireType;
 use FormaLibre\BulletinBundle\Form\Admin\MatiereOptionsCollectionType;
@@ -72,17 +70,17 @@ class BulletinAdminController extends Controller
 
     /**
      * @DI\InjectParams({
-     *      "authorization"      = @DI\Inject("security.authorization_checker"),
-     *      "bulletinManager"    = @DI\Inject("formalibre.manager.bulletin_manager"),
-     *      "toolManager"        = @DI\Inject("claroline.manager.tool_manager"),
-     *      "roleManager"        = @DI\Inject("claroline.manager.role_manager"),
-     *      "userManager"        = @DI\Inject("claroline.manager.user_manager"),
-     *      "om"                 = @DI\Inject("claroline.persistence.object_manager"),
-     *      "em"                 = @DI\Inject("doctrine.orm.entity_manager"),
-     *      "pdfDir"             = @DI\Inject("%laurent.directories.pdf%"),
-     *      "formFactory"        = @DI\Inject("form.factory"),
-     *      "requestStack"       = @DI\Inject("request_stack"),
-     *     "router"              = @DI\Inject("router"),
+     *     "authorization"         = @DI\Inject("security.authorization_checker"),
+     *     "bulletinManager"       = @DI\Inject("formalibre.manager.bulletin_manager"),
+     *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
+     *     "formFactory"           = @DI\Inject("form.factory"),
+     *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
+     *     "pdfDir"                = @DI\Inject("%laurent.directories.pdf%"),
+     *     "requestStack"          = @DI\Inject("request_stack"),
+     *     "roleManager"           = @DI\Inject("claroline.manager.role_manager"),
+     *     "router"                = @DI\Inject("router"),
+     *     "toolManager"           = @DI\Inject("claroline.manager.tool_manager"),
+     *     "userManager"           = @DI\Inject("claroline.manager.user_manager")
      * })
      */
     public function __construct(
@@ -985,6 +983,74 @@ class BulletinAdminController extends Controller
         }
 
         return array('form' => $form->createView());
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/bulletin/configure/form",
+     *     name="formalibre_bulletin_configure_form",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/bulletinConfigureForm.html.twig")
+     */
+    public function bulletinConfigureFormAction()
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(
+            new BulletinConfigurationType($this->bulletinManager)
+        );
+
+        return array('form' => $form->createView());
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/bulletin/configure",
+     *     name="formalibre_bulletin_configure",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/bulletinConfigureForm.html.twig")
+     */
+    public function bulletinConfigureAction()
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(
+            new BulletinConfigurationType($this->bulletinManager)
+        );
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $withSecondPoint = $form->get('useSecondPoint')->getData();
+            $withThirdPoint = $form->get('useThirdPoint')->getData();
+            $secondPointName = $form->get('secondPointName')->getData();
+            $thirdPointName = $form->get('thirdPointName')->getData();
+
+            $this->bulletinManager->setBulletinParameter(
+                'bulletin_use_second_point',
+                $withSecondPoint
+            );
+            $this->bulletinManager->setBulletinParameter(
+                'bulletin_use_third_point',
+                $withThirdPoint
+            );
+            $this->bulletinManager->setBulletinParameter(
+                'bulletin_second_point_name',
+                $secondPointName
+            );
+            $this->bulletinManager->setBulletinParameter(
+                'bulletin_third_point_name',
+                $thirdPointName
+            );
+
+            return new RedirectResponse(
+                $this->router->generate('formalibreBulletinAdminIndex')
+            );
+        } else {
+
+            return array('form' => $form->createView());
+        }
     }
 
     private function checkOpen()

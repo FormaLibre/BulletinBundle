@@ -31,8 +31,14 @@
                 <th class="center">Point</th>
                 <th class="center">Total</th>
                 <th class="center">%</th>
-                <th class="center">Comportement</th>
-                <th class="center">Présence</th>
+                
+                {% if hasThirdPoint %}
+                    <th class="center">{{ thirdPointName }}</th>
+                {% endif %}
+                
+                {% if hasSecondPoint %}
+                    <th class="center">{{ secondPointName }}</th>
+                {% endif %}
             </tr></thead>
             <tbody>
             {% for pemp in pemps %}
@@ -57,15 +63,21 @@
                     <td class="center point">{{ pemp.point }}</td>
                     <td class="center total">{{ pemp.total }}</td>
                     <td class="center pourcent" data="{{ pemp.total }}"></td>
-                    {% if pemp.comportement < 850 %}
-                        <td class="center">{{ pemp.comportement }} / 10</td>
-                    {% else %}
-                        <td class="center">NE</td>
+                    
+                    {% if hasThirdPoint %}
+                        {% if pemp.comportement < 850 %}
+                            <td class="center">{{ pemp.comportement }} / 10</td>
+                        {% else %}
+                            <td class="center">NE</td>
+                        {% endif %}
                     {% endif %}
-                    {% if pemp.comportement < 850 %}
-                        <td class="center">{{ pemp.presence }} %</td>
-                    {% else %}
-                        <td class="center">NE</td>
+                    
+                    {% if hasSecondPoint %}
+                        {% if pemp.comportement < 850 %}
+                            <td class="center">{{ pemp.presence }} %</td>
+                        {% else %}
+                            <td class="center">NE</td>
+                        {% endif %}
                     {% endif %}
                 </tr>
             {% endif %}
@@ -76,7 +88,10 @@
                 <th class="center" id="totPoint"></th>
                 <th class="center" id="totTot"></th>
                 <th class="center" id="totPour"> %</th>
-                <th colspan="2"></th>
+                
+                {% if hasSecondPoint or hasThirdPoint %}
+                    <th colspan="2"></th>
+                {% endif %}
             </tr></thead>
         </table>
     </div>

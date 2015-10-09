@@ -4,6 +4,7 @@ namespace FormaLibre\BulletinBundle\Manager;
 
 use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Event\StrictDispatcher;
+use Claroline\CoreBundle\Library\Configuration\PlatformConfigurationHandler;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
@@ -21,29 +22,33 @@ class BulletinManager
     private $em;
     private $eventDispatcher;
     private $om;
+    private $platformConfigHandler;
 
     private $groupeTitulaireRepo;
     private $matiereOptionsRepo;
     private $pempRepo;
-    private $pempdRepo;
+    private $pepdpRepo;
     private $pointDiversRepo;
 
     /**
      * @DI\InjectParams({
-     *      "em"              = @DI\Inject("doctrine.orm.entity_manager"),
-     *      "eventDispatcher" = @DI\Inject("claroline.event.event_dispatcher"),
-     *      "om"              = @DI\Inject("claroline.persistence.object_manager")
+     *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
+     *     "eventDispatcher"       = @DI\Inject("claroline.event.event_dispatcher"),
+     *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
+     *     "platformConfigHandler" = @DI\Inject("claroline.config.platform_config_handler")
      * })
      */
     public function __construct(
         EntityManager $em,
         StrictDispatcher $eventDispatcher,
-        ObjectManager $om
+        ObjectManager $om,
+        PlatformConfigurationHandler $platformConfigHandler
     )
     {
         $this->em = $em;
         $this->eventDispatcher = $eventDispatcher;
         $this->om = $om;
+        $this->platformConfigHandler = $platformConfigHandler;
 
         $this->groupeTitulaireRepo = $om->getRepository('FormaLibreBulletinBundle:GroupeTitulaire');
         $this->matiereOptionsRepo = $om->getRepository('FormaLibreBulletinBundle:MatiereOptions');
@@ -330,5 +335,38 @@ class BulletinManager
         }
 
         return $matieresOptions;
+    }
+
+    public function hasSecondPoint()
+    {
+        $withSecond = $this->platformConfigHandler->getParameter('bulletin_use_second_point');
+
+        return is_null($withSecond) ? true : $withSecond;
+    }
+
+    public function hasThirdPoint()
+    {
+        $withThird = $this->platformConfigHandler->getParameter('bulletin_use_third_point');
+
+        return is_null($withThird) ? true : $withThird;
+    }
+
+    public function getSecondPointName()
+    {
+        $secondName = $this->platformConfigHandler->getParameter('bulletin_second_point_name');
+
+        return empty($secondName) ? 'Présence' : $secondName;
+    }
+
+    public function getThirdPointName()
+    {
+        $thirdName = $this->platformConfigHandler->getParameter('bulletin_third_point_name');
+
+        return empty($thirdName) ? 'Comportement' : $thirdName;
+    }
+
+    public function setBulletinParameter($name, $value)
+    {
+        $this->platformConfigHandler->setParameter($name, $value);
     }
 }

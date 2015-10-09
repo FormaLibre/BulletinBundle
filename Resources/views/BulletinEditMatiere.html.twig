@@ -20,8 +20,14 @@
                     <th>Point</th>
                     <th>Total</th>
                     {% if periode.onlyPoint != 1 %}
-                        <th>Présence</th>
-                        <th>Comportement</th>
+                    
+                        {% if hasSecondPoint %}
+                            <th>{{ secondPointName }} ( % )</th>
+                        {% endif %}
+                    
+                        {% if hasThirdPoint %}
+                            <th>{{ thirdPointName }} ( / 10 )</th>
+                        {% endif %}
                     {% endif %}
                 </tr></thead>
                 <tbody>
@@ -31,8 +37,14 @@
                         <td class="point">{{ form_widget(pemp.point) }}</td>
                         <td class="total">{{ form_widget(pemp.total) }}</td>
                         {% if periode.onlyPoint != 1 %}
-                            <td class="presence">{{ form_widget(pemp.presence) }}</td>
-                            <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
+                    
+                            {% if hasSecondPoint %}
+                                <td class="presence">{{ form_widget(pemp.presence) }}</td>
+                            {% endif %}
+
+                            {% if hasThirdPoint %}
+                                <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
+                            {% endif %}
                         {% endif %}
                     </tr>
                 {% endfor %}

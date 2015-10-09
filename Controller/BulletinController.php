@@ -2,88 +2,89 @@
 
 namespace FormaLibre\BulletinBundle\Controller;
 
-use FormaLibre\BulletinBundle\Manager\TotauxManager;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
-use JMS\DiExtraBundle\Annotation as DI;
-use Claroline\CoreBundle\Manager\ToolManager;
+use Claroline\CoreBundle\Entity\Group;
+use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Manager\RoleManager;
+use Claroline\CoreBundle\Manager\ToolManager;
 use Claroline\CoreBundle\Manager\UserManager;
-use Doctrine\ORM\EntityManager;
 use Claroline\CoreBundle\Persistence\ObjectManager;
+use Claroline\CursusBundle\Entity\CourseSession;
+use Doctrine\ORM\EntityManager;
+use FormaLibre\BulletinBundle\Form\Type\MatiereType;
+use FormaLibre\BulletinBundle\Form\Type\PempsType;
+use FormaLibre\BulletinBundle\Entity\Pemps;
+use FormaLibre\BulletinBundle\Entity\Periode;
+use FormaLibre\BulletinBundle\Manager\BulletinManager;
+use FormaLibre\BulletinBundle\Manager\TotauxManager;
+use JMS\DiExtraBundle\Annotation as DI;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Claroline\CoreBundle\Entity\User;
-use Claroline\CoreBundle\Entity\Group;
-use FormaLibre\BulletinBundle\Entity\Periode;
-use FormaLibre\BulletinBundle\Entity\Pemps;
-use FormaLibre\BulletinBundle\Form\Type\PempsType;
-use FormaLibre\BulletinBundle\Form\Type\MatiereType;
-use FormaLibre\BulletinBundle\Manager\BulletinManager;
-use Claroline\CursusBundle\Entity\CourseSession;
 
 class BulletinController extends Controller
 {
     private $authorization;
     private $bulletinManager;
-    private $toolManager;
-    private $roleManager;
-    private $userManager;
     private $em;
     private $om;
-    /** @var PeriodeEleveMatierePointRepository */
-    private $pempRepo;
-    /** @var PeriodeElevePointDiversPointRepository */
-    private $pemdRepo;
+    private $roleManager;
+    private $toolManager;
+    private $totauxManager;
+    private $userManager;
+
     /** @var GroupRepository */
     private $groupRepo;
-    /** @var UserRepository */
-    private $userRepo;
+    /** @var PeriodeElevePointDiversPointRepository */
+    private $pemdRepo;
+    /** @var PeriodeEleveMatierePointRepository */
+    private $pempRepo;
+    private $periodeEleveDecisionRepo;
     /** @var PeriodeRepository */
     private $periodeRepo;
-    private $totauxManager;
-    private $periodeEleveDecisionRepo;
+    /** @var UserRepository */
+    private $userRepo;
 
     /**
      * @DI\InjectParams({
-     *      "authorization"      = @DI\Inject("security.authorization_checker"),
-     *      "bulletinManager"    = @DI\Inject("formalibre.manager.bulletin_manager"),
-     *      "toolManager"        = @DI\Inject("claroline.manager.tool_manager"),
-     *      "roleManager"        = @DI\Inject("claroline.manager.role_manager"),
-     *      "userManager"        = @DI\Inject("claroline.manager.user_manager"),
-     *      "em"                 = @DI\Inject("doctrine.orm.entity_manager"),
-     *      "om"                 = @DI\Inject("claroline.persistence.object_manager"),
-     *      "totauxManager"      = @DI\Inject("laurent.manager.totaux_manager")
+     *     "authorization"         = @DI\Inject("security.authorization_checker"),
+     *     "bulletinManager"       = @DI\Inject("formalibre.manager.bulletin_manager"),
+     *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
+     *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
+     *     "roleManager"           = @DI\Inject("claroline.manager.role_manager"),
+     *     "toolManager"           = @DI\Inject("claroline.manager.tool_manager"),
+     *     "totauxManager"         = @DI\Inject("laurent.manager.totaux_manager"),
+     *     "userManager"           = @DI\Inject("claroline.manager.user_manager"),
      * })
      */
     public function __construct(
         AuthorizationCheckerInterface $authorization,
         BulletinManager $bulletinManager,
-        ToolManager $toolManager,
-        RoleManager $roleManager,
-        UserManager $userManager,
-        TotauxManager $totauxManager,
         EntityManager $em,
-        ObjectManager $om
-      )
+        ObjectManager $om,
+        RoleManager $roleManager,
+        ToolManager $toolManager,
+        TotauxManager $totauxManager,
+        UserManager $userManager
+    )
     {
-        $this->authorization      = $authorization;
-        $this->bulletinManager    = $bulletinManager;
-        $this->toolManager        = $toolManager;
-        $this->roleManager        = $roleManager;
-        $this->userManager        = $userManager;
-        $this->em                 = $em;
-        $this->om                 = $om;
-        $this->pempRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
-        $this->pemdRepo           = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
-        $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
-        $this->userRepo           = $om->getRepository('ClarolineCoreBundle:User');
-        $this->periodeRepo        = $om->getRepository('FormaLibreBulletinBundle:Periode');
-        $this->totauxManager      = $totauxManager;
+        $this->authorization = $authorization;
+        $this->bulletinManager = $bulletinManager;
+        $this->em = $em;
+        $this->om = $om;
+        $this->roleManager = $roleManager;
+        $this->toolManager = $toolManager;
+        $this->totauxManager = $totauxManager;
+        $this->userManager = $userManager;
+
+        $this->groupRepo = $om->getRepository('ClarolineCoreBundle:Group');
+        $this->pemdRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
+        $this->pempRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
         $this->periodeEleveDecisionRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveDecision');
+        $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
+        $this->userRepo = $om->getRepository('ClarolineCoreBundle:User');
     }
 
     /**
@@ -348,8 +349,20 @@ class BulletinController extends Controller
 
                 return $this->redirect($nextAction);
         }
+        $hasSecondPoint = $this->bulletinManager->hasSecondPoint();
+        $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
+        $secondPointName = $this->bulletinManager->getSecondPointName();
+        $thirdPointName = $this->bulletinManager->getThirdPointName();
 
-        return array('form' => $form->createView(), 'eleve' => $eleve, 'periode' => $periode);
+        return array(
+            'form' => $form->createView(),
+            'eleve' => $eleve,
+            'periode' => $periode,
+            'hasSecondPoint' => $hasSecondPoint,
+            'hasThirdPoint' => $hasThirdPoint,
+            'secondPointName' => $secondPointName,
+            'thirdPointName' => $thirdPointName
+        );
 
 
     }
@@ -373,7 +386,6 @@ class BulletinController extends Controller
     public function editMatiereAction(Request $request, Periode $periode, Group $group, CourseSession $matiere)
     {
         $this->checkOpen();
-        $pemps = array();
         $eleves = $this->userRepo->findByGroup($group);
         $pempCollection = new Pemps;
         foreach ( $eleves as $eleve){
@@ -390,8 +402,7 @@ class BulletinController extends Controller
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
-            //if ($form->isValid()) {
-            //  throw new \Exception('toto');
+
             foreach ($pempCollection as $pemp){
                 $this->em->persist($pemp);
             }
@@ -405,15 +416,22 @@ class BulletinController extends Controller
                     'group' => $group->getId()
                 )
             ));
-            //}
-            // else {
-            //     throw new \Exception('tata');
-            // }
         }
+        $hasSecondPoint = $this->bulletinManager->hasSecondPoint();
+        $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
+        $secondPointName = $this->bulletinManager->getSecondPointName();
+        $thirdPointName = $this->bulletinManager->getThirdPointName();
 
-        return array('form' => $form->createView(), 'matiere' => $matiere, 'group' => $group, 'periode' => $periode);
-
-
+        return array(
+            'form' => $form->createView(),
+            'matiere' => $matiere,
+            'group' => $group,
+            'periode' => $periode,
+            'hasSecondPoint' => $hasSecondPoint,
+            'hasThirdPoint' => $hasThirdPoint,
+            'secondPointName' => $secondPointName,
+            'thirdPointName' => $thirdPointName
+        );
     }
 
     /**
@@ -470,8 +488,24 @@ class BulletinController extends Controller
         }
 
         $recap = round($recap, 1);
+        $hasSecondPoint = $this->bulletinManager->hasSecondPoint();
+        $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
+        $secondPointName = $this->bulletinManager->getSecondPointName();
+        $thirdPointName = $this->bulletinManager->getThirdPointName();
 
-        $params = array('pemps' => $pemps, 'pemds' => $pemds, 'eleve' => $eleve, 'periode' => $periode, 'totaux' => $totaux, 'totauxMatieres' => $totauxMatieres, 'recap' => $recap);
+        $params = array(
+            'pemps' => $pemps,
+            'pemds' => $pemds,
+            'eleve' => $eleve,
+            'periode' => $periode,
+            'totaux' => $totaux,
+            'totauxMatieres' => $totauxMatieres,
+            'recap' => $recap,
+            'hasSecondPoint' => $hasSecondPoint,
+            'hasThirdPoint' => $hasThirdPoint,
+            'secondPointName' => $secondPointName,
+            'thirdPointName' => $thirdPointName
+        );
 
         return $this->render($template, $params);
     }
