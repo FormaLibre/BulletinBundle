@@ -10,7 +10,6 @@
         );
     });
 
-    // Click on widget create button
     $('.editPeriodeBtn').on('click', function (event) {
         var periodeId = $(event.currentTarget).data('periode-id');
 
@@ -19,6 +18,19 @@
             refreshPage,
             function() {}
         );
+    });
+
+    $('.refresh-periode-btn').on('click', function () {
+        var periodeId = $(this).data('periode-id');
+        
+        $.ajax({
+            url: Routing.generate(
+                'formalibre_bulletin_periode_options_refresh',
+                {'periode': periodeId}
+            ),
+            type: 'POST',
+            success: function () {}
+        });
     });
 
     var refreshPage = function () {

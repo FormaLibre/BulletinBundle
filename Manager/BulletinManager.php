@@ -306,9 +306,14 @@ class BulletinManager
         return $this->matiereOptionsRepo->findOneByMatiere($matiere);
     }
 
-    public function getAllMatieresOptions($withPager = false, $page = 1, $max = 20)
+    public function getAllMatieresOptions(
+        $withPager = false,
+        $page = 1,
+        $max = 20,
+        $matieresList = array()
+    )
     {
-        $matieres = $this->getAvailableSessions();
+        $matieres = (count($matieresList) > 0) ? $matieresList : $this->getAvailableSessions();
 
         if (count($matieres) > 0) {
             $qb = $this->em->createQueryBuilder();
@@ -401,5 +406,15 @@ class BulletinManager
         }
 
         return $eleveMatieres;
+    }
+
+    public function getPempsByPeriode(Periode $periode)
+    {
+        return $this->pempRepo->findByPeriode($periode);
+    }
+
+    public function getPepdpsByPeriode(Periode $periode)
+    {
+        return $this->pepdpRepo->findByPeriode($periode);
     }
 }
