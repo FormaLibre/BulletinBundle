@@ -949,17 +949,18 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/admin/matieres/options/management",
+     *     "/admin/matieres/options/management/page/{page}/max/{max}",
      *     name="formalibre_bulletin_matieres_options_management",
+     *     defaults={"page"=1, "max"=20},
      *     options={"expose"=true}
      * )
      * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
      * @EXT\Template("FormaLibreBulletinBundle::Admin/matieresOptionsManagement.html.twig")
      */
-    public function matieresOptionsManagementAction()
+    public function matieresOptionsManagementAction($page = 1, $max = 20)
     {
         $this->checkOpen();
-        $matieresOptions = $this->bulletinManager->getAllMatieresOptions();
+        $matieresOptions = $this->bulletinManager->getAllMatieresOptions(true, $page, $max);
 
         $formCollection = new Pemps();
 
@@ -977,12 +978,17 @@ class BulletinAdminController extends Controller
             }
             $this->om->endFlushSuite();
 
-            return new RedirectResponse(
-                $this->router->generate('formalibreBulletinAdminIndex')
-            );
+//            return new RedirectResponse(
+//                $this->router->generate('formalibreBulletinAdminIndex')
+//            );
         }
 
-        return array('form' => $form->createView());
+        return array(
+            'form' => $form->createView(),
+            'pager' => $matieresOptions,
+            'page' => $page,
+            'max' => $max
+        );
     }
 
     /**

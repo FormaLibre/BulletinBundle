@@ -1,3 +1,19 @@
+{% macro renderPager(pager, max) %}
+    {{
+        pagerfanta(
+            pager,
+            'twitter_bootstrap_translated',
+            {
+                'proximity' : 1,
+                'routeName': 'formalibre_bulletin_matieres_options_management',
+                'routeParams': {'max': max}
+            }
+        )
+    }}
+{% endmacro %}
+
+{% from _self import renderPager %}
+
 {% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
 
 {% block section_content %}
@@ -6,6 +22,10 @@
     </div>
     <div class="panel-body">
         <form action="" method="POST" {{ form_enctype(form) }} autocomplete="off">
+            
+            {% if pager.getNbPages() > 1 %}
+                {{ renderPager(pager, max) }}
+            {% endif %}
             <table class="table">
                 <thead>
                     <tr>
@@ -26,6 +46,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+                
+            {% if pager.getNbPages() > 1 %}
+                {{ renderPager(pager, max) }}
+                <br>
+            {% endif %}
             {{ form_widget(form.save) }}
             <a href="{{ path('formalibreBulletinAdminIndex') }}"
                class="btn btn-default"

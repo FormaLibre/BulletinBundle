@@ -5,6 +5,7 @@ namespace FormaLibre\BulletinBundle\Manager;
 use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Event\StrictDispatcher;
 use Claroline\CoreBundle\Library\Configuration\PlatformConfigurationHandler;
+use Claroline\CoreBundle\Pager\PagerFactory;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
@@ -22,6 +23,7 @@ class BulletinManager
     private $em;
     private $eventDispatcher;
     private $om;
+    private $pagerFactory;
     private $platformConfigHandler;
 
     private $groupeTitulaireRepo;
@@ -35,6 +37,7 @@ class BulletinManager
      *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
      *     "eventDispatcher"       = @DI\Inject("claroline.event.event_dispatcher"),
      *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
+     *     "pagerFactory"          = @DI\Inject("claroline.pager.pager_factory"),
      *     "platformConfigHandler" = @DI\Inject("claroline.config.platform_config_handler")
      * })
      */
@@ -42,12 +45,14 @@ class BulletinManager
         EntityManager $em,
         StrictDispatcher $eventDispatcher,
         ObjectManager $om,
+        PagerFactory $pagerFactory,
         PlatformConfigurationHandler $platformConfigHandler
     )
     {
         $this->em = $em;
         $this->eventDispatcher = $eventDispatcher;
         $this->om = $om;
+        $this->pagerFactory = $pagerFactory;
         $this->platformConfigHandler = $platformConfigHandler;
 
         $this->groupeTitulaireRepo = $om->getRepository('FormaLibreBulletinBundle:GroupeTitulaire');
@@ -301,7 +306,7 @@ class BulletinManager
         return $this->matiereOptionsRepo->findOneByMatiere($matiere);
     }
 
-    public function getAllMatieresOptions()
+    public function getAllMatieresOptions($withPager = false, $page = 1, $max = 20)
     {
         $matieres = $this->getAvailableSessions();
 
@@ -334,7 +339,9 @@ class BulletinManager
             $matieresOptions = array();
         }
 
-        return $matieresOptions;
+        return $withPager ?
+            $this->pagerFactory->createPagerFromArray($matieresOptions, $page, $max) :
+            $matieresOptions;
     }
 
     public function hasSecondPoint()
