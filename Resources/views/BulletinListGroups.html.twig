@@ -2,7 +2,7 @@
 
 {% block section_content %}
     <div class="panel-heading">
-        <h1>Mes Groupes</h1>
+        <h1>Mes matières</h1>
     </div>
     <div class="panel-body">
         <table class="table">
@@ -24,28 +24,22 @@
                 </tr>
             {% endfor %}
             
-            {% for data in datas %}
-                {% set matiere = data['matiere'] %}
-
-                {% for group in data['groups'] %}
-                    <tr>
-                        <td>
-                            <a href="{{
-                                path (
-                                    'formalibreBulletinListEleveProf', 
-                                    {
-                                        'periode' : periode.getId(),
-                                        'group' : group.getId(),
-                                        'matiere' : matiere.getId()
-                                    }
-                                )
-                            }}">
-                                {{ group.getName() }}
-                                [{{ matiere.getCourse().getTitle() }}]
-                            </a> 
-                        </td>
-                    </tr>
-                {% endfor %}
+            {% for matiere in matieres %}
+                <tr>
+                    <td>
+                        <a href="{{
+                            path (
+                                'formalibreBulletinListEleveProf', 
+                                {
+                                    'periode' : periode.getId(),
+                                    'matiere' : matiere.getId()
+                                }
+                            )
+                        }}">
+                            {{ matiere.getCourse().getTitle() }}
+                        </a> 
+                    </td>
+                </tr>
             {% endfor %}
         </table>
     </div>

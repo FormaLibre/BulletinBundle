@@ -9,6 +9,7 @@ use Claroline\CoreBundle\Manager\ToolManager;
 use Claroline\CoreBundle\Manager\UserManager;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CursusBundle\Entity\CourseSession;
+use Claroline\CursusBundle\Manager\CursusManager;
 use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Form\Type\MatiereType;
 use FormaLibre\BulletinBundle\Form\Type\PempsType;
@@ -28,6 +29,7 @@ class BulletinController extends Controller
 {
     private $authorization;
     private $bulletinManager;
+    private $cursusManager;
     private $em;
     private $om;
     private $roleManager;
@@ -51,6 +53,7 @@ class BulletinController extends Controller
      * @DI\InjectParams({
      *     "authorization"         = @DI\Inject("security.authorization_checker"),
      *     "bulletinManager"       = @DI\Inject("formalibre.manager.bulletin_manager"),
+     *     "cursusManager"         = @DI\Inject("claroline.manager.cursus_manager"),
      *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
      *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
      *     "roleManager"           = @DI\Inject("claroline.manager.role_manager"),
@@ -62,6 +65,7 @@ class BulletinController extends Controller
     public function __construct(
         AuthorizationCheckerInterface $authorization,
         BulletinManager $bulletinManager,
+        CursusManager $cursusManager,
         EntityManager $em,
         ObjectManager $om,
         RoleManager $roleManager,
@@ -72,6 +76,7 @@ class BulletinController extends Controller
     {
         $this->authorization = $authorization;
         $this->bulletinManager = $bulletinManager;
+        $this->cursusManager = $cursusManager;
         $this->em = $em;
         $this->om = $om;
         $this->roleManager = $roleManager;
@@ -238,31 +243,13 @@ class BulletinController extends Controller
     public function listMyGroupAction(Periode $periode, User $user)
     {
         $this->checkOpen();
-        $datas = array();
-        $groups = $this->bulletinManager->getTaggedGroups();
-        $groupIds = array();
-
-        foreach ($groups as $group) {
-            $groupIds[] = $group->getId();
-        }
-        $matieres = $periode->getMatieres();
-
-        if (count($groupIds) > 0) {
-
-            foreach ($matieres as $matiere) {
-                $datas[$matiere->getId()] = array();
-            }
-        }
 
         if ($this->authorization->isGranted('ROLE_PROF')){
             $myGroups = $this->bulletinManager->getGroupsByTitulaire($user);
-            $datas = $this->bulletinManager->getMatiereGroupsByUserAndPeriode(
-                $user,
-                $periode
-            );
+            $matieres = $this->bulletinManager->getMatieresByProf($user, $periode);
             $content = $this->renderView(
                 'FormaLibreBulletinBundle::BulletinListGroups.html.twig',
-                array('periode' => $periode, 'datas' => $datas, 'myGroups' => $myGroups)
+                array('periode' => $periode, 'matieres' => $matieres, 'myGroups' => $myGroups)
             );
             return new Response($content);
         }
@@ -274,29 +261,27 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/prof/periode/{periode}/group/{group}/matiere/{matiere}/list/",
+     *     "/prof/periode/{periode}/matiere/{matiere}/list/",
      *     name="formalibreBulletinListEleveProf",
      *     options = {"expose"=true}
      * )
      *
      *
      * @param Periode $periode
-     * @param Group $group
      * @param CourseSession $matiere
      *
      *@EXT\Template("FormaLibreBulletinBundle::BulletinListEleves.html.twig")
      *
      * @return array|Response
      */
-    public function listEleveProfAction(Periode $periode, Group $group, CourseSession $matiere)
+    public function listEleveProfAction(Periode $periode, CourseSession $matiere)
     {
         $this->checkOpen();
         $editMatiereUrl = $this->generateUrl(
             'formalibreBulletinEditMatiere',
             array(
                 'periode' => $periode->getId(),
-                'matiere' => $matiere->getId(),
-                'group' => $group->getId()
+                'matiere' => $matiere->getId()
             )
         );
 
@@ -369,24 +354,21 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/periode/{periode}/group/{group}/matiere/{matiere}/edit/",
+     *     "/periode/{periode}/matiere/{matiere}/edit/",
      *     name="formalibreBulletinEditMatiere",
      *     options = {"expose"=true}
      * )
-     *
-     *
      * @param Periode $periode
-     * @param Group $group
      * @param CourseSession $matiere
      *
      *@EXT\Template("FormaLibreBulletinBundle::BulletinEditMatiere.html.twig")
      *
      * @return array|Response
      */
-    public function editMatiereAction(Request $request, Periode $periode, Group $group, CourseSession $matiere)
+    public function editMatiereAction(Request $request, Periode $periode, CourseSession $matiere)
     {
         $this->checkOpen();
-        $eleves = $this->userRepo->findByGroup($group);
+        $eleves = $this->cursusManager->getUsersBySessionAndType($matiere, 0);
         $pempCollection = new Pemps;
         foreach ( $eleves as $eleve){
             $pempCollection->getPemps()->add(
@@ -412,8 +394,7 @@ class BulletinController extends Controller
                 'formalibreBulletinEditMatiere',
                 array(
                     'periode' => $periode->getId(),
-                    'matiere' => $matiere->getId(),
-                    'group' => $group->getId()
+                    'matiere' => $matiere->getId()
                 )
             ));
         }
@@ -425,7 +406,6 @@ class BulletinController extends Controller
         return array(
             'form' => $form->createView(),
             'matiere' => $matiere,
-            'group' => $group,
             'periode' => $periode,
             'hasSecondPoint' => $hasSecondPoint,
             'hasThirdPoint' => $hasThirdPoint,
