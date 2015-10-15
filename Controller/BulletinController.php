@@ -55,7 +55,7 @@ class BulletinController extends Controller
      *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
      *     "roleManager"           = @DI\Inject("claroline.manager.role_manager"),
      *     "toolManager"           = @DI\Inject("claroline.manager.tool_manager"),
-     *     "totauxManager"         = @DI\Inject("laurent.manager.totaux_manager"),
+     *     "totauxManager"         = @DI\Inject("formalibre.manager.totaux_manager"),
      *     "userManager"           = @DI\Inject("claroline.manager.user_manager"),
      * })
      */
@@ -571,7 +571,7 @@ class BulletinController extends Controller
     /**
      * @EXT\Route(
      *     "/user/{user}/printable/bulletinWidget/",
-     *     name="laurentPrintableBulletinWidget"
+     *     name="formalibrePrintableBulletinWidget"
      * )
      *
      * @param User $user
@@ -659,7 +659,7 @@ class BulletinController extends Controller
     /**
      * @EXT\Route(
      *     "/user/{user}/printable/bulletinPointsDiversWidget/",
-     *     name="laurentPrintableBulletinPointsDiversWidget"
+     *     name="formalibrePrintableBulletinPointsDiversWidget"
      * )
      *
      * @param User $user

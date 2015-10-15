@@ -1,2 +1,2 @@
 parameters:
-  laurent.directories.pdf: "%claroline.param.files_directory%/FormaLibreBulletinBundle/"
+  formalibre.directories.pdf: "%claroline.param.files_directory%/FormaLibreBulletinBundle/"

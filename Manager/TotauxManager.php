@@ -18,7 +18,7 @@ use FormaLibre\BulletinBundle\Entity\Periode;
 use Claroline\CursusBundle\Entity\CourseSession;
 
 /**
- * @DI\Service("laurent.manager.totaux_manager")
+ * @DI\Service("formalibre.manager.totaux_manager")
  */
 class TotauxManager
 {

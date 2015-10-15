@@ -75,7 +75,7 @@ class BulletinAdminController extends Controller
      *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
      *     "formFactory"           = @DI\Inject("form.factory"),
      *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
-     *     "pdfDir"                = @DI\Inject("%laurent.directories.pdf%"),
+     *     "pdfDir"                = @DI\Inject("%formalibre.directories.pdf%"),
      *     "requestStack"          = @DI\Inject("request_stack"),
      *     "roleManager"           = @DI\Inject("claroline.manager.role_manager"),
      *     "router"                = @DI\Inject("router"),
