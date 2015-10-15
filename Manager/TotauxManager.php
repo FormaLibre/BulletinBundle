@@ -89,7 +89,10 @@ class TotauxManager
         }
 
         foreach ($totaux as $key => $total) {
-            $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+
+            if ($nbPeriodes[$key] > 0) {
+                $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+            }
         }
 
         return $totaux;
@@ -118,7 +121,10 @@ class TotauxManager
         }
 
         foreach ($totaux as $key => $total) {
-            $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+
+            if ($nbPeriodes[$key] > 0) {
+                $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+            }
         }
 
         return $totaux;
@@ -155,7 +161,10 @@ class TotauxManager
         foreach ($totaux as $key => $total) {
             $pourcentage = $total['pourcentage'];
             $nbPeriodes = $total['nbPeriodes'];
-            $totaux[$key]['value'] = round($pourcentage / $nbPeriodes, 1);
+
+            if ($nbPeriodes > 0) {
+                $totaux[$key]['value'] = round($pourcentage / $nbPeriodes, 1);
+            }
         }
 
         return $totaux;

@@ -216,7 +216,7 @@ class PeriodeEleveMatierePoint
     public function getPourcentage()
     {
         if ($this->point < 850){
-            $pourcentage = ($this->point / $this->total) * 100;
+            $pourcentage = empty($this->total) ? 0 : ($this->point / $this->total) * 100;
         }
         else {
             $pourcentage = 999;
@@ -233,7 +233,7 @@ class PeriodeEleveMatierePoint
             $pourcentage = 'CM';
         }
         else {
-            $pourcentage = round(($this->point / $this->total) * 100, 1).' %';
+            $pourcentage = empty($this->total) ? 0 : round(($this->point / $this->total) * 100, 1).' %';
         }
         return $pourcentage;
     }

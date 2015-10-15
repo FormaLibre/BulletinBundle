@@ -7,7 +7,12 @@ $( document ).ready(function() {
         totPoint = totPoint + point;
         var total = parseFloat($(this).prevAll('.total').html());
         totTot = totTot + total;
-        var pourc = point / total * 100
+        
+        if (parseInt(total) > 0) {
+            var pourc = point / total * 100;
+        } else {
+            var pourc = 0;
+        }
         $(this).text(Number((pourc).toFixed(1)) + " %");
         if (Number((pourc).toFixed(1)) < 50){
             $(this).parent().addClass('echec');
@@ -15,7 +20,12 @@ $( document ).ready(function() {
     });
     $('#totPoint').text(totPoint);
     $('#totTot').text(totTot);
-    var totPour = totPoint / totTot * 100;
+        
+    if (parseInt(totTot) > 0) {
+        var totPour = totPoint / totTot * 100;
+    } else {
+        var totPour = 0;
+    }
     $('#totPour').text(Number((totPour).toFixed(1)) + " %");
 
 });

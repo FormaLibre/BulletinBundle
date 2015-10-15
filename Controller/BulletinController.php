@@ -668,7 +668,10 @@ class BulletinController extends Controller
         $totauxMatieres = $this->totauxManager->getFinalTotalPeriodes($eleve);
 
         foreach ($totaux as $total) {
-            $recap += $total['totalPourcentage'] / count($periodes);
+
+            if (count($periodes) > 0) {
+                $recap += $total['totalPourcentage'] / count($periodes);
+            }
         }
 
         $recap = round($recap, 1);
