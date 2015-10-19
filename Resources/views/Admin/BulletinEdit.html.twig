@@ -29,6 +29,10 @@
                             <th>{{ thirdPointName }} ( / 10 )</th>
                         {% endif %}
                     {% endif %}
+                    
+                    {% if isBulletinAdmin %}
+                        <th></th>
+                    {% endif %}
                 </tr></thead>
                 <tbody>
                 {% for pemp in form.pemps %}
@@ -45,6 +49,16 @@
                             {% if hasThirdPoint %}
                                 <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
                             {% endif %}
+                        {% endif %}
+                    
+                        {% if isBulletinAdmin %}
+                            <td>
+                                <i class="btn btn-danger fa fa-trash delete-pemp-btn"
+                                   data-periode-id="{{ periode.getId() }}"
+                                   data-eleve-id="{{ eleve.getId() }}"
+                                >
+                                </i>
+                            </td>
                         {% endif %}
                     </tr>
                 {% endfor %}

@@ -417,4 +417,10 @@ class BulletinManager
     {
         return $this->pepdpRepo->findByPeriode($periode);
     }
+
+    public function deletePemp(PeriodeEleveMatierePoint $pemp)
+    {
+        $this->om->remove($pemp);
+        $this->om->flush();
+    }
 }

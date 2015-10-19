@@ -20,6 +20,7 @@ use FormaLibre\BulletinBundle\Manager\TotauxManager;
 use JMS\DiExtraBundle\Annotation as DI;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -306,6 +307,8 @@ class BulletinController extends Controller
     public function editEleveAction(Request $request, Periode $periode, User $eleve)
     {
         $this->checkOpen();
+        $isBulletinAdmin = $this->authorization->isGranted('ROLE_BULLETIN_ADMIN') ||
+            $this->authorization->isGranted('ROLE_ADMIN');
 
         $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
         $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
@@ -346,10 +349,9 @@ class BulletinController extends Controller
             'hasSecondPoint' => $hasSecondPoint,
             'hasThirdPoint' => $hasThirdPoint,
             'secondPointName' => $secondPointName,
-            'thirdPointName' => $thirdPointName
+            'thirdPointName' => $thirdPointName,
+            'isBulletinAdmin' => $isBulletinAdmin
         );
-
-
     }
 
     /**
@@ -488,6 +490,35 @@ class BulletinController extends Controller
         );
 
         return $this->render($template, $params);
+    }
+
+
+    /**
+     * @EXT\Route(
+     *     "/periode/{periode}/eleve/{eleve}/matiere/{matiere}/delete",
+     *     name="formalibre_bulletin_pemp_delete",
+     *     options = {"expose"=true}
+     * )
+     * @param Periode $periode
+     * @param User $eleve
+     * @param CourseSession $matiere
+     *
+     * @return JsonResponse
+     */
+    public function deletePempAction(Periode $periode, User $eleve, CourseSession $matiere)
+    {
+        if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN') ||
+            $this->authorization->isGranted('ROLE_ADMIN')) {
+
+            $pemp = $this->bulletinManager->getPempByPeriodeAndUserAndMatiere(
+                $periode,
+                $eleve,
+                $matiere
+            );
+            $this->bulletinManager->deletePemp($pemp);
+        }
+
+        return new JsonResponse('success', 200);
     }
 
     /**

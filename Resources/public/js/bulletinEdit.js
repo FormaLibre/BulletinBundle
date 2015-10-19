@@ -104,3 +104,23 @@ $('.comportement').focusout(function(){
         $(this).append('<span class="fa fa-close form-control-feedback"></span>');
     }
 });
+
+$('.delete-pemp-btn').on('click', function () {
+    var periodeId = $(this).data('periode-id');
+    var eleveId = $(this).data('eleve-id');
+    var parent = $(this).closest('tr');
+    var matiereElement = parent.find('select');
+    var matiereId = matiereElement.val();
+    
+
+    window.Claroline.Modal.confirmRequest(
+        Routing.generate(
+            'formalibre_bulletin_pemp_delete',
+            {'periode': periodeId, 'eleve': eleveId, 'matiere': matiereId}
+        ),
+        function () {parent.remove();},
+        null,
+        'Voulez-vous vraiment retirer cette matière ?',
+        'Retrait de la matière'
+    );
+});
