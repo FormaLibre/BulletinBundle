@@ -83,6 +83,18 @@ class BulletinManager
         return $groups;
     }
 
+    public function getTaggedGroupIds()
+    {
+        $groupIds = array();
+        $groups = $this->getTaggedGroups();
+
+        foreach ($groups as $group) {
+            $groupIds[] = $group->getId();
+        }
+
+        return $groupIds;
+    }
+
     public function getMatiereGroupsByUserAndPeriode(User $user, Periode $periode)
     {
         $datas = array();
@@ -164,14 +176,15 @@ class BulletinManager
     public function getClasseByEleve(User $eleve)
     {
         $group = null;
-        $taggedGroups = $this->getTaggedGroups();
+        $taggedGroupIds = $this->getTaggedGroupIds();
 
-        if (count($taggedGroups) > 0) {
+        if (count($taggedGroupIds) > 0) {
             $userGroups = $eleve->getGroups();
 
             foreach ($userGroups as $userGroup) {
+                $groupId = $userGroup->getId();
 
-                if (in_array($userGroup, $taggedGroups)) {
+                if (in_array($groupId, $taggedGroupIds)) {
                     $group = $userGroup;
                     break;
                 }
