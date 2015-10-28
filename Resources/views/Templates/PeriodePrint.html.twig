@@ -21,6 +21,11 @@
             2015-2016<br>
             {{ eleve.getLastName() }}<br>
             {{ eleve.getFirstName() }}
+            
+            {% if classe is defined and classe is not empty %}
+                <br>
+                {{ classe.getName() }}
+            {% endif %}
         </div>
     </div> <!-- /row -->
     <hr style="visibility: hidden;">

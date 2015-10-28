@@ -3,7 +3,8 @@
         width: 800px;
     }
 }
-@media print {
+
+@media print and (width: 21cm) and (height: 29.7cm) {
     .page {
         margin: 0;
         border: initial;
@@ -18,9 +19,10 @@
         margin:4%
     }
 }
+
 @page {
     size: A4;
-    margin : 5%
+    margin : 2cm;
 }
 
 #title-box{
@@ -28,7 +30,7 @@
 }
 
 #title-box h1{
-    font-size: 60px;
+    font-size: 40px;
     margin:0px;
 }
 

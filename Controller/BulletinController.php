@@ -474,6 +474,7 @@ class BulletinController extends Controller
         $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
         $secondPointName = $this->bulletinManager->getSecondPointName();
         $thirdPointName = $this->bulletinManager->getThirdPointName();
+        $classe = $this->bulletinManager->getClasseByEleve($eleve);
 
         $params = array(
             'pemps' => $pemps,
@@ -486,7 +487,8 @@ class BulletinController extends Controller
             'hasSecondPoint' => $hasSecondPoint,
             'hasThirdPoint' => $hasThirdPoint,
             'secondPointName' => $secondPointName,
-            'thirdPointName' => $thirdPointName
+            'thirdPointName' => $thirdPointName,
+            'classe' => $classe
         );
 
         return $this->render($template, $params);
