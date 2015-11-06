@@ -5,9 +5,6 @@
     <title>Bulletin</title>
     <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bootstrap.css')}}"/>
     <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bulletin.css')}}"/>
-    <script type="text/javascript" src='{{ asset('bundles/frontend/jquery/jquery-2.1.0.min.js') }}'></script>
-    <script type="text/javascript" src='{{ asset('bundles/formalibrebulletin/js/bootstrap.js') }}'></script>
-    <script type="text/javascript" src='{{ asset('bundles/formalibrebulletin/js/bulletinPrint.js') }}'></script>
 </head>
 <body>
 <div class="container" id="content">
@@ -67,7 +64,7 @@
                     <td>{{ pemp.matiere.getCourse().getTitle() }}</td>
                     <td class="center point">{{ pemp.point }}</td>
                     <td class="center total">{{ pemp.total }}</td>
-                    <td class="center pourcent" data="{{ pemp.total }}"></td>
+                    <td class="center pourcent" data="{{ pemp.total }}">{{ pemp.getDisplayPourcentage() }}</td>
                     
                     {% if hasThirdPoint %}
                         {% if pemp.comportement < 850 %}
@@ -90,9 +87,9 @@
             </tbody>
             <thead><tr>
                 <th>Total</th>
-                <th class="center" id="totPoint"></th>
-                <th class="center" id="totTot"></th>
-                <th class="center" id="totPour"> %</th>
+                <th class="center" id="totPoint">{{ totaux.totalPoint }}</th>
+                <th class="center" id="totTot">{{ totaux.totalTotal }}</th>
+                <th class="center" id="totPour">{{ totaux.totalPourcentage }}</th>
                 
                 {% if hasSecondPoint or hasThirdPoint %}
                     <th colspan="2"></th>

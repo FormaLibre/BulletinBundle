@@ -444,7 +444,8 @@ class BulletinController extends Controller
         if (!$periode->getOnlyPoint()){
             $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
             $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
-
+            $totaux = $this->totauxManager->getTotalPeriode($periode, $eleve);
+            $recap += $totaux['totalPourcentage'];
         } else {
             $pemps = array();
             $pemds = array();
@@ -460,14 +461,14 @@ class BulletinController extends Controller
 
             }
             $totauxMatieres = $this->totauxManager->getTotalPeriodes($eleve);
+
+            foreach ($totaux as $total) {
+                $recap += $total['totalPourcentage'] / 3;
+            }
         }
 
         $template = 'FormaLibreBulletinBundle::Templates/'.$periode->getTemplate().'.html.twig';
 
-
-        foreach ($totaux as $total) {
-            $recap += $total['totalPourcentage'] / 3;
-        }
 
         $recap = round($recap, 1);
         $hasSecondPoint = $this->bulletinManager->hasSecondPoint();
