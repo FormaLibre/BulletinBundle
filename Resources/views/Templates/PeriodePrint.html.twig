@@ -120,18 +120,18 @@
         </div>
     </div>
     <div class="row">
-        <div class="panel panel-default center" id="reunion">
-            {{ periode.ReunionParent|raw }}
-        </div>
-    </div>
-    <div class="row">
         <div class="col-xs-3 signature">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Signature du directeur
                 </div>
                 <div class="panel-body">
-
+                    {% if isBulletinAdmin is defined and isBulletinAdmin %}
+                        <img src="{{ asset('bundles/formalibrebulletin/images/Signature.jpg') }}"
+                             alt=""
+                             id="signature-directeur"
+                        >
+                    {% endif %}
                 </div>
             </div>
         </div>

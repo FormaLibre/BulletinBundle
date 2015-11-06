@@ -475,6 +475,7 @@ class BulletinController extends Controller
         $secondPointName = $this->bulletinManager->getSecondPointName();
         $thirdPointName = $this->bulletinManager->getThirdPointName();
         $classe = $this->bulletinManager->getClasseByEleve($eleve);
+        $isBulletinAdmin = $this->isBulletinAdmin();
 
         $params = array(
             'pemps' => $pemps,
@@ -488,7 +489,8 @@ class BulletinController extends Controller
             'hasThirdPoint' => $hasThirdPoint,
             'secondPointName' => $secondPointName,
             'thirdPointName' => $thirdPointName,
-            'classe' => $classe
+            'classe' => $classe,
+            'isBulletinAdmin' => $isBulletinAdmin
         );
 
         return $this->render($template, $params);
@@ -732,6 +734,11 @@ class BulletinController extends Controller
         }
 
         throw new AccessDeniedException();
+    }
+
+    private function isBulletinAdmin()
+    {
+        return $this->authorization->isGranted('ROLE_BULLETIN_ADMIN');
     }
 
     private function checkOpenPrintPdf(Request $request = NULL)

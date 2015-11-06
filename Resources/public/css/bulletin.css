@@ -74,13 +74,17 @@
 }
 
 .signature{
-    height: 115px;
+    height: 100px;
     font-size:12px;
     text-align: center;
 }
 
 .signature .panel{
     height: 100%;
+}
+
+#signature-directeur {
+    height: 40px;
 }
 
 .echec{
