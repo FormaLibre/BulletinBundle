@@ -469,7 +469,6 @@ class BulletinController extends Controller
 
         $template = 'FormaLibreBulletinBundle::Templates/'.$periode->getTemplate().'.html.twig';
 
-
         $recap = round($recap, 1);
         $hasSecondPoint = $this->bulletinManager->hasSecondPoint();
         $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
