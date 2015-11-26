@@ -15,6 +15,7 @@ use FormaLibre\BulletinBundle\Form\Type\MatiereType;
 use FormaLibre\BulletinBundle\Form\Type\PempsType;
 use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Entity\Periode;
+use FormaLibre\BulletinBundle\Entity\LockStatus;
 use FormaLibre\BulletinBundle\Manager\BulletinManager;
 use FormaLibre\BulletinBundle\Manager\TotauxManager;
 use JMS\DiExtraBundle\Annotation as DI;
@@ -49,6 +50,8 @@ class BulletinController extends Controller
     private $periodeRepo;
     /** @var UserRepository */
     private $userRepo;
+    /** @var LockStatusRepository */
+    private $lockStatusRepo;
 
     /**
      * @DI\InjectParams({
@@ -91,6 +94,7 @@ class BulletinController extends Controller
         $this->periodeEleveDecisionRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveDecision');
         $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->userRepo = $om->getRepository('ClarolineCoreBundle:User');
+        $this->lockStatusRepo = $om->getRepository('FormaLibreBulletinBundle:LockStatus');
     }
 
     /**
@@ -296,7 +300,7 @@ class BulletinController extends Controller
      *     options = {"expose"=true}
      * )
      *
-     *
+     * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
      * @param Periode $periode
      * @param User $eleve
      *
@@ -304,8 +308,9 @@ class BulletinController extends Controller
      *
      * @return array|Response
      */
-    public function editEleveAction(Request $request, Periode $periode, User $eleve)
-    {
+    public function editEleveAction(Request $request, Periode $periode, User $eleve, User $user)
+    {   
+        $matiere = $this->bulletinManager->getMatieresByEleveAndPeriode($eleve, $periode);
         $this->checkOpen();
         $isBulletinAdmin = $this->authorization->isGranted('ROLE_BULLETIN_ADMIN') ||
             $this->authorization->isGranted('ROLE_ADMIN');
@@ -313,23 +318,31 @@ class BulletinController extends Controller
         $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
         $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
 
-        $pempCollection = new Pemps;
+        $pempCollection = new Pemps();
+        
         foreach ($pemps as $pemp) {
+            $lock = $this->lockStatusRepo->findLockStatus($user, $pemp->getMatiere(), $pemp->getPeriode());
+            $pemp->setLocked($lock);
             $pempCollection->getPemps()->add($pemp);
-        }
-        foreach ($pemds as $pemd) {
-            $pempCollection->getPemds()->add($pemd);
+            
         }
 
-        $form = $this->createForm(new PempsType, $pempCollection);
+        
+        $form = $this->createForm(new PempsType(), $pempCollection);
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
+                
+                $list=$form->get('pemps')->getData();
+                foreach ($list as $test){
+                $actualLockStatus = $this->lockStatusRepo->findLockStatus($user, $test->getMatiere(), $test->getPeriode());
+                
+                if ($actualLockStatus == true){
+                    $this->em->refresh($test);
+                }
 
-            foreach ($pempCollection as $pemp){
-                $this->em->persist($pemp);
-            }
-                $this->em->flush();
+              }
+              $this->em->flush();
 
             $nextAction = $form->get('saveAndAdd')->isClicked()
                 ? 'task_new'
@@ -350,7 +363,8 @@ class BulletinController extends Controller
             'hasThirdPoint' => $hasThirdPoint,
             'secondPointName' => $secondPointName,
             'thirdPointName' => $thirdPointName,
-            'isBulletinAdmin' => $isBulletinAdmin
+            'isBulletinAdmin' => $isBulletinAdmin,
+            'matieres'=> $matiere
         );
     }
 
@@ -362,12 +376,12 @@ class BulletinController extends Controller
      * )
      * @param Periode $periode
      * @param CourseSession $matiere
-     *
-     *@EXT\Template("FormaLibreBulletinBundle::BulletinEditMatiere.html.twig")
+     * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
+     * @EXT\Template("FormaLibreBulletinBundle::BulletinEditMatiere.html.twig")
      *
      * @return array|Response
      */
-    public function editMatiereAction(Request $request, Periode $periode, CourseSession $matiere)
+    public function editMatiereAction(User $user, Request $request, Periode $periode, CourseSession $matiere)
     {
         $this->checkOpen();
         $eleves = $this->cursusManager->getUsersBySessionAndType($matiere, 0);
@@ -382,7 +396,8 @@ class BulletinController extends Controller
             );
         }
 
-        $form = $this->createForm(new MatiereType, $pempCollection);
+        $lock=$this->lockStatusRepo->findLockStatus($user,$matiere,$periode);
+        $form = $this->createForm(new MatiereType($lock) , $pempCollection);
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
@@ -412,7 +427,9 @@ class BulletinController extends Controller
             'hasSecondPoint' => $hasSecondPoint,
             'hasThirdPoint' => $hasThirdPoint,
             'secondPointName' => $secondPointName,
-            'thirdPointName' => $thirdPointName
+            'thirdPointName' => $thirdPointName,
+            'eleves' => $eleves,
+            'lock' => $lock
         );
     }
 
@@ -757,6 +774,40 @@ class BulletinController extends Controller
         }
 
         throw new AccessDeniedException();
+    }
+    
+     /**
+     * @EXT\Route(
+     *     "/bulletin/lockPoints/periode/{periode}/session/{session}",
+     *     name="formalibreBulletinLockPoint",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
+
+     */
+    public function lockPointsAction(User $user, CourseSession $session, Periode $periode)
+    {
+        $actualLockStatus = $this->lockStatusRepo->findOneBy(array('teacher'=>$user,
+                                                             'matiere'=>$session,
+                                                             'periode'=>$periode));
+        if (is_null($actualLockStatus))
+        {
+            $newLockStatus = new LockStatus();
+            $newLockStatus -> setMatiere($session);
+            $newLockStatus -> setPeriode($periode);
+            $newLockStatus -> setTeacher($user);
+            $newLockStatus -> setLockStatus(true);
+            $this->em->persist($newLockStatus);
+            $this->em->flush();
+        }
+        else
+        {
+            $this->em->remove($actualLockStatus);
+            $this->em->flush();
+        }
+        
+        return new JsonResponse('success', 200);
     }
 }
 

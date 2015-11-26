@@ -8,9 +8,15 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class PeriodeEleveProfPointType extends AbstractType
 {
+    private $lockStatus;
+    
+    public function __construct($lockStatus = false) {
+        $this->lockStatus = $lockStatus;
+    }
+    
     public function buildForm(FormBuilderInterface $builder, array $options){
-        $builder->add('eleve', 'entity', array('required' => false, 'disabled' => true, 'read_only' => true, 'class' => 'Claroline\CoreBundle\Entity\User', 'property' => 'username'));
-        $builder->add('point', 'text', array('required'  => false));
+        $builder->add('eleve', 'entity', array('required' => false, 'disabled' => true, 'read_only' => true, 'class' => 'Claroline\CoreBundle\Entity\User', 'property' => 'firstName'));
+        $builder->add('point', 'text', array('required'  => false, 'read_only' => $this->lockStatus));
         $builder->add('total', 'text', array('required'  => false, 'read_only' => True));
         $builder->add('comportement', 'text', array('required'  => false));
         $builder->add('presence', 'text', array('required'  => false));

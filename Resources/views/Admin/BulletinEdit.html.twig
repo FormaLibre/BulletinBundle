@@ -37,7 +37,12 @@
                 <tbody>
                 {% for pemp in form.pemps %}
                     <tr>
-                        <td class="matiere">{{ form_widget(pemp.matiere) }}</td>
+                        <td class="matiere">
+                            {% for matiere in matieres %}
+                                {% if matiere.getId()== pemp.vars.value.matiere.getId %}
+                                {{matiere.getCourseTitle()}}
+                                {% endif %}
+                            {% endfor %}
                         <td class="point">{{ form_widget(pemp.point) }}</td>
                         <td class="total">{{ form_widget(pemp.total) }}</td>
                         {% if periode.onlyPoint != 1 %}
