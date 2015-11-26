@@ -4,6 +4,7 @@ namespace FormaLibre\BulletinBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+
 /**
  * @ORM\Entity(repositoryClass="FormaLibre\BulletinBundle\Repository\PeriodeEleveMatierePointRepository")
  * @ORM\Table(name="formalibre_bulletin_periode_eleve_matiere_point")
@@ -68,6 +69,9 @@ class PeriodeEleveMatierePoint
      * @ORM\Column(type="text", nullable=true)
      */
     protected $comment;
+    
+    protected $isLocked = false;
+   
 
     /**
      * @param mixed $comportement
@@ -247,4 +251,14 @@ class PeriodeEleveMatierePoint
     {
         $this->comment = $comment;
     }
+    
+    public function setLocked($bool)
+     {       
+        $this->isLocked = $bool;
+     }
+    public function isLocked() 
+      {      
+     
+        return $this->isLocked;
+      }
 }

@@ -4,6 +4,7 @@ namespace FormaLibre\BulletinBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+
 /**
  * @ORM\Entity(repositoryClass="FormaLibre\BulletinBundle\Repository\PeriodeElevePointDiversPointRepository")
  * @ORM\Table(name="formalibre_bulletin_periode_eleve_pointdivers_point")

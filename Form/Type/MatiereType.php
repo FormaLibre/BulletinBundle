@@ -8,9 +8,14 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class MatiereType extends AbstractType
-{
+{   private $lockStatus;
+    
+    public function __construct($lockStatus = false) {
+        $this->lockStatus = $lockStatus;
+    }
+    
     public function buildForm(FormBuilderInterface $builder, array $options){
-        $builder->add('pemps', 'collection', array('type' => new PeriodeEleveProfPointType()));
+        $builder->add('pemps', 'collection', array('type' => new PeriodeEleveProfPointType($this->lockStatus)));
         $builder->add('save', 'submit', array('label'=>'Enregistrer','attr' => array('class' => 'btn btn-primary')));
     }
 
