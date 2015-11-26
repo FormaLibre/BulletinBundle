@@ -160,7 +160,7 @@ class BulletinController extends Controller
     public function listEleveAction(Periode $periode, Group $group)
     {
         $this->checkOpen();
-        $eleves = $this->userRepo->findByGroup($group);
+        $eleves = $this->userRepo->findByGroup($group,true,'lastName','ASC');
         $userDecisions = $this->periodeEleveDecisionRepo->findDecisionsByUsersAndPeriode(
             $eleves,
             $periode
