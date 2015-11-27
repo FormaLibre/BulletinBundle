@@ -9,19 +9,18 @@ use Claroline\CursusBundle\Entity\CourseSession;
 
 class LockStatusRepository extends EntityRepository
 {
-    public function findLockStatus(User $user,CourseSession $matiere,Periode $periode)
+    public function findLockStatus(CourseSession $matiere,Periode $periode)
     {
         $dql = '
             SELECT l
             FROM FormaLibre\BulletinBundle\Entity\LockStatus l
             WHERE l.periode = :periode
-            AND l.matiere = :matiere
-            AND l.teacher = :teacher
+            AND l.matiere = :matiere 
         ';
         $query = $this->_em->createQuery($dql);
         $query->setParameter('periode', $periode);
         $query->setParameter('matiere', $matiere);
-        $query->setParameter('teacher', $user);
+      
 
         $lockStatus= $query->getOneOrNullResult();
         
