@@ -43,28 +43,39 @@
                                 {{matiere.getCourseTitle()}}
                                 {% endif %}
                             {% endfor %}
-                        <td class="point">{{ form_widget(pemp.point) }}</td>
-                        <td class="total">{{ form_widget(pemp.total) }}</td>
-                        {% if periode.onlyPoint != 1 %}
-                    
-                            {% if hasSecondPoint %}
-                                <td class="presence">{{ form_widget(pemp.presence) }}</td>
+                            <td class="point">{{ form_widget(pemp.point) }}</td>
+                            <td class="total">{{ form_widget(pemp.total) }}</td>
+                            {% if periode.onlyPoint != 1 %}
+                                {% if hasSecondPoint %}
+                                    <td class="presence">{{ form_widget(pemp.presence) }}</td>
+                                {% endif %}
+
+                                {% if hasThirdPoint %}
+                                    <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
+                                {% endif %}
                             {% endif %}
 
-                            {% if hasThirdPoint %}
-                                <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
-                            {% endif %}
-                        {% endif %}
-                    
-                        {% if isBulletinAdmin %}
-                            <td>
-                                <i class="btn btn-danger fa fa-trash delete-pemp-btn"
-                                   data-periode-id="{{ periode.getId() }}"
-                                   data-eleve-id="{{ eleve.getId() }}"
-                                >
-                                </i>
-                            </td>
-                        {% endif %}
+                            {% if isBulletinAdmin %}
+                                <td>
+                                    <i class="btn btn-danger fa fa-trash delete-pemp-btn"
+                                       data-periode-id="{{ periode.getId() }}"
+                                       data-eleve-id="{{ eleve.getId() }}"
+                                    >
+                                    </i>
+                                    <button class="btn btn-warning verouiller-btn" 
+                                            data-matiere-id="{{ pemp.vars.value.matiere.getId }}"
+                                            type="submit">
+                                        {% set testUnlock=''%}
+                                        {% for oneLockStatus in allLockStatus if oneLockStatus.getMatiere.getId()==pemp.vars.value.matiere.getId%}
+                                            <i class="fa fa-lock"></i>
+                                            {% set testUnlock = 1%}
+                                        {% endfor %}
+                                        {% if testUnlock !=1 %}
+                                            <i class="fa fa-unlock"></i>
+                                        {% endif %}
+                            {% endif %} 
+                                    </button>
+                                 </td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -86,6 +97,20 @@
     <script
             src='{{ asset('bundles/formalibrebulletin/js/bulletinEdit.js') }}'
             type="text/javascript">
+    </script>
+    <script>
+        $(".verouiller-btn").on("click",function(){
+        var periode={{periode.getId()}}
+        var matiere=$(this).data("matiere-id");
+        window.Claroline.Modal.displayForm(
+                            Routing.generate("formalibreBulletinLockPoint",{"session":matiere,"periode":periode}),
+                                function() {
+                                    window.location.reload();
+                                },
+                                function() {}
+                                    );
+
+     });
     </script>
 {% endblock %}
 
