@@ -310,6 +310,7 @@ class BulletinController extends Controller
      */
     public function editEleveAction(Request $request, Periode $periode, User $eleve, User $user)
     {   
+        $allLockStatus = $this->lockStatusRepo->findAll();
         $matiere = $this->bulletinManager->getMatieresByEleveAndPeriode($eleve, $periode);
         $this->checkOpen();
         $isBulletinAdmin = $this->authorization->isGranted('ROLE_BULLETIN_ADMIN') ||
@@ -338,7 +339,7 @@ class BulletinController extends Controller
                 $actualLockStatus = $this->lockStatusRepo->findLockStatus($eleveMatierePoint->getMatiere(), $eleveMatierePoint->getPeriode());
                 
                 if ($actualLockStatus == true){
-                    $this->em->refresh($test);
+                    $this->em->refresh($eleveMatierePoint);
                 }
             }
             $this->em->flush();
@@ -363,7 +364,8 @@ class BulletinController extends Controller
             'secondPointName' => $secondPointName,
             'thirdPointName' => $thirdPointName,
             'isBulletinAdmin' => $isBulletinAdmin,
-            'matieres'=> $matiere
+            'matieres'=> $matiere,
+            'allLockStatus'=> $allLockStatus
         );
     }
 
@@ -786,7 +788,7 @@ class BulletinController extends Controller
 
      */
     public function lockPointsAction(User $user, CourseSession $session, Periode $periode)
-    {
+    {   
         $actualLockStatus = $this->lockStatusRepo->findOneBy(array(
                                                              'matiere'=>$session,
                                                              'periode'=>$periode));
