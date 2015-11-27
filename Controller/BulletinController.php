@@ -321,7 +321,7 @@ class BulletinController extends Controller
         $pempCollection = new Pemps();
         
         foreach ($pemps as $pemp) {
-            $lock = $this->lockStatusRepo->findLockStatus($user, $pemp->getMatiere(), $pemp->getPeriode());
+            $lock = $this->lockStatusRepo->findLockStatus($pemp->getMatiere(), $pemp->getPeriode());
             $pemp->setLocked($lock);
             $pempCollection->getPemps()->add($pemp);
             
@@ -334,15 +334,14 @@ class BulletinController extends Controller
             $form->handleRequest($request);
                 
                 $list=$form->get('pemps')->getData();
-                foreach ($list as $test){
-                $actualLockStatus = $this->lockStatusRepo->findLockStatus($user, $test->getMatiere(), $test->getPeriode());
+                foreach ($list as $eleveMatierePoint){
+                $actualLockStatus = $this->lockStatusRepo->findLockStatus($eleveMatierePoint->getMatiere(), $eleveMatierePoint->getPeriode());
                 
                 if ($actualLockStatus == true){
                     $this->em->refresh($test);
                 }
-
-              }
-              $this->em->flush();
+            }
+            $this->em->flush();
 
             $nextAction = $form->get('saveAndAdd')->isClicked()
                 ? 'task_new'
@@ -396,7 +395,7 @@ class BulletinController extends Controller
             );
         }
 
-        $lock=$this->lockStatusRepo->findLockStatus($user,$matiere,$periode);
+        $lock=$this->lockStatusRepo->findLockStatus($matiere,$periode);
         $form = $this->createForm(new MatiereType($lock) , $pempCollection);
 
         if ($request->isMethod('POST')) {
@@ -788,7 +787,7 @@ class BulletinController extends Controller
      */
     public function lockPointsAction(User $user, CourseSession $session, Periode $periode)
     {
-        $actualLockStatus = $this->lockStatusRepo->findOneBy(array('teacher'=>$user,
+        $actualLockStatus = $this->lockStatusRepo->findOneBy(array(
                                                              'matiere'=>$session,
                                                              'periode'=>$periode));
         if (is_null($actualLockStatus))
