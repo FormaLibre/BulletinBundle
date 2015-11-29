@@ -24,8 +24,8 @@ class PeriodeEleveMatierePointType extends AbstractType
         );
         $builder->add('point', 'text', array('required'  => false, 'read_only' => false));
         $builder->add('total', 'text', array('required'  => false, 'read_only' => True));
-        $builder->add('comportement', 'text', array('required'  => false));
-        $builder->add('presence', 'text', array('required'  => false));
+        $builder->add('comportement', 'text', array('required'  => false,'read_only' => false));
+        $builder->add('presence', 'text', array('required'  => false,'read_only' => false));
         
         $builder->addEventListener(FormEvents::POST_SET_DATA, array($this, 'onPreSetData'));
     }
@@ -46,5 +46,7 @@ class PeriodeEleveMatierePointType extends AbstractType
         $data = $form->getData();
         $form->remove('point');
         $form->add('point', 'text', array('required'  => false, 'read_only' => $data->isLocked()));
+        $form->add('comportement', 'text', array('required'  => false,'read_only' => $data->isLocked()));
+        $form->add('presence', 'text', array('required'  => false,'read_only' => $data->isLocked()));
     }
 }
