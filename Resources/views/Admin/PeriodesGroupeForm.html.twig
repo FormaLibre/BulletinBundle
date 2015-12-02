@@ -1,0 +1,115 @@
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <i class="fa fa-cogs dropdown-toggle pointer-hand"
+               data-toggle="dropdown"
+            >
+            </i>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="{{ path('formalibreBulletinAdminIndex') }}">
+                        Admin Bulletin
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibre_bulletin_configure_form') }}">
+                        Configuration
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibre_bulletin_matieres_options_management') }}">
+                        Gestion des matières
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibreBulletinDecisionsList') }}">
+                        Gestion des décisions
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibreBulletinGroupeTitulairesList') }}">
+                        Gestion des titulaires
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibre_bulletin_point_divers_management') }}">
+                        Gestion des points divers
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibreBulletinPeriodesGroup') }}">
+                        Gestion des groupes de périodes
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <h1>Gestion des groupes de périodes</h1>
+    </div>
+    <div class="panel-body">
+        <table>
+            {% for onePeriodesGroup in periodesGroup%}
+                <tr>
+                    <td>
+                        {{onePeriodesGroup.getName()}}
+                    </td>
+                    <td>
+                        <span  class="btn btn-default modifier-periodesGroup-btn"
+                               data-periodesgroup-id="{{onePeriodesGroup.getId()}}"
+                               data-toggle="tooltip" 
+                               title="" 
+                               data-original-title="Modifier" 
+                               role="button">
+                             <i class="fa fa-pencil"></i>
+                        </span>
+                        {% if onePeriodesGroup.getId() != 1%}      
+                        <span  class="btn btn-default supprimer-periodesGroup-btn"
+                               data-periodesgroup-id="{{onePeriodesGroup.getId()}}"
+                               data-toggle="tooltip" 
+                               title="" 
+                               data-original-title="Supprimer" 
+                               role="button">
+                             <i class="fa fa-times"></i>
+                        </span>       
+                        {% endif %}       
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="panel-footer">
+        <button class="btn btn-primary ajouter_periodesGroup-btn">Nouveau groupe</button>
+
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(".modifier-periodesGroup-btn").on("click",function(){
+           var periodesGroupId=$(this).data("periodesgroup-id");
+            window.Claroline.Modal.displayForm(
+                                Routing.generate("formalibre_periodesGroup_modif",{"periodesGroupId":periodesGroupId}),
+                                function() {
+                                    window.location.reload();
+                                },
+                                function() {}
+                                    );
+        });    
+
+        $(".supprimer-periodesGroup-btn").on("click",function(){
+            var periodesGroupId=$(this).data("periodesgroup-id");
+            window.Claroline.Modal.confirmRequest(
+                               Routing.generate("formalibre_periodesGroup_supprimer",{"periodesGroupId":periodesGroupId}),
+                               function() {
+                                   window.location.reload();
+                               },
+                               periodesGroupId,
+                               "Etes-vous certain de vouloir supprimer ce groupe?",
+                               "Supression période"
+                                   );
+
+        });  
+    </script>
+{% endblock %}
+

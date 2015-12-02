@@ -16,6 +16,7 @@ use FormaLibre\BulletinBundle\Form\Type\PempsType;
 use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\LockStatus;
+use FormaLibre\BulletinBundle\Entity\PeriodesGroup;
 use FormaLibre\BulletinBundle\Manager\BulletinManager;
 use FormaLibre\BulletinBundle\Manager\TotauxManager;
 use JMS\DiExtraBundle\Annotation as DI;
@@ -52,6 +53,8 @@ class BulletinController extends Controller
     private $userRepo;
     /** @var LockStatusRepository */
     private $lockStatusRepo;
+    /** @var PeriodesGroupRepository */
+    private $periodesGroupRepo;
 
     /**
      * @DI\InjectParams({
@@ -95,6 +98,7 @@ class BulletinController extends Controller
         $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->userRepo = $om->getRepository('ClarolineCoreBundle:User');
         $this->lockStatusRepo = $om->getRepository('FormaLibreBulletinBundle:LockStatus');
+        $this->periodesGroupRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodesGroup');
     }
 
     /**
@@ -105,6 +109,8 @@ class BulletinController extends Controller
         $this->checkOpen();
 
         $periodes = $this->periodeRepo->findAll();
+        
+        $periodesGroup =$this->periodesGroupRepo->findBy(Array(),Array('id'=>'DESC'));
 
         $periodeCompleted = array();
 
@@ -140,7 +146,10 @@ class BulletinController extends Controller
             $periodeCompleted[$id] = number_format($pourcent,0);
         }
 
-        return $this->render('FormaLibreBulletinBundle::BulletinIndex.html.twig', array('periodes' => $periodes, 'periodeCompleted' => $periodeCompleted));
+        return $this->render('FormaLibreBulletinBundle::BulletinIndex.html.twig', 
+                array('periodes' => $periodes, 
+                      'periodeCompleted' => $periodeCompleted,
+                      'periodesGroup'=> $periodesGroup));
     }
 
     /**
