@@ -552,4 +552,24 @@ class BulletinManager
         }
         $this->om->endFlushSuite();
     }
+
+    public function addSessionsToPeriode(array $sessions, Periode $periode)
+    {
+        foreach ($sessions as $session) {
+            $periode->addMatiere($session);
+        }
+
+        $this->om->persist($periode);
+        $this->om->flush();
+    }
+
+    public function removeSessionsFromPeriode(array $sessions, Periode $periode)
+    {
+        foreach ($sessions as $session) {
+            $periode->removeMatiere($session);
+        }
+
+        $this->om->persist($periode);
+        $this->om->flush();
+    }
 }
