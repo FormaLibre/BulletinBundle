@@ -79,6 +79,14 @@ class Periode
      * @ORM\Column(type="float", nullable=false)
      */
     private $coefficient = 1;
+    
+    /**
+     * @ORM\ManyToOne(
+     *     targetEntity="FormaLibre\BulletinBundle\Entity\PeriodesGroup"
+     * )
+     * @ORM\JoinTable(name="formalibre_bulletin_periodes_group")
+     */
+    private $periodesGroup = 0;
 
     public function __construct()
     {
@@ -277,4 +285,13 @@ class Periode
     {
         $this->coefficient = $coefficient;
     }
+    function getPeriodesGroup() {
+        return $this->periodesGroup;
+    }
+
+    function setPeriodesGroup($periodesGroup) {
+        $this->periodesGroup = $periodesGroup;
+    }
+
+
 }

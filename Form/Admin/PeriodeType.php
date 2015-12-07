@@ -61,6 +61,14 @@ class PeriodeType extends AbstractType
                     'autoclose' => true
                 )
             )
+            ->add('periodesGroup','entity',array(
+                'required' => false,
+                'class' => 'FormaLibre\BulletinBundle\Entity\PeriodesGroup',
+                'property' => 'name',
+                'label' => 'Ajouter au groupe',
+                'empty_value' => 'Choisissez un groupe',
+                'required' => false
+            ))
             ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
             ->add(
                 'template',

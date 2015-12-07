@@ -10,6 +10,7 @@ use Claroline\CoreBundle\Manager\UserManager;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Entity\Decision;
+use FormaLibre\BulletinBundle\Entity\PeriodesGroup;
 use FormaLibre\BulletinBundle\Entity\GroupeTitulaire;
 use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Entity\Periode;
@@ -24,6 +25,7 @@ use FormaLibre\BulletinBundle\Form\Admin\PeriodeOptionsType;
 use FormaLibre\BulletinBundle\Form\Admin\PointDiversType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionCreateType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionEditType;
+use FormaLibre\BulletinBundle\Form\Admin\PeriodesGroupType;
 use FormaLibre\BulletinBundle\Manager\BulletinManager;
 use JMS\DiExtraBundle\Annotation as DI;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
@@ -66,6 +68,8 @@ class BulletinAdminController extends Controller
     private $periodeRepo;
     /** @var UserRepository */
     private $userRepo;
+     /** @var PeriodesGroupRepository */
+    private $periodesGroupRepo;
 
 
     /**
@@ -117,6 +121,7 @@ class BulletinAdminController extends Controller
         $this->periodeEleveDecisionRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveDecision');
         $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->userRepo = $om->getRepository('ClarolineCoreBundle:User');
+        $this->periodesGroupRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodesGroup');
     }
 
     /**
@@ -125,7 +130,9 @@ class BulletinAdminController extends Controller
     public function indexAction()
     {
         $this->checkOpen();
-
+        
+        $periodesGroup =$this->periodesGroupRepo->findBy(Array(),Array('id'=>'DESC'));
+        
         $periodes = $this->periodeRepo->findAll();
 
         $periodeCompleted = array();
@@ -162,7 +169,10 @@ class BulletinAdminController extends Controller
             $periodeCompleted[$id] = number_format($pourcent,0);
         }
 
-        return $this->render('FormaLibreBulletinBundle::Admin/BulletinAdminIndex.html.twig', array('periodes' => $periodes, 'periodeCompleted' => $periodeCompleted));
+        return $this->render('FormaLibreBulletinBundle::Admin/BulletinAdminIndex.html.twig', 
+                array('periodes' => $periodes, 
+                      'periodeCompleted' => $periodeCompleted,
+                      'periodesGroup' => $periodesGroup));
     }
 
     /**
@@ -1085,5 +1095,84 @@ class BulletinAdminController extends Controller
 
         throw new AccessDeniedException();
     }
-}
+    
+    
+     /**
+     * @EXT\Route("/admin/periodesGroup", name="formalibreBulletinPeriodesGroup", options = {"expose"=true})
+     *
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodesGroupeForm.html.twig")
+     */
+    public function adminSchoolPeriodesGroupAction()
+    {
+       $periodesGroup =$this->periodesGroupRepo->findBy(Array(),Array('id'=>'DESC'));
+       
+        return array('periodesGroup'=>$periodesGroup);
+    }
+    
+    /**
+     * @EXT\Route("/admin/periodesGroup/supprimer/periodesGroupId/{periodesGroupId}", 
+     * name="formalibre_periodesGroup_supprimer", options = {"expose"=true})
+     *
+     */
+    public function adminPeriodesGroupSupprimerAction(PeriodesGroup $periodesGroupId)
+    {   
+        $this->checkOpen();
+        $periodesToChange= $this->periodeRepo->findBy(array('periodesGroup'=>$periodesGroupId));
+        foreach ($periodesToChange as $onePeriodeToChange){
+            
+            $onePeriodeToChange->setPeriodesGroup(null);
+            $this->om->persist($onePeriodeToChange);  
+        }
 
+        $this->om->remove($periodesGroupId);
+        $this->om->flush();
+
+        return new JsonResponse('success', 200);
+    }
+     
+     /**
+     * @EXT\Route("/admin/periodesGroupNew", name="formalibreBulletinPeriodesGroupNew", options = {"expose"=true})
+     *
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodesGroupeFormNew.html.twig")
+     */
+    public function adminSchoolPeriodesGroupNewAction()
+    {
+        $actualPeriodesGroup = new PeriodesGroup();
+        $form = $this->createForm(new PeriodesGroupType(), $actualPeriodesGroup);
+       
+        $form->handleRequest($this->request);
+      
+            if ($form->isValid()){
+                
+                $this->om->persist($actualPeriodesGroup);
+                $this->om->flush();
+                
+                 return new JsonResponse('success', 200);
+            } 
+
+        return array('form' => $form->createView());
+    }
+    
+         /**
+     * @EXT\Route("/admin/periodesGroupEdit/periodesGroupId/{periodesGroupId}", name="formalibreBulletinPeriodesGroupEdit", options = {"expose"=true})
+     *
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodesGroupeFormEdit.html.twig")
+     */
+    public function adminSchoolPeriodesGroupEditAction(PeriodesGroup $periodesGroupId)
+     {   
+        $form = $this->createForm(new PeriodesGroupType(), $periodesGroupId);
+        
+        $form->handleRequest($this->request);
+      
+            if ($form->isValid()){
+                
+                $this->om->persist($periodesGroupId);
+                $this->om->flush();
+                
+                 return new JsonResponse('success', 200);
+            } 
+        return array('periodesGroupId'=>$periodesGroupId,
+                     'form' => $form->createView());    
+    }
+    
+}

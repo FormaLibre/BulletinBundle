@@ -15,6 +15,7 @@ use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use FormaLibre\BulletinBundle\Entity\PeriodesGroup;
 
 class LoadGroupData extends AbstractFixture implements ContainerAwareInterface
 {
