@@ -431,6 +431,72 @@ class BulletinManager
         return $this->pepdpRepo->findByPeriode($periode);
     }
 
+    public function refresh(Periode $periode)
+    {
+        $options = array();
+        $coefficient = $periode->getCoefficient();
+
+        $matieres = $periode->getMatieres();
+        $allMatieresOptions = $this->getAllMatieresOptions(
+            false,
+            1,
+            20,
+            $matieres
+        );
+
+        foreach ($allMatieresOptions as $matiereOptions) {
+            $matiereId = $matiereOptions->getMatiere()->getId();
+            $totalMatiere = $matiereOptions->getTotal();
+            $total = empty($totalMatiere) ?
+                null :
+                ceil($coefficient * $totalMatiere);
+            $options[$matiereId] = array();
+            $options[$matiereId]['total'] = $total;
+            $options[$matiereId]['position'] = $matiereOptions->getPosition();
+        }
+
+        $pemps = $this->getPempsByPeriode($periode);
+        $this->om->startFlushSuite();
+
+        foreach ($pemps as $pemp) {
+            $matiereId = $pemp->getMatiere()->getId();
+
+            if (isset($options[$matiereId])) {
+                $pemp->setTotal($options[$matiereId]['total']);
+                $pemp->setPosition($options[$matiereId]['position']);
+                $this->om->persist($pemp);
+            }
+        }
+        $this->om->endFlushSuite();
+
+        $optionsDivers = array();
+        $pointsDivers = $periode->getPointDivers();
+
+        foreach ($pointsDivers as $divers) {
+            $pointDiversId = $divers->getId();
+            $totalDivers = $divers->getTotal();
+            $total = empty($totalDivers) || !$divers->getWithTotal() ?
+                null :
+                ceil($coefficient * $totalDivers);
+            $optionsDivers[$pointDiversId] = array();
+            $optionsDivers[$pointDiversId]['total'] = $total;
+            $optionsDivers[$pointDiversId]['position'] = $divers->getPosition();
+        }
+        $pepdps = $this->getPepdpsByPeriode($periode);
+        $this->om->startFlushSuite();
+
+        foreach ($pepdps as $pepdp) {
+            $diversId = $pepdp->getDivers()->getId();
+
+            if (isset($optionsDivers[$diversId])) {
+                $pepdp->setTotal($optionsDivers[$diversId]['total']);
+                $pepdp->setPosition($optionsDivers[$diversId]['position']);
+                $this->om->persist($pepdp);
+            }
+        }
+        $this->om->endFlushSuite();
+    }
+
     public function deletePemp(PeriodeEleveMatierePoint $pemp)
     {
         $this->om->remove($pemp);
