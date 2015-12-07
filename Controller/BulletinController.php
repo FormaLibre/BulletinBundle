@@ -203,6 +203,7 @@ class BulletinController extends Controller
     public function listClasseAction(Periode $periode, User $user)
     {
         $this->checkOpen();
+        $this->bulletinManager->refresh($periode);
         $groups = array();
         if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN')){
             $groups = $this->bulletinManager->getTaggedGroups();
