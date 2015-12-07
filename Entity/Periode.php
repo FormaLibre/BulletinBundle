@@ -227,6 +227,12 @@ class Periode
         return $this->matieres->toArray();
     }
 
+    //Alias because it's actually some course sessions and it makes everything way too confusing for me.
+    public function getCourseSessions()
+    {
+        return $this->getMatieres();
+    }
+
     public function addMatiere(CourseSession $matiere)
     {
         if (!$this->matieres->contains($matiere)) {
@@ -234,6 +240,11 @@ class Periode
         }
 
         return $this;
+    }
+
+    public function setCourseSessions(array $sessions) 
+    {
+        $this->matieres = new ArrayCollection($sessions);
     }
 
     public function removeMatiere(CourseSession $matiere)

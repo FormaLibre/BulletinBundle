@@ -199,20 +199,27 @@ class BulletinManager
         return $this->pointDiversRepo->findAll();
     }
 
-    public function getAvailableSessions()
+    public function getAvailableSessions($count = false, $page = null, $limit = null)
     {
         $status = array(CourseSession::SESSION_NOT_STARTED, CourseSession::SESSION_OPEN);
 
         $qb = $this->em->createQueryBuilder();
-        $qb->select('cs')
-            ->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
+
+        $count ? $qb->select('count(cs)'): $qb->select('cs');
+
+        $qb->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
             ->join('cs.course', 'c')
             ->where('cs.sessionStatus IN (:status)')
             ->setParameter('status', $status)
             ->orderBy('c.title', 'ASC');
         $query = $qb->getQuery();
 
-        return $query->getResult();
+        if ($page && $limit) {
+            $query->setMaxResults($limit);
+            $query->setFirstResult($page * $limit);
+        }
+
+        return $count ? $query->getSingleScalarResult(): $query->getResult();
     }
 
     public function getPempByPeriodeAndUserAndMatiere(
@@ -435,5 +442,107 @@ class BulletinManager
     {
         $this->om->remove($pemp);
         $this->om->flush();
+    }
+
+    public function searchAvailableSessions($searches, $count = false, $page = null, $limit = null)
+    {
+        $status = array(CourseSession::SESSION_NOT_STARTED, CourseSession::SESSION_OPEN);
+        $courseProperties = array('code', 'title');
+        $sessionProperties = array('name');
+
+        $qb = $this->em->createQueryBuilder();
+        $count ? $qb->select('count(cs)'): $qb->select('cs');
+        $qb->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
+            ->join('cs.course', 'c')
+            ->where('cs.sessionStatus IN (:status)')
+            ->setParameter('status', $status)
+            ->orderBy('c.title', 'ASC');
+
+        foreach ($searches as $key => $search) {
+            foreach ($search as $id => $el) {
+                if (in_array($key, $courseProperties)) {
+                    $qb->andWhere("UPPER (c.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                } elseif (in_array($key, $sessionProperties)) {
+                    $qb->andWhere("UPPER (cs.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                }
+            }
+        }
+
+        $query = $qb->getQuery();
+
+        if ($page && $limit) {
+            $query->setMaxResults($limit);
+            $query->setFirstResult($page * $limit);
+        }
+
+        return $count ? $query->getSingleScalarResult(): $query->getResult();
+    }
+
+    public function refresh(Periode $periode) 
+    {
+         $options = array();
+        $coefficient = $periode->getCoefficient();
+
+        $matieres = $periode->getMatieres();
+        $allMatieresOptions = $this->getAllMatieresOptions(
+            false,
+            1,
+            20,
+            $matieres
+        );
+
+        foreach ($allMatieresOptions as $matiereOptions) {
+            $matiereId = $matiereOptions->getMatiere()->getId();
+            $totalMatiere = $matiereOptions->getTotal();
+            $total = empty($totalMatiere) ?
+                null :
+                ceil($coefficient * $totalMatiere);
+            $options[$matiereId] = array();
+            $options[$matiereId]['total'] = $total;
+            $options[$matiereId]['position'] = $matiereOptions->getPosition();
+        }
+
+        $pemps = $this->getPempsByPeriode($periode);
+        $this->om->startFlushSuite();
+
+        foreach ($pemps as $pemp) {
+            $matiereId = $pemp->getMatiere()->getId();
+
+            if (isset($options[$matiereId])) {
+                $pemp->setTotal($options[$matiereId]['total']);
+                $pemp->setPosition($options[$matiereId]['position']);
+                $this->om->persist($pemp);
+            }
+        }
+        $this->om->endFlushSuite();
+
+        $optionsDivers = array();
+        $pointsDivers = $periode->getPointDivers();
+
+        foreach ($pointsDivers as $divers) {
+            $pointDiversId = $divers->getId();
+            $totalDivers = $divers->getTotal();
+            $total = empty($totalDivers) || !$divers->getWithTotal() ?
+                null :
+                ceil($coefficient * $totalDivers);
+            $optionsDivers[$pointDiversId] = array();
+            $optionsDivers[$pointDiversId]['total'] = $total;
+            $optionsDivers[$pointDiversId]['position'] = $divers->getPosition();
+        }
+        $pepdps = $this->getPepdpsByPeriode($periode);
+        $this->om->startFlushSuite();
+
+        foreach ($pepdps as $pepdp) {
+            $diversId = $pepdp->getDivers()->getId();
+
+            if (isset($optionsDivers[$diversId])) {
+                $pepdp->setTotal($optionsDivers[$diversId]['total']);
+                $pepdp->setPosition($optionsDivers[$diversId]['position']);
+                $this->om->persist($pepdp);
+            }
+        }
+        $this->om->endFlushSuite();
     }
 }
