@@ -316,10 +316,8 @@ class BulletinController extends Controller
         $this->checkOpen();
         $isBulletinAdmin = $this->authorization->isGranted('ROLE_BULLETIN_ADMIN') ||
             $this->authorization->isGranted('ROLE_ADMIN');
-
         $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
-        $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
-
+        $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode); 
         $pempCollection = new Pemps();
         
         foreach ($pemps as $pemp) {
@@ -329,7 +327,6 @@ class BulletinController extends Controller
             
         }
 
-        
         $form = $this->createForm(new PempsType(), $pempCollection);
 
         if ($request->isMethod('POST')) {
@@ -786,7 +783,7 @@ class BulletinController extends Controller
      * )
      *
      * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
-
+     *
      */
     public function lockPointsAction(User $user, CourseSession $session, Periode $periode)
     {   

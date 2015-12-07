@@ -199,20 +199,27 @@ class BulletinManager
         return $this->pointDiversRepo->findAll();
     }
 
-    public function getAvailableSessions()
+    public function getAvailableSessions($count = false, $page = null, $limit = null)
     {
         $status = array(CourseSession::SESSION_NOT_STARTED, CourseSession::SESSION_OPEN);
 
         $qb = $this->em->createQueryBuilder();
-        $qb->select('cs')
-            ->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
+
+        $count ? $qb->select('count(cs)'): $qb->select('cs');
+
+        $qb->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
             ->join('cs.course', 'c')
             ->where('cs.sessionStatus IN (:status)')
             ->setParameter('status', $status)
             ->orderBy('c.title', 'ASC');
         $query = $qb->getQuery();
 
-        return $query->getResult();
+        if ($page && $limit) {
+            $query->setMaxResults($limit);
+            $query->setFirstResult($page * $limit);
+        }
+
+        return $count ? $query->getSingleScalarResult(): $query->getResult();
     }
 
     public function getPempByPeriodeAndUserAndMatiere(
@@ -500,6 +507,69 @@ class BulletinManager
     public function deletePemp(PeriodeEleveMatierePoint $pemp)
     {
         $this->om->remove($pemp);
+        $this->om->flush();
+    }
+
+    public function searchAvailableSessions($searches, $count = false, $page = null, $limit = null)
+    {
+        $status = array(CourseSession::SESSION_NOT_STARTED, CourseSession::SESSION_OPEN);
+        $courseProperties = array('code', 'title');
+        $sessionProperties = array('name');
+
+        $qb = $this->em->createQueryBuilder();
+        $count ? $qb->select('count(cs)'): $qb->select('cs');
+        $qb->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
+            ->join('cs.course', 'c')
+            ->where('cs.sessionStatus IN (:status)')
+            ->setParameter('status', $status)
+            ->orderBy('c.title', 'ASC');
+
+        foreach ($searches as $key => $search) {
+            foreach ($search as $id => $el) {
+                if (in_array($key, $courseProperties)) {
+                    $qb->andWhere("UPPER (c.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                } elseif (in_array($key, $sessionProperties)) {
+                    $qb->andWhere("UPPER (cs.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                }
+            }
+        }
+
+        $query = $qb->getQuery();
+
+        if ($page && $limit) {
+            $query->setMaxResults($limit);
+            $query->setFirstResult($page * $limit);
+        }
+
+        return $count ? $query->getSingleScalarResult(): $query->getResult();
+    }
+
+    public function invertSessionPeriode($periode, $session)
+    {
+        $periode->invertSession($session);
+        $this->om->persist($periode);
+        $this->om->flush();
+    }
+
+    public function addSessionsToPeriode(array $sessions, Periode $periode)
+    {
+        foreach ($sessions as $session) {
+            $periode->addMatiere($session);
+        }
+
+        $this->om->persist($periode);
+        $this->om->flush();
+    }
+
+    public function removeSessionsFromPeriode(array $sessions, Periode $periode)
+    {
+        foreach ($sessions as $session) {
+            $periode->removeMatiere($session);
+        }
+
+        $this->om->persist($periode);
         $this->om->flush();
     }
 }

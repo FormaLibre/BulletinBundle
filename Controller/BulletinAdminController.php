@@ -4,6 +4,7 @@ namespace FormaLibre\BulletinBundle\Controller;
 
 use Claroline\CoreBundle\Entity\Group;
 use Claroline\CoreBundle\Entity\User;
+use Claroline\CursusBundle\Entity\CourseSession;
 use Claroline\CoreBundle\Manager\RoleManager;
 use Claroline\CoreBundle\Manager\ToolManager;
 use Claroline\CoreBundle\Manager\UserManager;
@@ -37,6 +38,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use JMS\Serializer\SerializationContext;
 
 class BulletinAdminController extends Controller
 {
@@ -838,6 +840,217 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/admin/periode/{periode}/page/{page}/limit/{limit}/sessions.json",
+     *     name="formalibre_bulletin_get_sessions",
+     *     defaults={"page"=0, "limit"=99999},
+     *     options = {"expose"=true}
+     * )
+     */
+    public function getAdminSessionAction(Periode $periode, $page, $limit)
+    {
+        $this->checkOpen();
+        $linkedSessionsIds = array();
+
+        foreach ($periode->getCourseSessions() as $link) {
+            $linkedSessionsIds[] = $link->getId();
+        }
+
+        $sessions = $this->bulletinManager->getAvailableSessions(false, $page, $limit);
+
+        foreach ($sessions as $session) {
+            (in_array($session->getId(), $linkedSessionsIds)) ?
+                $session->setExtra(array('linked' => true)):
+                $session->setExtra(array('linked' => false));
+        }
+
+        $context = new SerializationContext();
+        $context->setGroups('bulletin');
+        $data = $this->container->get('serializer')->serialize($sessions, 'json', $context);
+        $sessions = json_decode($data);
+        $response = new JsonResponse(array('sessions' => $sessions, 'total' => $this->bulletinManager->getAvailableSessions(true)));
+
+        return $response;
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/page/{page}/limit/{limit}/search/sessions.json",
+     *     name="formalibre_bulletin_search_sessions",
+     *     defaults={"page"=0, "limit"=99999},
+     *     options = {"expose"=true}
+     * )
+     */
+    public function searchAdminSessionAction(Periode $periode, $page, $limit)
+    {
+        $this->checkOpen();
+
+        foreach ($periode->getCourseSessions() as $link) {
+            $linkedSessionsIds[] = $link->getId();
+        }
+
+        $searches = $this->request->query->all();
+        $sessions = $this->bulletinManager->searchAvailableSessions($searches, false, $page, $limit);
+
+        foreach ($sessions as $session) {
+            (in_array($session->getId(), $linkedSessionsIds)) ?
+                $session->setExtra(array('linked' => true)):
+                $session->setExtra(array('linked' => false));
+        }
+
+        $context = new SerializationContext();
+        $context->setGroups('bulletin');
+        $data = $this->container->get('serializer')->serialize($sessions, 'json', $context);
+        $sessions = json_decode($data);
+        $response = new JsonResponse(
+            array(
+                'sessions' => $sessions, 
+                'total' => $this->bulletinManager->searchAvailableSessions($searches, true)
+            )
+        );
+
+        return $response;
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/add/search/sessions.json",
+     *     name="formalibre_bulletin_add_search_sessions",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function checkAllSessionsFromSearchAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $searches = $this->request->query->all();
+        $sessions = $this->bulletinManager->searchAvailableSessions($searches, false);
+        $this->bulletinManager->addSessionsToPeriode($sessions, $periode);
+
+        return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/remove/search/sessions.json",
+     *     name="formalibre_bulletin_remove_search_sessions",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function removeAllSessionsFromSearchAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $searches = $this->request->query->all();
+        $sessions = $this->bulletinManager->searchAvailableSessions($searches, false);
+        $this->bulletinManager->removeSessionsFromPeriode($sessions, $periode);
+
+        return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/add/sessions",
+     *     name="formalibre_bulletin_add_sessions_to_periode",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function addSessionsToPeriode(Periode $periode)
+    {
+        $this->checkOpen();
+        $sessions = $this->request->request->all();
+        $sessionIds = array();
+
+        foreach ($sessions as $session) {
+            $sessionIds[] = $session['id'];
+        }
+
+        $sessions = $this->om->findByIds('Claroline\CursusBundle\Entity\CourseSession', $sessionIds);
+        $periode->setCourseSessions($sessions);
+        $this->om->persist($periode);
+        $this->om->flush();
+
+        return new JsonResponse('done');
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/add/session/{session}",
+     *     name="formalibre_bulletin_add_session_to_periode",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function addSessionToPeriode(Periode $periode, CourseSession $session)
+    {
+        $this->checkOpen();
+        $periode->addMatiere($session);
+        $this->om->persist($periode);
+        $this->om->flush();
+
+        return new JsonResponse('done');
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/remove/session/{session}",
+     *     name="formalibre_bulletin_remove_session_from_periode",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function removeSessionFromPeriode(Periode $periode, CourseSession $session)
+    {
+        $this->checkOpen();
+        $periode->removeMatiere($session);
+        $this->om->persist($periode);
+        $this->om->flush();
+
+        return new JsonResponse('done');
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/invert/sessions",
+     *     name="formalibre_bulletin_invert_session_from_periode",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function invertSessionsPeriode(Periode $periode)
+    {
+        $this->checkOpen();
+        $sessions = $this->request->request->all();
+        $sessionIds = array();
+
+        foreach ($sessions as $session) {
+            $sessionIds[] = $session['id'];
+        }
+
+        $sessions = $this->om->findByIds('Claroline\CursusBundle\Entity\CourseSession', $sessionIds);
+        $this->om->startFlushSuite();
+
+        foreach ($sessions as $session) {
+            $this->bulletinManager->invertSessionPeriode($periode, $session);
+        }
+
+        $this->om->endFlushSuite();
+
+        return new JsonResponse('done');
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/session/fields.json",
+     *     name="formalibre_bulletin_get_sessions_fields",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function getAdminSessionFieldsAction()
+    {
+        return new JsonResponse(array(
+            'title',
+            'name',
+            'code',
+        ));
+    }
+
+    /**
+     * @EXT\Route(
      *     "/admin/periode/{periode}/options/edit/form",
      *     name="formalibre_bulletin_periode_options_edit_form",
      *     options = {"expose"=true}
@@ -849,38 +1062,22 @@ class BulletinAdminController extends Controller
     public function adminPeriodeOptionsEditFormAction(Periode $periode)
     {
         $this->checkOpen();
-        $matieres = $periode->getMatieres();
-        $matiereIds = array();
-
-        foreach ($matieres as $matiere) {
-            $matiereIds[] = $matiere->getId();
-        }
         $pointsDivers = $periode->getPointDivers();
         $pointDiversIds = array();
 
         foreach ($pointsDivers as $pointDivers) {
             $pointDiversIds[] = $pointDivers->getId();
         }
+
         $allPointDivers = $this->bulletinManager->getAllPointDivers();
         $sessions = $this->bulletinManager->getAvailableSessions();
         $datas = array();
-
-        foreach ($sessions as $session) {
-            $course = $session->getCourse();
-            $courseName = $course->getTitle() . ' [' . $course->getCode() . ']';
-
-            if (!isset($datas[$courseName])) {
-                $datas[$courseName] = array();
-            }
-            $datas[$courseName][$session->getId()] = $session;
-        }
         $form = $this->createForm(new PeriodeOptionsType(), $periode);
 
         return array(
             'form' => $form->createView(),
             'periode' => $periode,
             'datas' => $datas,
-            'matiereIds' => $matiereIds,
             'allPointDivers' => $allPointDivers,
             'pointDiversIds' => $pointDiversIds
         );
@@ -916,25 +1113,17 @@ class BulletinAdminController extends Controller
             foreach ($matieres as $matiere) {
                 $matiereIds[] = $matiere->getId();
             }
+
             $pointsDivers = $periode->getPointDivers();
             $pointDiversIds = array();
 
             foreach ($pointsDivers as $pointDivers) {
                 $pointDiversIds[] = $pointDivers->getId();
             }
+
             $allPointDivers = $this->bulletinManager->getAllPointDivers();
             $sessions = $this->bulletinManager->getAvailableSessions();
             $datas = array();
-
-            foreach ($sessions as $session) {
-                $course = $session->getCourse();
-                $courseName = $course->getTitle() . ' [' . $course->getCode() . ']';
-
-                if (!isset($datas[$courseName])) {
-                    $datas[$courseName] = array();
-                }
-                $datas[$courseName][$session->getId()] = $session;
-            }
 
             return array(
                 'form' => $form->createView(),
