@@ -1261,7 +1261,7 @@ class BulletinAdminController extends Controller
     public function refreshPeriodeOptionsAction(Periode $periode)
     {
         $this->checkOpen();
-        $this->refresh($periode);
+        $this->bulletinManager->refresh($periode);
 
         return new JsonResponse('success', 200);
     }

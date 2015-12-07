@@ -438,56 +438,7 @@ class BulletinManager
         return $this->pepdpRepo->findByPeriode($periode);
     }
 
-    public function deletePemp(PeriodeEleveMatierePoint $pemp)
-    {
-        $this->om->remove($pemp);
-        $this->om->flush();
-    }
-
-    public function searchAvailableSessions($searches, $count = false, $page = null, $limit = null)
-    {
-        $status = array(CourseSession::SESSION_NOT_STARTED, CourseSession::SESSION_OPEN);
-        $courseProperties = array('code', 'title');
-        $sessionProperties = array('name');
-
-        $qb = $this->em->createQueryBuilder();
-        $count ? $qb->select('count(cs)'): $qb->select('cs');
-        $qb->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
-            ->join('cs.course', 'c')
-            ->where('cs.sessionStatus IN (:status)')
-            ->setParameter('status', $status)
-            ->orderBy('c.title', 'ASC');
-
-        foreach ($searches as $key => $search) {
-            foreach ($search as $id => $el) {
-                if (in_array($key, $courseProperties)) {
-                    $qb->andWhere("UPPER (c.{$key}) LIKE :{$key}{$id}");
-                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
-                } elseif (in_array($key, $sessionProperties)) {
-                    $qb->andWhere("UPPER (cs.{$key}) LIKE :{$key}{$id}");
-                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
-                }
-            }
-        }
-
-        $query = $qb->getQuery();
-
-        if ($page && $limit) {
-            $query->setMaxResults($limit);
-            $query->setFirstResult($page * $limit);
-        }
-
-        return $count ? $query->getSingleScalarResult(): $query->getResult();
-    }
-
-    public function invertSessionPeriode($periode, $session)
-    {
-        $periode->invertSession($session);
-        $this->om->persist($periode);
-        $this->om->flush();
-    }
-
-    public function refresh(Periode $periode) 
+    public function refresh(Periode $periode)
     {
         $options = array();
         $coefficient = $periode->getCoefficient();
@@ -551,6 +502,55 @@ class BulletinManager
             }
         }
         $this->om->endFlushSuite();
+    }
+
+    public function deletePemp(PeriodeEleveMatierePoint $pemp)
+    {
+        $this->om->remove($pemp);
+        $this->om->flush();
+    }
+
+    public function searchAvailableSessions($searches, $count = false, $page = null, $limit = null)
+    {
+        $status = array(CourseSession::SESSION_NOT_STARTED, CourseSession::SESSION_OPEN);
+        $courseProperties = array('code', 'title');
+        $sessionProperties = array('name');
+
+        $qb = $this->em->createQueryBuilder();
+        $count ? $qb->select('count(cs)'): $qb->select('cs');
+        $qb->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
+            ->join('cs.course', 'c')
+            ->where('cs.sessionStatus IN (:status)')
+            ->setParameter('status', $status)
+            ->orderBy('c.title', 'ASC');
+
+        foreach ($searches as $key => $search) {
+            foreach ($search as $id => $el) {
+                if (in_array($key, $courseProperties)) {
+                    $qb->andWhere("UPPER (c.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                } elseif (in_array($key, $sessionProperties)) {
+                    $qb->andWhere("UPPER (cs.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                }
+            }
+        }
+
+        $query = $qb->getQuery();
+
+        if ($page && $limit) {
+            $query->setMaxResults($limit);
+            $query->setFirstResult($page * $limit);
+        }
+
+        return $count ? $query->getSingleScalarResult(): $query->getResult();
+    }
+
+    public function invertSessionPeriode($periode, $session)
+    {
+        $periode->invertSession($session);
+        $this->om->persist($periode);
+        $this->om->flush();
     }
 
     public function addSessionsToPeriode(array $sessions, Periode $periode)
