@@ -13,8 +13,7 @@
                         {{group.getName()}}
                     </div>
                     <div class="panel-body text-center">
-                        {% for periode in periodes if periode.getPeriodesGroup.getId()==group.getId() %}  
-                            
+                         {% for periode in periodes if periode.getPeriodesGroup() is not null and periode.getPeriodesGroup.getId()==group.getId() %}   
                             <div class="col-xs-3">
                                 <div class="panel panel-default">
                                     <div class="panel-heading text-center"">
@@ -36,6 +35,37 @@
                         {% endfor %}            
                     </div>
                 </div>    
-            {% endfor %}    
+            {% endfor %}
+            <div class="row">
+            <div class="col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-heading text-center">
+                        {{"Périodes non classées"}}
+                </div>
+                <div class="panel-body text-center">
+                    {% for periode in periodes if periode.getPeriodesGroup() is null%}   
+                        <div class="col-xs-3">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center"">
+                                    {{ periode.Name }} - {{ attribute(periodeCompleted, periode.Id) }}{{"%"}}
+                                    </br>
+                                </div>
+                            </div>
+                            <div class="panel-body text-center">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="{{ attribute(periodeCompleted, periode.Id) }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ attribute(periodeCompleted, periode.Id) }}%;">
+                                        {{ attribute(periodeCompleted, periode.Id) }}%
+                                    </div>
+                                </div>
+                                <div class="btn btn-default" role="button">
+                                    <a href="{{ path('formalibreBulletinListMyGroup', {'periode' : periode.id()}) }}"> <i class="fa fa-search fa-3x "></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}            
+                </div>
+            </div>
+            </div>
+            </div>
         </div>
 {% endblock %}

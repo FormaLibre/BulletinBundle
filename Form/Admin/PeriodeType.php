@@ -66,7 +66,8 @@ class PeriodeType extends AbstractType
                 'class' => 'FormaLibre\BulletinBundle\Entity\PeriodesGroup',
                 'property' => 'name',
                 'label' => 'Ajouter au groupe',
-                'required' => true
+                'empty_value' => 'Choisissez un groupe',
+                'required' => false
             ))
             ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
             ->add(

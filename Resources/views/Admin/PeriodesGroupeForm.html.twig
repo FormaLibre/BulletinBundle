@@ -62,8 +62,7 @@
                                data-original-title="Modifier" 
                                role="button">
                              <i class="fa fa-pencil"></i>
-                        </span>
-                        {% if onePeriodesGroup.getId() != 1%}      
+                        </span>  
                         <span  class="btn btn-default supprimer-periodesGroup-btn"
                                data-periodesgroup-id="{{onePeriodesGroup.getId()}}"
                                data-toggle="tooltip" 
@@ -71,8 +70,7 @@
                                data-original-title="Supprimer" 
                                role="button">
                              <i class="fa fa-times"></i>
-                        </span>       
-                        {% endif %}       
+                        </span>             
                     </td>
                 </tr>
             {% endfor %}
@@ -89,13 +87,22 @@
         $(".modifier-periodesGroup-btn").on("click",function(){
            var periodesGroupId=$(this).data("periodesgroup-id");
             window.Claroline.Modal.displayForm(
-                                Routing.generate("formalibre_periodesGroup_modif",{"periodesGroupId":periodesGroupId}),
+                                Routing.generate("formalibreBulletinPeriodesGroupEdit",{"periodesGroupId":periodesGroupId}),
                                 function() {
                                     window.location.reload();
                                 },
                                 function() {}
                                     );
-        });    
+        });   
+        
+        $(".ajouter_periodesGroup-btn").on("click",function(){
+            window.Claroline.Modal.displayForm(
+                                Routing.generate("formalibreBulletinPeriodesGroupNew"),
+                                function() {window.location.reload();},
+                                function() {}, 
+                                'periode-form'
+                                    );
+        });   
 
         $(".supprimer-periodesGroup-btn").on("click",function(){
             var periodesGroupId=$(this).data("periodesgroup-id");

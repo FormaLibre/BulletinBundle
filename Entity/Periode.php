@@ -86,7 +86,7 @@ class Periode
      * )
      * @ORM\JoinTable(name="formalibre_bulletin_periodes_group")
      */
-    private $periodesGroup = 1;
+    private $periodesGroup = 0;
 
     public function __construct()
     {

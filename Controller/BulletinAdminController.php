@@ -26,7 +26,6 @@ use FormaLibre\BulletinBundle\Form\Admin\PointDiversType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionCreateType;
 use FormaLibre\BulletinBundle\Form\Admin\UserDecisionEditType;
 use FormaLibre\BulletinBundle\Form\Admin\PeriodesGroupType;
-use FormaLibre\BulletinBundle\Form\Admin\CollPeriodesGroupType;
 use FormaLibre\BulletinBundle\Manager\BulletinManager;
 use JMS\DiExtraBundle\Annotation as DI;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
@@ -1168,7 +1167,6 @@ class BulletinAdminController extends Controller
     {
        $periodesGroup =$this->periodesGroupRepo->findBy(Array(),Array('id'=>'DESC'));
        
-
         return array('periodesGroup'=>$periodesGroup);
     }
     
@@ -1180,12 +1178,10 @@ class BulletinAdminController extends Controller
     public function adminPeriodesGroupSupprimerAction(PeriodesGroup $periodesGroupId)
     {   
         $this->checkOpen();
-        $defaultPeriodesGroup=$this->periodesGroupRepo->findOneBy(array('id'=>1));
-        $periodesGroupIdString=$periodesGroupId->getId();
         $periodesToChange= $this->periodeRepo->findBy(array('periodesGroup'=>$periodesGroupId));
         foreach ($periodesToChange as $onePeriodeToChange){
             
-            $onePeriodeToChange->setPeriodesGroup($defaultPeriodesGroup);
+            $onePeriodeToChange->setPeriodesGroup(null);
             $this->om->persist($onePeriodeToChange);  
         }
 
@@ -1194,6 +1190,50 @@ class BulletinAdminController extends Controller
 
         return new JsonResponse('success', 200);
     }
+     
+     /**
+     * @EXT\Route("/admin/periodesGroupNew", name="formalibreBulletinPeriodesGroupNew", options = {"expose"=true})
+     *
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodesGroupeFormNew.html.twig")
+     */
+    public function adminSchoolPeriodesGroupNewAction()
+    {
+        $actualPeriodesGroup = new PeriodesGroup();
+        $form = $this->createForm(new PeriodesGroupType(), $actualPeriodesGroup);
+       
+        $form->handleRequest($this->request);
+      
+            if ($form->isValid()){
+                
+                $this->om->persist($actualPeriodesGroup);
+                $this->om->flush();
+                
+                 return new JsonResponse('success', 200);
+            } 
+
+        return array('form' => $form->createView());
+    }
     
+         /**
+     * @EXT\Route("/admin/periodesGroupEdit/periodesGroupId/{periodesGroupId}", name="formalibreBulletinPeriodesGroupEdit", options = {"expose"=true})
+     *
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodesGroupeFormEdit.html.twig")
+     */
+    public function adminSchoolPeriodesGroupEditAction(PeriodesGroup $periodesGroupId)
+     {   
+        $form = $this->createForm(new PeriodesGroupType(), $periodesGroupId);
+        
+        $form->handleRequest($this->request);
+      
+            if ($form->isValid()){
+                
+                $this->om->persist($periodesGroupId);
+                $this->om->flush();
+                
+                 return new JsonResponse('success', 200);
+            } 
+        return array('periodesGroupId'=>$periodesGroupId,
+                     'form' => $form->createView());    
+    }
     
 }

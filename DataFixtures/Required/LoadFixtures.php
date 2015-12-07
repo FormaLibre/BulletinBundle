@@ -32,13 +32,6 @@ class LoadGroupData extends AbstractFixture implements ContainerAwareInterface
         if (!$roleRepository->findOneByName('ROLE_BULLETIN_ADMIN')){
             $roleManager->createBaseRole('ROLE_BULLETIN_ADMIN', 'Bulletin Admin');
         }
-        
-        $defaultGroup = new PeriodesGroup();
-        $defaultGroup ->setName("Non-classées");
-        $manager->persist($defaultGroup);
-        $manager->flush();
-
-          
 
     }
 }
