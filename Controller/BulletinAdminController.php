@@ -972,6 +972,35 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/admin/periode/{periode}/invert/sessions",
+     *     name="formalibre_bulletin_invert_session_from_periode",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function invertSessionsPeriode(Periode $periode)
+    {
+        $this->checkOpen();
+        $sessions = $this->request->request->all();
+        $sessionIds = array();
+
+        foreach ($sessions as $session) {
+            $sessionIds[] = $session['id'];
+        }
+
+        $sessions = $this->om->findByIds('Claroline\CursusBundle\Entity\CourseSession', $sessionIds);
+        $this->om->startFlushSuite();
+
+        foreach ($sessions as $session) {
+            $this->bulletinManager->invertSessionPeriode($periode, $session);
+        }
+
+        $this->om->endFlushSuite();
+
+        return new JsonResponse('done');
+    }
+
+    /**
+     * @EXT\Route(
      *     "/admin/session/fields.json",
      *     name="formalibre_bulletin_get_sessions_fields",
      *     options = {"expose"=true}

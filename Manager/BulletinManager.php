@@ -480,9 +480,16 @@ class BulletinManager
         return $count ? $query->getSingleScalarResult(): $query->getResult();
     }
 
+    public function invertSessionPeriode($periode, $session)
+    {
+        $periode->invertSession($session);
+        $this->om->persist($periode);
+        $this->om->flush();
+    }
+
     public function refresh(Periode $periode) 
     {
-         $options = array();
+        $options = array();
         $coefficient = $periode->getCoefficient();
 
         $matieres = $periode->getMatieres();

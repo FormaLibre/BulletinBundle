@@ -256,6 +256,17 @@ class Periode
         return $this;
     }
 
+    public function invertSession(CourseSession $matiere)
+    {
+        if ($this->matieres->contains($matiere)) {
+            $this->matieres->removeElement($matiere);
+        } else {
+            $this->matieres->add($matiere);
+        }
+
+        return $this;
+    }
+
     public function getPointDivers()
     {
         return $this->pointDivers->toArray();

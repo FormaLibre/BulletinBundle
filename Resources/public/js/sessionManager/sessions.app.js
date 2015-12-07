@@ -5,7 +5,7 @@ sessionManager.config(function(clarolineSearchProvider) {
 	clarolineSearchProvider.setBaseRoute('formalibre_bulletin_get_sessions', {'periode': AngularApp.periode});
 	clarolineSearchProvider.setSearchRoute('formalibre_bulletin_search_sessions', {'periode': AngularApp.periode});
 	clarolineSearchProvider.setFieldRoute('formalibre_bulletin_get_sessions_fields');
-	clarolineSearchProvider.disablePager();
+	//clarolineSearchProvider.disablePager();
 });
 
 sessionManager.controller('sessionsCtrl', function(
@@ -15,7 +15,7 @@ sessionManager.controller('sessionsCtrl', function(
 	$cacheFactory,
 	clarolineSearch
 ) {
-	$http.defaults.cache = true;
+	//$http.defaults.cache = true;
 	$scope.addedSessions = [];
 	var refreshSelected = true;
 
@@ -26,6 +26,12 @@ sessionManager.controller('sessionsCtrl', function(
 	var setSessions = function(data, offset, size) {
 		var sessions = data.sessions;
 		$scope.dataTableOptions.paging.count = data.total;
+
+		//I know it's terrible... but I have no other choice with this table.
+			for (var i = 0; i < offset * size; i++) {
+				sessions.unshift({});
+			}
+			
 		$scope.sessions = sessions;
 		setSelected(sessions);
 	}
@@ -35,12 +41,12 @@ sessionManager.controller('sessionsCtrl', function(
 			$scope.selectedRows.splice(0, $scope.selectedRows.length);
 
 			for (var i = 0; i < sessions.length; i++) {
-				if (sessions[i].extra.linked === true) {
+				if (sessions[i].extra && sessions[i].extra.linked === true) {
 					$scope.selectedRows.push(sessions[i]);
 				}
 			}
 
-			refreshSelected = false;
+			//refreshSelected = false;
 		} 
 	}
 
@@ -72,7 +78,7 @@ sessionManager.controller('sessionsCtrl', function(
  		}
 	};
 	
-	$scope.clarolineSearch = function(searches) {
+	$scope.onSearch = function(searches) {
 		$scope.dataTableOptions.paging.offset = 0;
 		$scope.savedSearch = searches;
 		refreshSelected = true;
@@ -87,8 +93,23 @@ sessionManager.controller('sessionsCtrl', function(
 		});
 	}
 
-	$scope.onSelect = function(rows) {
-		//
+	$scope.onCheck = function(rows) {
+		var row = rows[0];
+		$http.post(
+			Routing.generate('formalibre_bulletin_add_session_to_periode', {'periode': AngularApp.periode, 'session': row.id})
+		);
+	}
+
+	$scope.onUncheck = function(rows) {
+		var row = rows[0];
+		$http.post(
+			Routing.generate('formalibre_bulletin_remove_session_from_periode', {'periode': AngularApp.periode, 'session': row.id}),
+			[row]
+		);
+	}
+
+	$scope.onHeaderCheckboxChange = function(isChecked) {
+		console.log(isChecked);
 	}
 });
 

@@ -6,7 +6,9 @@
 		selected="selectedRows" 
 		on-page="paging(offset, size)"
 		on-row-click="onRowClick(row)" 
-		on-select="onSelect(rows)"
+		on-select="onCheck(rows)"
+		on-uncheck="onUncheck(rows)"
+		on-header-checkbox-changed="onHeaderCheckboxChange(isChecked)"
 	>
 	</dtable>
 </div>
