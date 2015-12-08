@@ -1240,6 +1240,21 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/admin/bulletin/remove/{periode}",
+     *     name="formalibre_bulletin_remove_periode",
+     *     options={"expose"=true}
+     * )
+     */
+    public function removePeriodeAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $this->bulletinManager->removePeriode($periode);
+
+        return new JsonResponse('success');
+    }
+
+    /**
+     * @EXT\Route(
      *     "/admin/periode/{periode}/options/refresh",
      *     name="formalibre_bulletin_periode_options_refresh",
      *     options = {"expose"=true}

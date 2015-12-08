@@ -22,6 +22,7 @@ class PeriodeElevePointDiversPoint
      * @ORM\ManyToOne(
      *      targetEntity="FormaLibre\BulletinBundle\Entity\Periode",
      * )
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $periode;
 
