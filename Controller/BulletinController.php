@@ -324,8 +324,11 @@ class BulletinController extends Controller
             $lock = $this->lockStatusRepo->findLockStatus($pemp->getMatiere(), $pemp->getPeriode());
             $pemp->setLocked($lock);
             $pempCollection->getPemps()->add($pemp);
-            
         }
+
+        foreach ($pemds as $pemd) {
+           $pempCollection->getPemds()->add($pemd);
+         }
 
         $form = $this->createForm(new PempsType(), $pempCollection);
 

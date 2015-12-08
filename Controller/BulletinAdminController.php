@@ -1107,16 +1107,6 @@ class BulletinAdminController extends Controller
                 $this->router->generate('formalibreBulletinAdminIndex')
             );
         } else {
-            $matieres = $periode->getMatieres();
-            $matiereIds = array();
-
-            foreach ($matieres as $matiere) {
-                $matiereIds[] = $matiere->getId();
-            }
-
-            $pointsDivers = $periode->getPointDivers();
-            $pointDiversIds = array();
-
             foreach ($pointsDivers as $pointDivers) {
                 $pointDiversIds[] = $pointDivers->getId();
             }
