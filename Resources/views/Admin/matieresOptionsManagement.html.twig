@@ -20,15 +20,41 @@
     <div class="panel-heading">
         <h1>Configuration des matières</h1>
     </div>
-    <div class="panel-body">
+    <div class="panel-body" ng-app="CourseManager">
         <coursemanager>
         </coursemanager>
     </div>
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link 
+        rel="stylesheet" 
+        href="{{ asset('bundles/clarolineangulardatatable/js/release/dataTable.css') }}"
+    />
+    <link 
+        rel="stylesheet" 
+        href="{{ asset('bundles/clarolineangulardatatable/js/release/material.css') }}"
+    />
+    <link rel="stylesheet" 
+          href="{{ asset('bundles/clarolineangularuiselectize/select.css')}}"
+    />
+    <link href="http://fontastic.s3.amazonaws.com/Jnf54BZCm7mSjGCxNRbfp3/icons.css" rel="stylesheet">
+{% endblock %}
+
 {% block javascripts %}
     {{ parent() }}
-    <script type="text/javascript" src={{ asset('bundles/clarolinecore/js/angular/search/generic/search.app.js') }}></script>
-    <script type="text/javascript" src={{ asset('bundles/formalibrebulletin/js/courseManager/courses.app.js') }}></script>
+    {# Set some vars needed by Angular parts #}
+    <script type="text/javascript">
+        {# Make Twig variables accessibles by AngularJS #}
+        var AngularApp = {};
+        AngularApp.webDir = "{{ asset('') }}";
+    </script>
+    <script type="text/javascript" src="{{ asset('vendor/angular/angular.js')}}"> </script>
+    <script type="text/javascript" src="{{ asset('vendor/angular/angular-ui.js')}}"> </script>
+    <script type="text/javascript" src="{{ asset('bundles/clarolineangulardatatable/js/release/dataTable.helpers.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/clarolineangularuiselectize/select.min.js')}}"> </script>
+    <script type="text/javascript" src="{{ asset('bundles/clarolinecore/js/angular/search/generic/search.app.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/formalibrebulletin/js/courseManager/courses.app.js') }}"></script>
 {% endblock %}
     
