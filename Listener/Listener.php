@@ -8,6 +8,9 @@ use JMS\DiExtraBundle\Annotation as DI;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use FormaLibre\BulletinBundle\Entity\MatiereOptions;
+use Claroline\CursusBundle\Event\CreateCourseSessionEvent;
+use Claroline\CoreBundle\Persistence\ObjectManager;
 
 /**
  * Class Listener
@@ -23,14 +26,21 @@ class Listener
      * @DI\InjectParams({
      *      "container" = @DI\Inject("service_container"),
      *      "requestStack"   = @DI\Inject("request_stack"),
-     *     "httpKernel"     = @DI\Inject("http_kernel")
+     *      "httpKernel"     = @DI\Inject("http_kernel"),
+     *      "om"             = @DI\Inject("claroline.persistence.object_manager")  
      * })
      */
-    public function __construct(ContainerInterface $container, RequestStack $requestStack, HttpKernelInterface $httpKernel)
+    public function __construct(
+        ContainerInterface $container, 
+        RequestStack $requestStack, 
+        HttpKernelInterface $httpKernel,
+        ObjectManager $om
+    )
     {
         $this->container = $container;
         $this->request = $requestStack->getCurrentRequest();
         $this->httpKernel = $httpKernel;
+        $this->om = $om;
     }
 
     /**
@@ -59,6 +69,19 @@ class Listener
 
     }
 
+    /**
+     * @DI\Observe("create_course_session")
+     *
+     * @param DisplayToolEvent $event
+     */
+    public function onCreateSession(CreateCourseSessionEvent $event)
+    {
+        $session = $event->getCourseSession();
+        $options = new MatiereOptions();
+        $options->setCourseSession($session);
+        $this->om->persist($options);
+        $this->om->flush();
+    }
 
     private function redirect($params, $event)
     {

@@ -1128,46 +1128,30 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/admin/matieres/options/management/page/{page}/max/{max}",
+     *     "/admin/matieres/options/management",
      *     name="formalibre_bulletin_matieres_options_management",
-     *     defaults={"page"=1, "max"=20},
      *     options={"expose"=true}
      * )
-     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
      * @EXT\Template("FormaLibreBulletinBundle::Admin/matieresOptionsManagement.html.twig")
      */
-    public function matieresOptionsManagementAction($page = 1, $max = 20)
+    public function matieresOptionsManagementAction()
     {
         $this->checkOpen();
-        $matieresOptions = $this->bulletinManager->getAllMatieresOptions(true, $page, $max);
 
-        $formCollection = new Pemps();
+        return array();
+    }
 
-        foreach ($matieresOptions as $matiereOptions) {
-            $formCollection->getPemps()->add($matiereOptions);
-        }
-        $form = $this->formFactory->create(new MatiereOptionsCollectionType(), $formCollection);
-
-        if ($this->request->isMethod('POST')) {
-            $form->handleRequest($this->request);
-            $this->om->startFlushSuite();
-
-            foreach ($formCollection as $matiereOptions){
-                $this->em->persist($matiereOptions);
-            }
-            $this->om->endFlushSuite();
-
-//            return new RedirectResponse(
-//                $this->router->generate('formalibreBulletinAdminIndex')
-//            );
-        }
-
-        return array(
-            'form' => $form->createView(),
-            'pager' => $matieresOptions,
-            'page' => $page,
-            'max' => $max
-        );
+    /**
+     * @EXT\Route(
+     *     "/admin/matiereoptions/page/{page}/limit/{limit}/matiereoptions.json",
+     *     name="formalibre_bulletin_get_matiere_options",
+     *     defaults={"page"=0, "limit"=99999},
+     *     options = {"expose"=true}
+     * )
+     */
+    public function getMatiereOptionsAction($page, $limit)
+    {
+        $matiereOptions = $this->bulletinManager->getAllMatieresOptions(false, $page, $limit);
     }
 
     /**

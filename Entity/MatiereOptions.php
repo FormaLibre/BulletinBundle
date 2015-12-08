@@ -52,10 +52,20 @@ class MatiereOptions
 
     public function getMatiere()
     {
+        return $this->getCourseSession();
+    }
+
+    public function getCourseSession()
+    {
         return $this->matiere;
     }
 
     public function setMatiere(CourseSession $matiere)
+    {
+        $this->setCourseSession($matière);
+    }
+
+    public function setCourseSession(CourseSession $matiere)
     {
         $this->matiere = $matiere;
     }

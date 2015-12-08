@@ -326,47 +326,31 @@ class BulletinManager
         return $this->matiereOptionsRepo->findOneByMatiere($matiere);
     }
 
-    public function getAllMatieresOptions(
-        $withPager = false,
-        $page = 1,
-        $max = 20,
-        $matieresList = array()
-    )
+    public function getMatiereOptionsBySessions(array $sessions)
     {
-        $matieres = (count($matieresList) > 0) ? $matieresList : $this->getAvailableSessions();
+        $qb = $this->em->createQueryBuilder();
+        $qb->select('mo')
+            ->from('FormaLibre\BulletinBundle\Entity\MatiereOptions', 'mo')
+            ->join('mo.matiere', 'session')
+            ->where('session IN (:sessions)')
+            ->setParameter('sessions', $sessions);
 
-        if (count($matieres) > 0) {
-            $qb = $this->em->createQueryBuilder();
-            $qb->select('mo')
-                ->from('FormaLibre\BulletinBundle\Entity\MatiereOptions', 'mo')
-                ->where('mo.matiere IN (:matieres)')
-                ->setParameter('matieres', $matieres);
-            $query = $qb->getQuery();
-            $matieresOptions = $query->getResult();
-            $matiereIds = array();
-            
-            foreach ($matieresOptions as $matiereOptions) {
-                $matiereIds[] = $matiereOptions->getMatiere()->getId();
-            }
+        return $qb->getQuery()->getResult();
+    }
 
-            foreach ($matieres as $matiere) {
-                $matiereId = $matiere->getId();
+    public function getAllMatieresOptions($count = false, $page = null, $limit = null)
+    {
+        $qb = $this->em->createQueryBuilder();
+        $count ? $qb->select('count(mo)'): $qb->select('mo');
+        $qb->from('FormaLibre\BulletinBundle\Entity\MatiereOptions', 'mo');
+        $query = $qb->getQuery();
 
-                if (!in_array($matiereId, $matiereIds)) {
-                    $matiereOptions = new MatiereOptions();
-                    $matiereOptions->setMatiere($matiere);
-                    $this->om->persist($matiereOptions);
-                    $matieresOptions[] = $matiereOptions;
-                }
-            }
-            $this->om->flush();
-        } else {
-            $matieresOptions = array();
+        if ($page && $limit) {
+            $query->setMaxResults($limit);
+            $query->setFirstResult($page * $limit);
         }
 
-        return $withPager ?
-            $this->pagerFactory->createPagerFromArray($matieresOptions, $page, $max) :
-            $matieresOptions;
+        return $count ? $query->getSingleScalarResult(): $query->getResult();
     }
 
     public function hasSecondPoint()
@@ -438,18 +422,13 @@ class BulletinManager
         return $this->pepdpRepo->findByPeriode($periode);
     }
 
+    //this method should not exist
     public function refresh(Periode $periode)
     {
         $options = array();
         $coefficient = $periode->getCoefficient();
-
-        $matieres = $periode->getMatieres();
-        $allMatieresOptions = $this->getAllMatieresOptions(
-            false,
-            1,
-            20,
-            $matieres
-        );
+        $sessions = $periode->getCourseSessions();
+        $allMatieresOptions = $this->getMatiereOptionsBySessions($sessions);
 
         foreach ($allMatieresOptions as $matiereOptions) {
             $matiereId = $matiereOptions->getMatiere()->getId();

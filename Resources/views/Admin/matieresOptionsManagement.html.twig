@@ -21,63 +21,14 @@
         <h1>Configuration des matières</h1>
     </div>
     <div class="panel-body">
-        <form action="" method="POST" {{ form_enctype(form) }} autocomplete="off">
-            
-            {% if pager.getNbPages() > 1 %}
-                {{ renderPager(pager, max) }}
-            {% endif %}
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Matière</th>
-                        <th>Total</th>
-                        <th>Position</th>
-                        <th>Couleur</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pemp in form.pemps %}
-                        <tr>
-                            <td class="matiere">{{ form_widget(pemp.matiere) }}</td>
-                            <td class="total">{{ form_widget(pemp.total) }}</td>
-                            <td class="total">{{ form_widget(pemp.position) }}</td>
-                            <td class="total">{{ form_widget(pemp.color) }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-                
-            {% if pager.getNbPages() > 1 %}
-                {{ renderPager(pager, max) }}
-                <br>
-            {% endif %}
-            {{ form_widget(form.save) }}
-            <a href="{{ path('formalibreBulletinAdminIndex') }}"
-               class="btn btn-default"
-            >
-                Retour
-            </a>
-        </form>
+        <coursemanager>
+        </coursemanager>
     </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script src='{{ asset('bundles/frontend/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js') }}'
-            type="text/javascript"
-    >
-    </script>
-    <script type="text/javascript">
-        $('.color-field').on('focus', function () {
-            $(this).colorpicker();
-        });
-    </script>
+    <script type="text/javascript" src={{ asset('bundles/clarolinecore/js/angular/search/generic/search.app.js') }}></script>
+    <script type="text/javascript" src={{ asset('bundles/formalibrebulletin/js/courseManager/courses.app.js') }}></script>
 {% endblock %}
     
-{% block stylesheets %}
-    {{ parent() }}
-    <link rel='stylesheet'
-          type='text/css'
-          href='{{ asset('bundles/frontend/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css')}}'
-    >
-{% endblock %}
