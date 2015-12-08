@@ -1,5 +1,7 @@
 (function () {
     'use strict';
+
+    var translator = window.Translator;
     
     // Click on widget create button
     $('.addPeriodeBtn').on('click', function () {
@@ -31,6 +33,21 @@
             type: 'POST',
             success: function () {}
         });
+    });
+
+    $('.delete-periode-btn').on('click', function(event) {
+        var periode = $(event.target).attr('data-periode');
+        var periodeName = $(event.target).attr('data-name');
+        var url = Routing.generate('formalibre_bulletin_remove_periode', {'periode': periode});
+        window.Claroline.Modal.confirmRequest(
+            url, 
+            function(event, successParameters, data) {
+                $('#periode-' + periode + '-panel').remove();
+            },
+            {'periode': periode},
+            translator.trans('remove_periode_confirm', {'periodeName': periodeName}, 'platform'),
+            translator.trans('remove_periode', {}, 'platform')
+        );
     });
 
     var refreshPage = function () {

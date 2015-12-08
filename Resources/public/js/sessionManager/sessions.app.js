@@ -109,8 +109,6 @@ sessionManager.controller('sessionsCtrl', function(
 	}
 
 	$scope.onHeaderCheckboxChange = function(isChecked) {
-		console.log(isChecked);
-		
 		var route = (isChecked) ?
 			Routing.generate('formalibre_bulletin_add_search_sessions', {'periode': AngularApp.periode}):
 			Routing.generate('formalibre_bulletin_remove_search_sessions', {'periode': AngularApp.periode});

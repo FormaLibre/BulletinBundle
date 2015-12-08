@@ -572,4 +572,10 @@ class BulletinManager
         $this->om->persist($periode);
         $this->om->flush();
     }
+
+    public function removePeriode(Periode $periode)
+    {
+        $this->om->remove($periode);
+        $this->om->flush();
+    }
 }
