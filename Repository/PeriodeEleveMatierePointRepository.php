@@ -19,7 +19,7 @@ class PeriodeEleveMatierePointRepository extends EntityRepository
 	    ->join('matiere.course', 'course' )
             ->where('pemp.periode = :periode')
             ->andWhere('pemp.eleve = :user')
-            ->addOrderBy('course.title')
+            ->addOrderBy('pemp.position')
             ->setParameter('periode', $periode)
             ->setParameter('user', $user);
         $query = $qb->getQuery();
