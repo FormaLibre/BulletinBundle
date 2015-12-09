@@ -53,14 +53,14 @@
                 <div class="row">
                 <div class="col-xs-12">
                 <div class="panel panel-default">
-                    <div class="panel-heading text-center"">
+                    <div class="panel-heading text-center">
                         {{group.getName()}}
                     </div>
                     <div class="panel-body text-center">
                         {% for periode in periodes if periode.getPeriodesGroup() is not null and periode.getPeriodesGroup.getId()==group.getId() %}   
                             <div class="col-xs-3">
                                 <div class="panel panel-default">
-                                    <div class="panel-heading text-center"">
+                                    <div class="panel-heading text-center">
                                         {{ periode.Name }} - {{ attribute(periodeCompleted, periode.Id) }}{{"%"}}
                                         </br>
                                         <div class="btn-group row">  
@@ -75,6 +75,15 @@
                                             <div class="btn btn-default btn-sm refresh-periode-btn" role="button" data-periode-id="{{ periode.Id }}">
                                                 <i class="fa fa-refresh"></i>
                                             </div>
+                                            <button class="btn btn-default btn-sm delete-periode-btn" role="button" 
+                                                data-periode="{{ periode.id }}"
+                                                data-name="{{ periode.name }}"
+                                            >
+                                                <i class="fa fa-trash-o" 
+                                                    data-periode="{{ periode.id }}"
+                                                    data-name="{{ periode.name }}">
+                                                </i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -96,14 +105,14 @@
             <div class="row">
             <div class="col-xs-12">
             <div class="panel panel-default">
-                <div class="panel-heading text-center"">
+                <div class="panel-heading text-center">
                         {{"Périodes non classées"}}
                 </div>
                 <div class="panel-body text-center">
                     {% for periode in periodes if periode.getPeriodesGroup() is null%}   
                         <div class="col-xs-3">
                             <div class="panel panel-default">
-                                <div class="panel-heading text-center"">
+                                <div class="panel-heading text-center">
                                     {{ periode.Name }} - {{ attribute(periodeCompleted, periode.Id) }}{{"%"}}
                                     </br>
                                     <div class="btn-group row">  
@@ -118,6 +127,15 @@
                                         <div class="btn btn-default btn-sm refresh-periode-btn" role="button" data-periode-id="{{ periode.Id }}">
                                             <i class="fa fa-refresh"></i>
                                         </div>
+                                        <button class="btn btn-default btn-sm delete-periode-btn" role="button" 
+                                            data-periode="{{ periode.id }}"
+                                            data-name="{{ periode.name }}"
+                                        >
+                                            <i class="fa fa-trash-o" 
+                                                data-periode="{{ periode.id }}"
+                                                data-name="{{ periode.name }}">
+                                            </i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>

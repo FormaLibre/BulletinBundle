@@ -17,6 +17,7 @@ use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
 use FormaLibre\BulletinBundle\Entity\PointDivers;
+use FormaLibre\BulletinBundle\Entity\MatiereOptions;
 use FormaLibre\BulletinBundle\Form\Admin\BulletinConfigurationType;
 use FormaLibre\BulletinBundle\Form\Admin\DecisionType;
 use FormaLibre\BulletinBundle\Form\Admin\GroupeTitulaireType;
@@ -1061,6 +1062,22 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/admin/matiereoptions/fields.json",
+     *     name="formalibre_bulletin_get_matiereoptions_fields",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function getAdminMatiereOptionsFieldsAction()
+    {
+        return new JsonResponse(array(
+            'title',
+            'code',
+            'name'
+        ));
+    }
+
+    /**
+     * @EXT\Route(
      *     "/admin/periode/{periode}/options/edit/form",
      *     name="formalibre_bulletin_periode_options_edit_form",
      *     options = {"expose"=true}
@@ -1138,47 +1155,63 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/admin/matieres/options/management/page/{page}/max/{max}",
+     *     "/admin/matieres/options/management",
      *     name="formalibre_bulletin_matieres_options_management",
-     *     defaults={"page"=1, "max"=20},
      *     options={"expose"=true}
      * )
-     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
      * @EXT\Template("FormaLibreBulletinBundle::Admin/matieresOptionsManagement.html.twig")
      */
-    public function matieresOptionsManagementAction($page = 1, $max = 20)
+    public function matieresOptionsManagementAction()
     {
         $this->checkOpen();
-        $matieresOptions = $this->bulletinManager->getAllMatieresOptions(true, $page, $max);
 
-        $formCollection = new Pemps();
-
-        foreach ($matieresOptions as $matiereOptions) {
-            $formCollection->getPemps()->add($matiereOptions);
-        }
-        $form = $this->formFactory->create(new MatiereOptionsCollectionType(), $formCollection);
-
-        if ($this->request->isMethod('POST')) {
-            $form->handleRequest($this->request);
-            $this->om->startFlushSuite();
-
-            foreach ($formCollection as $matiereOptions){
-                $this->em->persist($matiereOptions);
-            }
-            $this->om->endFlushSuite();
-
-//            return new RedirectResponse(
-//                $this->router->generate('formalibreBulletinAdminIndex')
-//            );
-        }
-
-        return array(
-            'form' => $form->createView(),
-            'pager' => $matieresOptions,
-            'page' => $page,
-            'max' => $max
-        );
+        return array();
     }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/matiereoptions/page/{page}/limit/{limit}/matiereoptions.json",
+     *     name="formalibre_bulletin_get_matiereoptions",
+     *     defaults={"page"=0, "limit"=99999},
+     *     options = {"expose"=true}
+     * )
+     */
+    public function getMatiereOptionsAction($page, $limit)
+    {
+        $matiereOptions = $this->bulletinManager->getAllMatieresOptions(false, $page, $limit);
+        $total = $this->bulletinManager->getAllMatieresOptions(true);
+
+        $context = new SerializationContext();
+        $context->setGroups('bulletin');
+        $data = $this->container->get('serializer')->serialize($matiereOptions, 'json', $context);
+        $matiereOptions = json_decode($data);
+        $response = new JsonResponse(array('options' => $matiereOptions, 'total' => $total));
+
+        return $response;
+    }
+    /**
+     * @EXT\Route(
+     *     "/search/admin/matiereoptions/page/{page}/limit/{limit}/matiereoptions.json",
+     *     name="formalibre_bulletin_search_matiereoptions",
+     *     defaults={"page"=0, "limit"=99999},
+     *     options = {"expose"=true}
+     * )
+     */
+    public function searchMatiereOptionsAction($page, $limit)
+    {
+        $searches = $this->request->query->all();
+        $matiereOptions = $this->bulletinManager->searchMatieresOptions($searches, false, $page, $limit);
+        $total = $this->bulletinManager->searchMatieresOptions($searches, true);
+
+        $context = new SerializationContext();
+        $context->setGroups('bulletin');
+        $data = $this->container->get('serializer')->serialize($matiereOptions, 'json', $context);
+        $matiereOptions = json_decode($data);
+        $response = new JsonResponse(array('options' => $matiereOptions, 'total' => $total));
+
+        return $response;
+    }
+
 
     /**
      * @EXT\Route(
@@ -1259,6 +1292,40 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $this->bulletinManager->removePeriode($periode);
+
+        return new JsonResponse('success');
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/options/{matiereOptions}/set/position/{position}",
+     *     name="formalibre_bulletin_set_option_position",
+     *     options={"expose"=true}
+     * )
+     */
+    public function setOptionPositionAction(MatiereOptions $matiereOptions, $position)
+    {
+        $this->checkOpen();
+        $matiereOptions->setPosition($position);
+        $this->om->persist($matiereOptions);
+        $this->om->flush();
+
+        return new JsonResponse('success');
+    }
+
+        /**
+     * @EXT\Route(
+     *     "/admin/options/{matiereOptions}/set/total/{total}",
+     *     name="formalibre_bulletin_set_option_total",
+     *     options={"expose"=true}
+     * )
+     */
+    public function setOptionTotalAction(matiereOptions $matiereoptions, $total)
+    {
+        $this->checkOpen();
+        $matiereOptions->setTotal($total);
+        $this->om->persist($matiereOptions);
+        $this->om->flush();
 
         return new JsonResponse('success');
     }

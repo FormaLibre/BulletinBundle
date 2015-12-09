@@ -4,6 +4,8 @@ namespace FormaLibre\BulletinBundle\Entity;
 
 use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\SerializedName;
 
 /**
  * @ORM\Entity
@@ -15,6 +17,7 @@ class MatiereOptions
      * @ORM\Column(type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @Groups({"bulletin"})
      */
     private $id;
 
@@ -22,16 +25,20 @@ class MatiereOptions
      * @ORM\ManyToOne(
      *      targetEntity="Claroline\CursusBundle\Entity\CourseSession"
      * )
+     * @Groups({"bulletin"})
+     * @SerializedName("course_session")
      */
     private $matiere;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
+     * @Groups({"bulletin"})
      */
     private $total;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
+     * @Groups({"bulletin"})
      */
     private $position;
 
@@ -52,10 +59,20 @@ class MatiereOptions
 
     public function getMatiere()
     {
+        return $this->getCourseSession();
+    }
+
+    public function getCourseSession()
+    {
         return $this->matiere;
     }
 
     public function setMatiere(CourseSession $matiere)
+    {
+        $this->setCourseSession($matière);
+    }
+
+    public function setCourseSession(CourseSession $matiere)
     {
         $this->matiere = $matiere;
     }

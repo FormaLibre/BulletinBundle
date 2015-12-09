@@ -5,6 +5,7 @@ namespace FormaLibre\BulletinBundle;
 use Claroline\CoreBundle\Library\PluginBundle;
 use Claroline\KernelBundle\Bundle\ConfigurationBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use FormaLibre\BulletinBundle\Installation\AdditionalInstaller;
 
 
 class FormaLibreBulletinBundle extends PluginBundle
@@ -18,6 +19,11 @@ class FormaLibreBulletinBundle extends PluginBundle
     public function hasMigrations()
     {
         return true;
+    }
+
+    public function getAdditionalInstaller()
+    {
+        return new AdditionalInstaller();
     }
 
     public function getRequiredFixturesDirectory($env){
