@@ -18,6 +18,49 @@
 
 {% block section_content %}
     <div class="panel-heading">
+        <div class="dropdown pull-right">
+            <i class="fa fa-cogs dropdown-toggle pointer-hand"
+               data-toggle="dropdown"
+            >
+            </i>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="{{ path('formalibreBulletinAdminIndex') }}">
+                        Admin Bulletin
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibre_bulletin_configure_form') }}">
+                        Configuration
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibre_bulletin_matieres_options_management') }}">
+                        Gestion des matières
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibreBulletinDecisionsList') }}">
+                        Gestion des décisions
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibreBulletinGroupeTitulairesList') }}">
+                        Gestion des titulaires
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibre_bulletin_point_divers_management') }}">
+                        Gestion des points divers
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('formalibreBulletinPeriodesGroup') }}">
+                        Gestion des groupes de périodes
+                    </a>
+                </li>
+            </ul>
+        </div>
         <h1>Configuration des matières</h1>
     </div>
     <div class="panel-body" ng-app="CourseManager">
