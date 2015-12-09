@@ -212,6 +212,7 @@ class BulletinController extends Controller
     public function listClasseAction(Periode $periode, User $user)
     {
         $this->checkOpen();
+        $this->bulletinManager->refresh($periode);
         $groups = array();
         if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN')){
             $groups = $this->bulletinManager->getTaggedGroups();
@@ -324,20 +325,20 @@ class BulletinController extends Controller
         $this->checkOpen();
         $isBulletinAdmin = $this->authorization->isGranted('ROLE_BULLETIN_ADMIN') ||
             $this->authorization->isGranted('ROLE_ADMIN');
-
         $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
-        $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
-
+        $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode); 
         $pempCollection = new Pemps();
         
         foreach ($pemps as $pemp) {
             $lock = $this->lockStatusRepo->findLockStatus($pemp->getMatiere(), $pemp->getPeriode());
             $pemp->setLocked($lock);
             $pempCollection->getPemps()->add($pemp);
-            
         }
 
-        
+        foreach ($pemds as $pemd) {
+           $pempCollection->getPemds()->add($pemd);
+         }
+
         $form = $this->createForm(new PempsType(), $pempCollection);
 
         if ($request->isMethod('POST')) {
@@ -794,7 +795,7 @@ class BulletinController extends Controller
      * )
      *
      * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
-
+     *
      */
     public function lockPointsAction(User $user, CourseSession $session, Periode $periode)
     {   

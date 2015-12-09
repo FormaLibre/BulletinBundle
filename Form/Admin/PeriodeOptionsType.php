@@ -18,18 +18,6 @@ class PeriodeOptionsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add(
-            'matieres',
-            'entity',
-            array(
-                'class' => 'ClarolineCursusBundle:CourseSession',
-                'property' => 'name',
-                'required' => false,
-                'multiple' => true,
-                'expanded' => true,
-                'label' => 'Matières'
-            )
-        )
-        ->add(
             'pointDivers',
             'entity',
             array(
