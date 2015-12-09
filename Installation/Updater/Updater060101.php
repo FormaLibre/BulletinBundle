@@ -33,7 +33,8 @@ class Updater060101 extends Updater
         $this->log('Creating missing "matiere options"...');
 
         $sessions = $this->bulletinManager->getAvailableSessions();
-        $matiereOptions = $this->bulletinManager->getAllMatieresOptions();
+        $matieresOptions = $this->bulletinManager->getAllMatieresOptions();
+        $sessionIds = [];
             
         foreach ($matieresOptions as $matiereOptions) {
             $sessionsIds[] = $matiereOptions->getCourseSession()->getId();

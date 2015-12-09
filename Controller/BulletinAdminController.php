@@ -16,6 +16,7 @@ use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
 use FormaLibre\BulletinBundle\Entity\PointDivers;
+use FormaLibre\BulletinBundle\Entity\MatiereOptions;
 use FormaLibre\BulletinBundle\Form\Admin\BulletinConfigurationType;
 use FormaLibre\BulletinBundle\Form\Admin\DecisionType;
 use FormaLibre\BulletinBundle\Form\Admin\GroupeTitulaireType;
@@ -1059,9 +1060,9 @@ class BulletinAdminController extends Controller
     public function getAdminMatiereOptionsFieldsAction()
     {
         return new JsonResponse(array(
-            'name',
-            'total',
-            'position',
+            'title',
+            'code',
+            'name'
         ));
     }
 
@@ -1178,6 +1179,29 @@ class BulletinAdminController extends Controller
 
         return $response;
     }
+    /**
+     * @EXT\Route(
+     *     "/search/admin/matiereoptions/page/{page}/limit/{limit}/matiereoptions.json",
+     *     name="formalibre_bulletin_search_matiereoptions",
+     *     defaults={"page"=0, "limit"=99999},
+     *     options = {"expose"=true}
+     * )
+     */
+    public function searchMatiereOptionsAction($page, $limit)
+    {
+        $searches = $this->request->query->all();
+        $matiereOptions = $this->bulletinManager->searchMatieresOptions($searches, false, $page, $limit);
+        $total = $this->bulletinManager->searchMatieresOptions($searches, true);
+
+        $context = new SerializationContext();
+        $context->setGroups('bulletin');
+        $data = $this->container->get('serializer')->serialize($matiereOptions, 'json', $context);
+        $matiereOptions = json_decode($data);
+        $response = new JsonResponse(array('options' => $matiereOptions, 'total' => $total));
+
+        return $response;
+    }
+
 
     /**
      * @EXT\Route(
@@ -1258,6 +1282,40 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $this->bulletinManager->removePeriode($periode);
+
+        return new JsonResponse('success');
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/options/{matiereOptions}/set/position/{position}",
+     *     name="formalibre_bulletin_set_option_position",
+     *     options={"expose"=true}
+     * )
+     */
+    public function setOptionPositionAction(MatiereOptions $matiereOptions, $position)
+    {
+        $this->checkOpen();
+        $matiereOptions->setPosition($position);
+        $this->om->persist($matiereOptions);
+        $this->om->flush();
+
+        return new JsonResponse('success');
+    }
+
+        /**
+     * @EXT\Route(
+     *     "/admin/options/{matiereOptions}/set/total/{total}",
+     *     name="formalibre_bulletin_set_option_total",
+     *     options={"expose"=true}
+     * )
+     */
+    public function setOptionTotalAction(matiereOptions $matiereoptions, $total)
+    {
+        $this->checkOpen();
+        $matiereOptions->setTotal($total);
+        $this->om->persist($matiereOptions);
+        $this->om->flush();
 
         return new JsonResponse('success');
     }

@@ -26,6 +26,7 @@ class MatiereOptions
      *      targetEntity="Claroline\CursusBundle\Entity\CourseSession"
      * )
      * @Groups({"bulletin"})
+     * @SerializedName("course_session")
      */
     private $matiere;
 

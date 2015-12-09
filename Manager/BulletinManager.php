@@ -214,7 +214,7 @@ class BulletinManager
             ->orderBy('c.title', 'ASC');
         $query = $qb->getQuery();
 
-        if ($page && $limit) {
+        if ($limit) {
             $query->setMaxResults($limit);
             $query->setFirstResult($page * $limit);
         }
@@ -345,7 +345,40 @@ class BulletinManager
         $qb->from('FormaLibre\BulletinBundle\Entity\MatiereOptions', 'mo');
         $query = $qb->getQuery();
 
-        if ($page && $limit) {
+        if ($limit) {
+            $query->setMaxResults($limit);
+            $query->setFirstResult($page * $limit);
+        }
+
+        return $count ? $query->getSingleScalarResult(): $query->getResult();
+    }
+
+    public function searchMatieresOptions($searches = array(), $count = false, $page = null, $limit = null)
+    {
+        $qb = $this->em->createQueryBuilder();
+        $count ? $qb->select('count(mo)'): $qb->select('mo');
+        $qb->from('FormaLibre\BulletinBundle\Entity\MatiereOptions', 'mo')
+            ->join('mo.matiere', 'cs')
+            ->join('cs.course', 'c');
+
+        $courseProperties = array('title', 'code');
+        $sessionProperties = array('name');
+
+        foreach ($searches as $key => $search) {
+            foreach ($search as $id => $el) {
+                if (in_array($key, $courseProperties)) {
+                    $qb->andWhere("UPPER (c.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                } elseif (in_array($key, $sessionProperties)) {
+                    $qb->andWhere("UPPER (cs.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                }
+            }
+        }
+
+        $query = $qb->getQuery();
+
+        if ($limit) {
             $query->setMaxResults($limit);
             $query->setFirstResult($page * $limit);
         }
