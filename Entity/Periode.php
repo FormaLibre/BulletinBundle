@@ -5,6 +5,7 @@ namespace FormaLibre\BulletinBundle\Entity;
 use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="FormaLibre\BulletinBundle\Repository\PeriodeRepository")
@@ -278,6 +279,11 @@ class Periode
     public function getPointDivers()
     {
         return $this->pointDivers->toArray();
+    }
+
+    public function setPointDivers(array $pointDivers)
+    {
+        $this->pointDivers = $pointDivers;
     }
 
     public function addPointDiver(PointDivers $pointDivers)
