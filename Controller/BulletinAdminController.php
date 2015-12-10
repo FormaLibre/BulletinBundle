@@ -1320,7 +1320,7 @@ class BulletinAdminController extends Controller
      *     options={"expose"=true}
      * )
      */
-    public function setOptionTotalAction(matiereOptions $matiereoptions, $total)
+    public function setOptionTotalAction(MatiereOptions $matiereOptions, $total)
     {
         $this->checkOpen();
         $matiereOptions->setTotal($total);
