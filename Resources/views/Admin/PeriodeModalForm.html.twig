@@ -18,7 +18,33 @@
                 {{ form_enctype(form) }}
             >
                 <div class="panel-body">
-                    {{ form_widget(form) }}
+                    {{"Nom"}}{{ form_widget(form.name) }}</br>
+                    {{"Date de début"}}{{ form_widget(form.start) }}</br>
+                    {{"Date de fin"}}{{ form_widget(form.end) }}</br>
+                    {{"Ajouter au groupe"}}{{ form_widget(form.periodesGroup) }}</br>
+                    {{"Réunion des parents"}}{{ form_widget(form.ReunionParent) }}</br>
+                    {{"Template"}}{{ form_widget(form.template) }}</br>
+                    <div id="title">
+                        {{"Options du template:"}}</br>
+                    </div>
+                    <div id="P1">
+                        {{"Période 1"}}{{ form_widget(form.oldPeriode1) }}</br>
+                    </div>
+                    <div id="P2">
+                        {{"Période 2"}}{{ form_widget(form.oldPeriode2) }}</br>
+                    </div>
+                    <div id="P3">
+                        {{"Examen"}}{{ form_widget(form.oldPeriode3) }}</br>
+                    </div>
+                    <div id="P4">
+                        {{"Période 3"}}{{ form_widget(form.oldPeriode4) }}</br>
+                    </div>
+                    <div id="P5">
+                        {{"Période 4"}}{{ form_widget(form.oldPeriode5) }}</br>
+                    </div>
+                    {{"Afficher seulement les points"}}{{ form_widget(form.onlyPoint) }}</br>
+                    </br>
+                    {{"Pondération de la période"}}{{ form_widget(form.coefficient) }}
                 </div>
             </form>
         </div>
@@ -32,3 +58,71 @@
         </div>
     </div>
 </div>
+{% block javascripts %}
+   <script>
+        
+        $(document).ready(function() {
+            var liste, valeur;
+            liste = document.getElementById("PeriodeForm_template");
+            valeur = liste.options[liste.selectedIndex].value;
+
+            if(valeur === "PeriodePrint"){
+                $('#title').hide();
+                $('#P1').hide();
+                $('#P2').hide();
+                $('#P3').hide();
+                $('#P4').hide();
+                $('#P5').hide();}
+
+            if (valeur === 'ExamPrint'){
+                $('#P3').hide();
+                $('#P4').hide();
+                $('#P5').hide();}
+
+            if (valeur === 'ExamPrintWithOnlyOnePeriodePrint'){
+                $('#P2').hide();
+                $('#P3').hide();
+                $('#P4').hide();
+                $('#P5').hide();}
+        });
+        
+        PeriodeForm_template.onchange = function() {
+            var liste, valeur;
+            liste = document.getElementById("PeriodeForm_template");
+            valeur = liste.options[liste.selectedIndex].value;
+
+            if(valeur === "PeriodePrint"){
+                $('#title').hide();
+                $('#P1').hide();
+                $('#P2').hide();
+                $('#P3').hide();
+                $('#P4').hide();
+                $('#P5').hide();}
+
+            if (valeur === "ExamPrint"){
+                $('#title').show();
+                $('#P1').show();
+                $('#P2').show();
+                $('#P3').hide();
+                $('#P4').hide();
+                $('#P5').hide();}
+
+            if (valeur === "ExamPrintWithOnlyOnePeriodePrint"){
+                $('#title').show();
+                $('#P1').show();
+                $('#P2').hide();
+                $('#P3').hide();
+                $('#P4').hide();
+                $('#P5').hide();}
+            
+            if (valeur === "FinalExamPrint"){
+                $('#title').show();
+                $('#P1').show();
+                $('#P2').show();
+                $('#P3').show();
+                $('#P4').show();
+                $('#P5').show();}
+        }
+
+    </script>
+{% endblock %} 

@@ -258,7 +258,7 @@ class BulletinController extends Controller
     public function listMyGroupAction(Periode $periode, User $user)
     {
         $this->checkOpen();
-
+        $this->bulletinManager->refresh($periode);
         if ($this->authorization->isGranted('ROLE_PROF')){
             $myGroups = $this->bulletinManager->getGroupsByTitulaire($user);
             $matieres = $this->bulletinManager->getMatieresByProf($user, $periode);
@@ -478,7 +478,7 @@ class BulletinController extends Controller
             $pemps = array();
             $pemds = array();
 
-            $periodes = array(1, 2, 3);
+            $periodes = array($periode->getOldPeriode1(), $periode->getOldPeriode2(), $periode);
 
             foreach ($periodes as $per){
                 $periode = $this->periodeRepo->findOneById($per);
@@ -491,7 +491,11 @@ class BulletinController extends Controller
             $totauxMatieres = $this->totauxManager->getTotalPeriodes($eleve);
 
             foreach ($totaux as $total) {
-                $recap += $total['totalPourcentage'] / 3;
+                if ($periode->getTemplate() === 'ExamPrintWithOnlyOnePeriodePrint') {
+                    $recap += $total['totalPourcentage'] / 2;}
+                else {
+                    $recap += $total['totalPourcentage'] / 3;
+                }
             }
         }
 

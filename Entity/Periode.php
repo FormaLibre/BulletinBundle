@@ -87,6 +87,46 @@ class Periode
      * @ORM\JoinTable(name="formalibre_bulletin_periodes_group")
      */
     private $periodesGroup = 0;
+    
+      /**
+     * @ORM\ManyToOne(
+     *     targetEntity="FormaLibre\BulletinBundle\Entity\Periode"
+     * )
+     * @ORM\JoinTable(name="oldPeriode1")
+     */
+    protected $oldPeriode1;
+    
+     /**
+     * @ORM\ManyToOne(
+     *     targetEntity="FormaLibre\BulletinBundle\Entity\Periode"
+     * )
+     * @ORM\JoinTable(name="oldPeriode2")
+     */
+    protected $oldPeriode2;
+    
+     /**
+     * @ORM\ManyToOne(
+     *     targetEntity="FormaLibre\BulletinBundle\Entity\Periode"
+     * )
+     * @ORM\JoinTable(name="oldPeriode3")
+     */
+    protected $oldPeriode3;
+    
+     /**
+     * @ORM\ManyToOne(
+     *     targetEntity="FormaLibre\BulletinBundle\Entity\Periode"
+     * )
+     * @ORM\JoinTable(name="oldPeriode4")
+     */
+    protected $oldPeriode4;
+    
+     /**
+     * @ORM\ManyToOne(
+     *     targetEntity="FormaLibre\BulletinBundle\Entity\Periode"
+     * )
+     * @ORM\JoinTable(name="oldPeriode5")
+     */
+    protected $oldPeriode5;
 
     public function __construct()
     {
@@ -314,6 +354,47 @@ class Periode
     function setPeriodesGroup($periodesGroup) {
         $this->periodesGroup = $periodesGroup;
     }
+
+    function getOldPeriode1() {
+        return $this->oldPeriode1;
+    }
+
+    function getOldPeriode2() {
+        return $this->oldPeriode2;
+    }
+
+    function getOldPeriode3() {
+        return $this->oldPeriode3;
+    }
+
+    function getOldPeriode4() {
+        return $this->oldPeriode4;
+    }
+
+    function getOldPeriode5() {
+        return $this->oldPeriode5;
+    }
+
+    function setOldPeriode1($oldPeriode1) {
+        $this->oldPeriode1 = $oldPeriode1;
+    }
+
+    function setOldPeriode2($oldPeriode2) {
+        $this->oldPeriode2 = $oldPeriode2;
+    }
+
+    function setOldPeriode3($oldPeriode3) {
+        $this->oldPeriode3 = $oldPeriode3;
+    }
+
+    function setOldPeriode4($oldPeriode4) {
+        $this->oldPeriode4 = $oldPeriode4;
+    }
+
+    function setOldPeriode5($oldPeriode5) {
+        $this->oldPeriode5 = $oldPeriode5;
+    }
+
 
 
 }
