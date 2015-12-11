@@ -66,15 +66,61 @@ class PeriodeType extends AbstractType
                 'class' => 'FormaLibre\BulletinBundle\Entity\PeriodesGroup',
                 'property' => 'name',
                 'label' => 'Ajouter au groupe',
-                'empty_value' => 'Choisissez un groupe',
+                'empty_value' => 'Non classées',
                 'required' => false
             ))
             ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
-            ->add(
-                'template',
-                'text',
+            ->add('template',
+                'choice',array(
+                    'label' => 'Template',
+                    'choices'=>array(
+                    'ExamPrint'=>'Examen Premier trimestre (2 périodes)',
+                    'FinalExamPrint'=>'Bulletin final',
+                    'PeriodePrint'=>'Une période',
+                    'ExamPrintWithOnlyOnePeriodePrint'=>'Examen Premier trimestre (1 période)'    
+                            )),
                 $templateOptions
             )
+            ->add('oldPeriode1','entity',array(
+                'required' => false,
+                'class' => 'FormaLibre\BulletinBundle\Entity\Periode',
+                'property' => 'name',
+                'label' => 'Première période',
+                'empty_value' => 'Choisissez une période',
+                'required' => false
+            ))
+            ->add('oldPeriode2','entity',array(
+                'required' => false,
+                'class' => 'FormaLibre\BulletinBundle\Entity\Periode',
+                'property' => 'name',
+                'label' => 'Deuxième période',
+                'empty_value' => 'Choisissez une période',
+                'required' => false
+            ))
+            ->add('oldPeriode3','entity',array(
+                'required' => false,
+                'class' => 'FormaLibre\BulletinBundle\Entity\Periode',
+                'property' => 'name',
+                'label' => 'Examens',
+                'empty_value' => 'Choisissez une période',
+                'required' => false
+            ))
+            ->add('oldPeriode4','entity',array(
+                'required' => false,
+                'class' => 'FormaLibre\BulletinBundle\Entity\Periode',
+                'property' => 'name',
+                'label' => 'Troisième période',
+                'empty_value' => 'Choisissez une période',
+                'required' => false
+            ))    
+            ->add('oldPeriode5','entity',array(
+                'required' => false,
+                'class' => 'FormaLibre\BulletinBundle\Entity\Periode',
+                'property' => 'name',
+                'label' => 'Quatrième période',
+                'empty_value' => 'Choisissez une période',
+                'required' => false
+            ))     
             ->add('onlyPoint', 'checkbox', array('label' => 'Uniquement des points'))
             ->add(
                 'coefficient',
