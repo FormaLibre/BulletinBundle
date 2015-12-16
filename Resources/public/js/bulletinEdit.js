@@ -106,7 +106,6 @@ $('.comportement').focusout(function(){
 });
 
 $('.delete-pemp-btn').on('click', function () {
-    console.log("coucou");
     var periodeId = $(this).data('periode-id');
     var eleveId = $(this).data('eleve-id');
     var parent = $(this).closest('tr');
