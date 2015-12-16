@@ -78,14 +78,12 @@
         $(".verouiller-btn").on("click",function(){
             var matiere ={{matiere.getId()}}
             var periode ={{periode.getId()}};
-            window.Claroline.Modal.displayForm(
-                                Routing.generate("formalibreBulletinLockPoint",{"session":matiere,"periode":periode}),
-                                function() {
-                                    window.location.reload();
-                                },
-                                function() {}
-                                    );
-
+            $.ajax({
+                url: Routing.generate("formalibreBulletinLockPoint",{"session":matiere,"periode":periode}),
+                onSuccess: function(data) {
+                    window.location.reload();
+                }    
+            });
      });
     </script>
 {% endblock %}
