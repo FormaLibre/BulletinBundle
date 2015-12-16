@@ -109,10 +109,8 @@ $('.delete-pemp-btn').on('click', function () {
     var periodeId = $(this).data('periode-id');
     var eleveId = $(this).data('eleve-id');
     var parent = $(this).closest('tr');
-    var matiereElement = parent.find('select');
-    var matiereId = matiereElement.val();
+    var matiereId = $(this).data('matiere-id');
     
-
     window.Claroline.Modal.confirmRequest(
         Routing.generate(
             'formalibre_bulletin_pemp_delete',
