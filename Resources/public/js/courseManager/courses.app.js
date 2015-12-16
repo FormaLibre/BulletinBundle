@@ -90,7 +90,7 @@ courseManager.controller('CourseController', function(
 	}
 
 	$scope.editPosition = function($row) {
-		API.editPosition($row.id, $row.total);
+		API.editPosition($row.id, $row.position);
 	}
 });
 

@@ -26,7 +26,8 @@ class PeriodeOptionsType extends AbstractType
                 'required' => false,
                 'multiple' => true,
                 'expanded' => true,
-                'label' => 'Point divers'
+                'label' => 'Point divers',
+                'error_bubbling' => true
             )
         );
     }

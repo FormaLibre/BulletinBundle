@@ -121,7 +121,6 @@ class PeriodeType extends AbstractType
                 'empty_value' => 'Choisissez une période',
                 'required' => false
             ))     
-            ->add('onlyPoint', 'checkbox', array('label' => 'Uniquement des points'))
             ->add(
                 'coefficient',
                 'number',

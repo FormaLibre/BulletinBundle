@@ -5,6 +5,7 @@ namespace FormaLibre\BulletinBundle\Entity;
 use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="FormaLibre\BulletinBundle\Repository\PeriodeRepository")
@@ -320,6 +321,11 @@ class Periode
         return $this->pointDivers->toArray();
     }
 
+    public function setPointDivers(array $pointDivers)
+    {
+        $this->pointDivers = $pointDivers;
+    }
+
     public function addPointDiver(PointDivers $pointDivers)
     {
         if (!$this->pointDivers->contains($pointDivers)) {
@@ -355,27 +361,42 @@ class Periode
         $this->periodesGroup = $periodesGroup;
     }
 
+    /**
+     * @return Periode
+     */
     function getOldPeriode1() {
         return $this->oldPeriode1;
     }
-
+    /**
+     * @return Periode
+     */
     function getOldPeriode2() {
         return $this->oldPeriode2;
     }
-
+    /**
+     * @return Periode
+     */
     function getOldPeriode3() {
         return $this->oldPeriode3;
     }
-
+    /**
+     * @return Periode
+     */
     function getOldPeriode4() {
         return $this->oldPeriode4;
     }
-
+    /**
+     * @return Periode
+     */
     function getOldPeriode5() {
         return $this->oldPeriode5;
     }
-
-    function setOldPeriode1($oldPeriode1) {
+    
+    /**
+     * 
+     * @param \FormaLibre\BulletinBundle\Entity\Periode $oldPeriode1
+     */
+    function setOldPeriode1(Periode $oldPeriode1) {
         $this->oldPeriode1 = $oldPeriode1;
     }
 

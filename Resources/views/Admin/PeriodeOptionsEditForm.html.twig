@@ -12,29 +12,14 @@
             </sessionslist>
         </div>
     </div>
-    <form action="{{ path('formalibre_bulletin_periode_options_edit', {'periode': periode.getId()}) }}"
+    <form action="{{ path('formalibre_bulletin_periode_options_edit_submit', {'periode': periode.getId()}) }}"
           method="POST"
           {{ form_enctype(form) }}
           novalidate
     >
         <div class="panel-body">
             <h3>Point divers</h3>
-            
-            <div class="col-md-offset-1">
-                
-                {% for pointDivers in allPointDivers %}
-                    {% set pointDiversId = pointDivers.getId() %}
-                    <label class="checkbox" for="periode_options_form_pointDivers_{{ pointDiversId }}">
-                        {{ pointDivers.getName() }}
-                        <input type="checkbox"
-                               id="periode_options_form_pointDivers_{{ pointDiversId }}"
-                               name="periode_options_form[pointDivers][]"
-                               value="{{ pointDiversId }}"
-                               {% if pointDiversId in pointDiversIds %}checked="checked"{% endif %}
-                        >
-                    </label>
-                {% endfor %}
-            </div>
+            {{ form_widget(form) }}
         </div>
         <div class="panel-footer">
             <button type="submit" class="btn btn-primary">

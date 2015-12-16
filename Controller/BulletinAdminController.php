@@ -1089,24 +1089,11 @@ class BulletinAdminController extends Controller
     public function adminPeriodeOptionsEditFormAction(Periode $periode)
     {
         $this->checkOpen();
-        $pointsDivers = $periode->getPointDivers();
-        $pointDiversIds = array();
-
-        foreach ($pointsDivers as $pointDivers) {
-            $pointDiversIds[] = $pointDivers->getId();
-        }
-
-        $allPointDivers = $this->bulletinManager->getAllPointDivers();
-        $sessions = $this->bulletinManager->getAvailableSessions();
-        $datas = array();
         $form = $this->createForm(new PeriodeOptionsType(), $periode);
 
         return array(
             'form' => $form->createView(),
-            'periode' => $periode,
-            'datas' => $datas,
-            'allPointDivers' => $allPointDivers,
-            'pointDiversIds' => $pointDiversIds
+            'periode' => $periode
         );
     }
 
@@ -1126,31 +1113,42 @@ class BulletinAdminController extends Controller
         $form = $this->createForm(new PeriodeOptionsType(), $periode);
         $form->handleRequest($this->request);
 
+        return array(
+            'form' => $form->createView(),
+            'periode' => $periode
+        );
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/options/form/submit",
+     *     name="formalibre_bulletin_periode_options_edit_submit",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @param Periode $periode
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/PeriodeOptionsEditForm.html.twig")
+     */
+    public function submitAdminPeriodeOptionsEditAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $form = $this->createForm(new PeriodeOptionsType(), $periode);
+        $form->handleRequest($this->request);
+
         if ($form->isValid()) {
             $this->om->persist($periode);
             $this->om->flush();
-
-            return new RedirectResponse(
-                $this->router->generate('formalibreBulletinAdminIndex')
-            );
         } else {
-            foreach ($pointsDivers as $pointDivers) {
-                $pointDiversIds[] = $pointDivers->getId();
-            }
-
-            $allPointDivers = $this->bulletinManager->getAllPointDivers();
-            $sessions = $this->bulletinManager->getAvailableSessions();
-            $datas = array();
-
-            return array(
-                'form' => $form->createView(),
-                'periode' => $periode,
-                'datas' => $datas,
-                'matiereIds' => $matiereIds,
-                'allPointDivers' => $allPointDivers,
-                'pointDiversIds' => $pointDiversIds
-            );
+        //stupid hack because if there are no PointDivers, the form is always wrong with no errors (can't find why)
+            $periode->setPointDivers(array());
         }
+
+        $this->om->persist($periode);
+        $this->om->flush();
+
+        return new RedirectResponse(
+            $this->router->generate('formalibreBulletinAdminIndex')
+        );
     }
 
     /**
@@ -1320,7 +1318,7 @@ class BulletinAdminController extends Controller
      *     options={"expose"=true}
      * )
      */
-    public function setOptionTotalAction(matiereOptions $matiereoptions, $total)
+    public function setOptionTotalAction(MatiereOptions $matiereOptions, $total)
     {
         $this->checkOpen();
         $matiereOptions->setTotal($total);
