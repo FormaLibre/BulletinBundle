@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-xs-3"><img src="http://www.fransfischer.be/logoFFnb.png" height="130px"></div>
         <div class="col-xs-7" id="title-box">
-            <h1>Bulletin</h1>
+            <h1>Bulletin {{recap2}}/{{totalCoefficient}}={{recap}}</h1>
             <h1><small>{{ periode.name }}</small></h1>
         </div>
         <div class="col-xs-2" id="NomEleve">
@@ -79,11 +79,11 @@
             <thead><tr>
                 <th>Total</th>
 
-                        <th class="center{% if totaux[2].totalPourcentage < 50%} echec {% endif %}">{{ totaux[2].totalPoint }}</th>
-                        <th class="center{% if totaux[2].totalPourcentage < 50%} echec {% endif %}">{{ totaux[2].totalTotal }}</th>
-                        <th class="center{% if totaux[2].totalPourcentage < 50%} echec {% endif %}" >{{ totaux[2].totalPourcentage }}</th>
-                        <th class="center{% if totaux[0].totalPourcentage < 50%} echec {% endif %}">{{ totaux[0].totalPourcentage }}</th>
-                        <th class="center{% if totaux[1].totalPourcentage < 50%} echec {% endif %}">{{ totaux[1].totalPourcentage }}</th>
+                        <th class="center{% if totaux[2].totalPourcentageAffiche < 50%} echec {% endif %}">{{ totaux[2].totalPoint }}</th>
+                        <th class="center{% if totaux[2].totalPourcentageAffiche < 50%} echec {% endif %}">{{ totaux[2].totalTotal }}</th>
+                        <th class="center{% if totaux[2].totalPourcentageAffiche < 50%} echec {% endif %}" >{{ totaux[2].totalPourcentageAffiche }}</th>
+                        <th class="center{% if totaux[0].totalPourcentageAffiche < 50%} echec {% endif %}">{{ totaux[0].totalPourcentageAffiche }}</th>
+                        <th class="center{% if totaux[1].totalPourcentageAffiche < 50%} echec {% endif %}">{{ totaux[1].totalPourcentageAffiche }}</th>
                         <th class="center{% if recap < 50%} echec {% endif %}">{{ recap }} %</th>
 
             </tr></thead>

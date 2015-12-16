@@ -361,27 +361,42 @@ class Periode
         $this->periodesGroup = $periodesGroup;
     }
 
+    /**
+     * @return Periode
+     */
     function getOldPeriode1() {
         return $this->oldPeriode1;
     }
-
+    /**
+     * @return Periode
+     */
     function getOldPeriode2() {
         return $this->oldPeriode2;
     }
-
+    /**
+     * @return Periode
+     */
     function getOldPeriode3() {
         return $this->oldPeriode3;
     }
-
+    /**
+     * @return Periode
+     */
     function getOldPeriode4() {
         return $this->oldPeriode4;
     }
-
+    /**
+     * @return Periode
+     */
     function getOldPeriode5() {
         return $this->oldPeriode5;
     }
-
-    function setOldPeriode1($oldPeriode1) {
+    
+    /**
+     * 
+     * @param \FormaLibre\BulletinBundle\Entity\Periode $oldPeriode1
+     */
+    function setOldPeriode1(Periode $oldPeriode1) {
         $this->oldPeriode1 = $oldPeriode1;
     }
 

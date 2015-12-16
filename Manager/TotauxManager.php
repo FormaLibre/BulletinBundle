@@ -59,16 +59,43 @@ class TotauxManager
 
         if ($totalTotal === 0) {
             $totalPourcentage = '0 %';
+            $totalPourcentageAffiche = '0 %';
         } else {
-            $totalPourcentage = round(($totalPoint / $totalTotal) * 100, 1).' %';
+            $totalPourcentageAffiche = round(($totalPoint / $totalTotal) * 100, 1).' %';
+            $totalPourcentage = round(($totalPoint*$periode->getCoefficient() / $totalTotal) * 100, 1).' %';
+            
         }
 
-        return array('totalPoint' => $totalPoint, 'totalTotal' => $totalTotal, 'totalPourcentage' => $totalPourcentage);
+        return array('totalPoint' => $totalPoint, 'totalTotal' => $totalTotal, 'totalPourcentage' => $totalPourcentage, 'totalPourcentageAffiche'=>$totalPourcentageAffiche);
     }
 
-    public function getTotalPeriodes(User $eleve)
+    public function getTotalCoefficient(Periode $periode){
+        
+        $totalCoefficient=$periode->getCoefficient();
+        
+        if ($periode->getTemplate() === 'ExamPrint'){
+            $totalCoefficient+=$periode->getOldPeriode1()->getCoefficient();  
+            $totalCoefficient+=$periode->getOldPeriode2()->getCoefficient();   
+        }
+        elseif ($periode->getTemplate() === 'ExamPrintOnlyOnePeriodePrint'){
+            $totalCoefficient+=$periode->getOldPeriode1()->getCoefficient();   
+        }
+        elseif ($periode->getTemplate() === 'FinalExamPrint'){
+            $totalCoefficient+=$periode->getOldPeriode1()->getCoefficient();
+            $totalCoefficient+=$periode->getOldPeriode2()->getCoefficient(); 
+            $totalCoefficient+=$periode->getOldPeriode3()->getCoefficient(); 
+            $totalCoefficient+=$periode->getOldPeriode4()->getCoefficient(); 
+            $totalCoefficient+=$periode->getOldPeriode5()->getCoefficient(); 
+        }
+        
+        return $totalCoefficient;  
+    }
+  
+    public function getTotalPeriodes(User $eleve, Periode $periode)
     {
-        $periodes = $this->periodeRepo->findAll();
+        $periodes = ($periode->getTemplate() === 'ExamPrintWithOnlyOnePeriodePrint') ?
+                array($periode->getOldPeriode1(), $periode):
+                array($periode->getOldPeriode1(), $periode->getOldPeriode2(), $periode);
         $totaux = array();
         $nbPeriodes = array();
 
@@ -82,7 +109,7 @@ class TotauxManager
                 }
 
                 if ($pemp->getPourcentage() != 999){
-                    $totaux[$key] += $pemp->getPourcentage();
+                    $totaux[$key] += $pemp->getPourcentage()*$periode->getCoefficient();
                     $nbPeriodes[$key]++;
                 }
             }
@@ -91,7 +118,7 @@ class TotauxManager
         foreach ($totaux as $key => $total) {
 
             if ($nbPeriodes[$key] > 0) {
-                $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+                $totaux[$key] = round($total / $this->getTotalCoefficient($periode), 1);
             }
         }
 
@@ -114,7 +141,7 @@ class TotauxManager
                 }
 
                 if ($pemp->getPourcentage() != 999){
-                    $totaux[$key] += $pemp->getPourcentage();
+                    $totaux[$key] += $pemp->getPourcentage()*$periode->getCoefficient();
                     $nbPeriodes[$key]++;
                 }
             }
@@ -123,7 +150,7 @@ class TotauxManager
         foreach ($totaux as $key => $total) {
 
             if ($nbPeriodes[$key] > 0) {
-                $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+                $totaux[$key] = round($total / $this->getTotalCoefficient($periode), 1);
             }
         }
 
