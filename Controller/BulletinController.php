@@ -473,7 +473,7 @@ class BulletinController extends Controller
             $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
             $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
             $totaux = $this->totauxManager->getTotalPeriode($periode, $eleve);
-            $recap += $totaux['totalPourcentage'];
+            $recap += $totaux['totalPourcentage']/ $periode->getCoefficient();
         } else {
             $pemps = array();
             $pemds = array();

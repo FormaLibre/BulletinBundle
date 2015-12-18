@@ -77,7 +77,7 @@ class TotauxManager
             $totalCoefficient+=$periode->getOldPeriode1()->getCoefficient();  
             $totalCoefficient+=$periode->getOldPeriode2()->getCoefficient();   
         }
-        elseif ($periode->getTemplate() === 'ExamPrintOnlyOnePeriodePrint'){
+        elseif ($periode->getTemplate() === 'ExamPrintWithOnlyOnePeriodePrint'){
             $totalCoefficient+=$periode->getOldPeriode1()->getCoefficient();   
         }
         elseif ($periode->getTemplate() === 'FinalExamPrint'){
