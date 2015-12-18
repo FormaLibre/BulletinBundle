@@ -62,7 +62,12 @@ class TotauxManager
             $totalPourcentageAffiche = '0 %';
         } else {
             $totalPourcentageAffiche = round(($totalPoint / $totalTotal) * 100, 1).' %';
-            $totalPourcentage = round(($totalPoint*$periode->getCoefficient() / $totalTotal) * 100, 1).' %';
+        if($periode->getTemplate()==="PeriodePrint"){
+            $totalPourcentage = round(($totalPoint / $totalTotal) * 100, 1).' %';
+        }
+            else{    
+                $totalPourcentage = round(($totalPoint*$periode->getCoefficient() / $totalTotal) * 100, 1).' %';
+            }
             
         }
 
@@ -77,7 +82,7 @@ class TotauxManager
             $totalCoefficient+=$periode->getOldPeriode1()->getCoefficient();  
             $totalCoefficient+=$periode->getOldPeriode2()->getCoefficient();   
         }
-        elseif ($periode->getTemplate() === 'ExamPrintOnlyOnePeriodePrint'){
+        elseif ($periode->getTemplate() === 'ExamPrintWithOnlyOnePeriodePrint'){
             $totalCoefficient+=$periode->getOldPeriode1()->getCoefficient();   
         }
         elseif ($periode->getTemplate() === 'FinalExamPrint'){

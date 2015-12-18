@@ -15,6 +15,7 @@
         background: initial;
         page-break-after: always;
     }
+
     #content{
         margin:4%
     }
@@ -23,8 +24,12 @@
 @page {
     size: A4;
     margin : 2cm;
+    background-color: red;
 }
 
+.firstcolumn{
+    width: 40%;
+}
 .page-break-element {
     page-break-before: always;
 }
