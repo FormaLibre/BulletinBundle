@@ -49,11 +49,6 @@
                     <td class="firstcolumn">{{ pemp.matiere.getCourse().getTitle() }}</td>
                     <td colspan="5" class="center">Non évalué</td>
                 </tr>
-            {% elseif pemp.point == 111 %}
-                <tr>
-                    <td class="firstcolumn">{{ pemp.matiere.getCourse().getTitle() }}</td>
-                    <td colspan="5" class="center">Certificat médical</td>
-                </tr>
             {% elseif pemp.point == 888 %}
                 <tr>
                     <td class="firstcolumn">{{ pemp.matiere.getCourse().getTitle() }}</td>

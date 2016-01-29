@@ -46,14 +46,6 @@
                         <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
                         <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">{{ totauxMatieres[key] }} %</td>
                     </tr>
-                {% elseif pemp.point == 111 %}
-                    <tr>
-                        <td class="firstcolumn">{{ pemp.matiere.getCourse().getTitle() }}</td>
-                        <td colspan="3" class="center">Certificat médical</td>
-                        <td class="center{% if pemps[0][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[0][key].getDisplayPourcentage() }}</td>
-                        <td class="center{% if pemps[1][key].getDisplayPourcentage() < 50%} echec {% endif %}">{{ pemps[1][key].getDisplayPourcentage() }}</td>
-                        <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">{{ totauxMatieres[key] }} %</td>
-                    </tr>
                 {% elseif pemp.point == 888 %}
                     <tr>
                         <td class="firstcolumn">{{ pemp.matiere.getCourse().getTitle() }}</td>

@@ -53,18 +53,6 @@
                             {{ totauxMatieres[key] }} %
                         </td>
                     </tr>
-                {% elseif pemp.point == 111 %}
-                    <tr>
-                        <td>
-                            {{ pemp.matiere.getCourse().getTitle() }}
-                        </td>
-                        <td colspan="3" class="center">
-                            Certificat médical
-                        </td>
-                        <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">
-                            {{ totauxMatieres[key] }} %
-                        </td>
-                    </tr>
                 {% elseif pemp.point == 888 %}
                     <tr>
                         <td>
