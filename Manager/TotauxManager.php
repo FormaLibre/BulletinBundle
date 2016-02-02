@@ -96,13 +96,14 @@ class TotauxManager
         return $totalCoefficient;  
     }
   
-    public function getTotalPeriodes(User $eleve, Periode $periode)
+     public function getTotalPeriodes(User $eleve, Periode $periode)
     {
         $periodes = ($periode->getTemplate() === 'ExamPrintWithOnlyOnePeriodePrint') ?
                 array($periode->getOldPeriode1(), $periode):
                 array($periode->getOldPeriode1(), $periode->getOldPeriode2(), $periode);
         $totaux = array();
         $nbPeriodes = array();
+        $coefficient = array();
 
         foreach ($periodes as $periode){
             $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
@@ -111,19 +112,21 @@ class TotauxManager
                 if (!isset($totaux[$key])) {
                     $totaux[$key] = 0;
                     $nbPeriodes[$key] = 0;
+                    $coefficient[$key] = 0;
                 }
 
                 if ($pemp->getPourcentage() != 999 && $pemp->getPourcentage() != 888){
                     $totaux[$key] += $pemp->getPourcentage()*$periode->getCoefficient();
                     $nbPeriodes[$key]++;
-                }
+                    $coefficient[$key]+=$periode->getCoefficient();
+                } 
             }
         }
 
         foreach ($totaux as $key => $total) {
 
             if ($nbPeriodes[$key] > 0) {
-                $totaux[$key] = round($total / $this->getTotalCoefficient($periode), 1);
+                $totaux[$key] = round($total / $coefficient[$key], 1);
             }
         }
 
@@ -135,6 +138,7 @@ class TotauxManager
         $periodes = $this->periodeRepo->findAll();
         $totaux = array();
         $nbPeriodes = array();
+        $coefficient = array();
 
         foreach ($periodes as $periode){
             $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
@@ -143,11 +147,13 @@ class TotauxManager
                 if (!isset($totaux[$key])) {
                     $totaux[$key] = 0;
                     $nbPeriodes[$key] = 0;
+                    $coefficient[$key] = 0;
                 }
 
                 if ($pemp->getPourcentage() != 999 && $pemp->getPourcentage() != 888){
                     $totaux[$key] += $pemp->getPourcentage()*$periode->getCoefficient();
                     $nbPeriodes[$key]++;
+                    $coefficient[$key]+=$periode->getCoefficient();
                 }
             }
         }
@@ -155,13 +161,12 @@ class TotauxManager
         foreach ($totaux as $key => $total) {
 
             if ($nbPeriodes[$key] > 0) {
-                $totaux[$key] = round($total / $this->getTotalCoefficient($periode), 1);
+                $totaux[$key] = round($total / $coefficient[$key], 1);
             }
         }
 
         return $totaux;
     }
-
     public function getTotalPeriodesMatiere(User $eleve)
     {
         $periodes = $this->periodeRepo->findAll();
