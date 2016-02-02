@@ -113,7 +113,7 @@ class TotauxManager
                     $nbPeriodes[$key] = 0;
                 }
 
-                if ($pemp->getPourcentage() != 999){
+                if ($pemp->getPourcentage() != 999 && $pemp->getPourcentage() != 888){
                     $totaux[$key] += $pemp->getPourcentage()*$periode->getCoefficient();
                     $nbPeriodes[$key]++;
                 }
@@ -145,7 +145,7 @@ class TotauxManager
                     $nbPeriodes[$key] = 0;
                 }
 
-                if ($pemp->getPourcentage() != 999){
+                if ($pemp->getPourcentage() != 999 && $pemp->getPourcentage() != 888){
                     $totaux[$key] += $pemp->getPourcentage()*$periode->getCoefficient();
                     $nbPeriodes[$key]++;
                 }
@@ -183,7 +183,7 @@ class TotauxManager
                     $totaux[$matiereId]['color'] = $matiereOptions->getColor();
                 }
                 
-                if ($pemp->getPourcentage() != 999){
+                if ($pemp->getPourcentage() != 999 && $pemp->getPourcentage() != 888){
                     $totaux[$matiereId]['pourcentage'] += $pemp->getPourcentage();
                     $totaux[$matiereId]['nbPeriodes']++;
                 }
@@ -270,7 +270,7 @@ class TotauxManager
         foreach ($periodes as $periode){
             $pemp = $this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere);
 
-            if (is_null($pemp) || $pemp->getPourcentage() == 999){
+            if (is_null($pemp) || $pemp->getPourcentage() == 999 || $pemp->getPourcentage() == 888){
                 $pourcPeriode[] = '';
             } else{
                 $pourcPeriode[] = round($pemp->getPourcentage(), 1);
