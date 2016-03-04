@@ -5,3 +5,11 @@ formalibre_bulletin_controller:
 formalibre_bulletin_admin_controller:
     resource: "@FormaLibreBulletinBundle/Controller/BulletinAdminController.php"
     type:     annotation
+
+formalibre_bulletin_api:
+    resource: "@FormaLibreBulletinBundle/Controller/API/BulletinController.php"
+    type: rest
+    prefix: api
+    defaults: {_format: json}
+    options:
+        expose: true
