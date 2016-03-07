@@ -1,21 +1,24 @@
 export default class SessionController {
-    constructor($http, $cacheFactory, ClarolineSearchService, ClarolineAPIService) {
+    constructor($http, ClarolineSearchService, ClarolineAPIService, $cacheFactory) {
         this.$http = $http
         this.$cacheFactory = $cacheFactory
         this.ClarolineSearchService = ClarolineSearchService
         this.ClarolineAPIService = ClarolineAPIService
-        this.addedSessions = [];
-        this.refreshSelected = true;
-        this.search = '';
-        this.savedSearch = [];
-        this.sessions = undefined;
-        this.selectedRows = [];
-        this.saveSelected = [];
+        this.addedSessions = []
+        this.refreshSelected = true
+        this.search = ''
+        this.savedSearch = []
+        this.sessions = undefined
+        this.selectedRows = []
+        this.saveSelected = []
+        this.fields = []
+
+        $http.get(Routing.generate('api_get_session_searchable_fields')).then(d => this.fields = d.data)
 
         this.columns = [
-            {name: translate('title'), prop: "course.title", isCheckboxColumn: true, headerCheckbox: true},
-            {name: translate('name'), prop: "name"},
-            {name: translate('code'), prop: "course.code"}
+            {name: this.translate('title'), prop: "course.title", isCheckboxColumn: true, headerCheckbox: true},
+            {name: this.translate('name'), prop: "name"},
+            {name: this.translate('code'), prop: "course.code"}
         ];
 
         this.dataTableOptions = {
@@ -26,32 +29,26 @@ export default class SessionController {
             selectable: true,
             multiSelect: true,
             checkboxSelection: true,
-            columns: $scope.columns,
-            loadingMessage: this.translate.trans('loading') + '...',
+            columns: this.columns,
+            loadingMessage: this.translate('loading') + '...',
             paging: {
                 externalPaging: true,
                 size: 10
             }
         };
+
+        this._onSearch = this._onSearch.bind(this)
     }
 
     translate(key, data = {}) {
         return window.Translator.trans(key, data, 'platform');
     }
 
-    onSearch(searches) {
-        this.dataTableOptions.paging.offset = 0;
-        this.savedSearch = searches;
-        refreshSelected = true;
-        clarolineSearch.find(searches, 0, this.dataTableOptions.paging.size).then(function(d) {
-            setSessions(d.data, 0, this.dataTableOptions.paging.size);
-        });
-    };
-
     paging(offset, size) {
-        clarolineSearch.find(this.savedSearch, offset, size).then(function(d) {
-            setSessions(d.data, offset, size);
-        });
+        //this is dirty but the app isn't full angular yet. Once we'll be able to pick w/e periode we need, this should be routed
+        this.ClarolineSearchService.find('api_get_search_periode_admin_session', this.savedSearch, offset, size, {'periode': AngularApp.periode}).then(d => {
+            this.setSessions(d.data, offset, size)
+        })
     }
 
     onCheck(rows) {
@@ -75,40 +72,52 @@ export default class SessionController {
             Routing.generate('formalibre_bulletin_remove_search_sessions', {'periode': AngularApp.periode});
 
         var qs = '?';
-        for (var i = 0; i < $scope.savedSearch.length; i++) {
-            qs += $scope.savedSearch[i].field +'[]=' + $scope.savedSearch[i].value + '&';
+        for (var i = 0; i < this.savedSearch.length; i++) {
+            qs += this.savedSearch[i].field +'[]=' + this.savedSearch[i].value + '&';
         } 
 
         route += qs;
         console.log(route);
 
-        $http.post(route);
+        this.$http.post(route);
     }
 
     setSessions(data, offset, size) {
         var sessions = data.sessions;
-        $scope.dataTableOptions.paging.count = data.total;
+        this.dataTableOptions.paging.count = data.total;
 
         //I know it's terrible... but I have no other choice with this table.
             for (var i = 0; i < offset * size; i++) {
                 sessions.unshift({});
             }
             
-        $scope.sessions = sessions;
-        setSelected(sessions);
+        this.sessions = sessions;
+        this.setSelected(sessions);
     }
 
     setSelected(sessions) {
-        if (refreshSelected) {
-            $scope.selectedRows.splice(0, $scope.selectedRows.length);
+        if (this.refreshSelected) {
+            this.selectedRows.splice(0, this.selectedRows.length);
 
             for (var i = 0; i < sessions.length; i++) {
                 if (sessions[i].extra && sessions[i].extra.linked === true) {
-                    $scope.selectedRows.push(sessions[i]);
+                    this.selectedRows.push(sessions[i]);
                 }
             }
 
-            //refreshSelected = false;
+            this.refreshSelected = false;
         } 
     }
+
+    _onSearch(searches) {
+        this.dataTableOptions.paging.offset = 0;
+        this.savedSearch = searches;
+        this.refreshSelected = true;
+
+        //this is dirty but the app isn't full angular yet. Once we'll be able to pick w/e periode we need, this should be routed
+        this.ClarolineSearchService.find('api_get_search_periode_admin_session', this.savedSearch, 0, this.dataTableOptions.paging.size, {'periode': AngularApp.periode}).then(d => {
+            this.setSessions(d.data, 0, this.dataTableOptions.paging.size)
+            this.dataTableOptions.paging.count = d.data.total
+        })
+    };
 }

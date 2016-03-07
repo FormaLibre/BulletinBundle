@@ -6,8 +6,16 @@ formalibre_bulletin_admin_controller:
     resource: "@FormaLibreBulletinBundle/Controller/BulletinAdminController.php"
     type:     annotation
 
-formalibre_bulletin_api:
-    resource: "@FormaLibreBulletinBundle/Controller/API/BulletinController.php"
+formalibre_matiere_api:
+    resource: "@FormaLibreBulletinBundle/Controller/API/MatiereController.php"
+    type: rest
+    prefix: api
+    defaults: {_format: json}
+    options:
+        expose: true
+
+formalibre_session_api:
+    resource: "@FormaLibreBulletinBundle/Controller/API/SessionController.php"
     type: rest
     prefix: api
     defaults: {_format: json}

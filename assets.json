@@ -1,7 +1,8 @@
 {
   "webpack": {
     "entry": {
-      "session-management": "modules/session/module"
+      "session-management": "modules/session/module",
+      "course-management": "modules/course/module"
     }
   }
 }

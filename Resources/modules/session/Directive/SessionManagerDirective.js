@@ -1,3 +1,9 @@
+import SessionController from '../Controller/SessionController'
+
+//claroline
+import ClarolineSearch from '../../../../../../../../claroline/core-bundle/Resources/modules/search/module'
+import ClarolineAPI from '../../../../../../../../claroline/core-bundle/Resources/modules/services/module'
+
 export default class SessionManagerDirective {
     constructor() {
         this.restrict = 'E';
@@ -7,3 +13,5 @@ export default class SessionManagerDirective {
         this.controllerAs = 'sc'
     }
 }
+
+SessionController.$inject = ['$http', 'ClarolineSearchService', 'ClarolineAPIService', '$cacheFactory']

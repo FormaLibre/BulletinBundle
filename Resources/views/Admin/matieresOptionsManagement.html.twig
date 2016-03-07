@@ -71,33 +71,14 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link 
-        rel="stylesheet" 
-        href="{{ asset('bundles/clarolineangulardatatable/js/release/dataTable.css') }}"
-    />
-    <link 
-        rel="stylesheet" 
-        href="{{ asset('bundles/clarolineangulardatatable/js/release/material.css') }}"
-    />
-    <link rel="stylesheet" 
-          href="{{ asset('bundles/clarolineangularuiselectize/select.css')}}"
-    />
-    <link href="http://fontastic.s3.amazonaws.com/Jnf54BZCm7mSjGCxNRbfp3/icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('vendor/angular-ui.css')}}"> </link>
+    {# we should be able to remove the following line if it's included in angular-ui.css #}
+    <link rel="stylesheet" href="{{ asset('bundles/clarolinecore/css/common/select.css') }}"></link>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
     {# Set some vars needed by Angular parts #}
-    <script type="text/javascript">
-        {# Make Twig variables accessibles by AngularJS #}
-        var AngularApp = {};
-        AngularApp.webDir = "{{ asset('') }}";
-    </script>
-    <script type="text/javascript" src="{{ asset('vendor/angular/angular.js')}}"> </script>
-    <script type="text/javascript" src="{{ asset('vendor/angular/angular-ui.js')}}"> </script>
-    <script type="text/javascript" src="{{ asset('bundles/clarolineangulardatatable/js/release/dataTable.helpers.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('bundles/clarolineangularuiselectize/select.min.js')}}"> </script>
-    <script type="text/javascript" src="{{ asset('bundles/clarolinecore/js/angular/search/generic/search.app.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('bundles/formalibrebulletin/js/courseManager/courses.app.js') }}"></script>
+    <script src="{{ hotAsset('dist/formalibre-bulletin-course-management.js') }}"></script>
 {% endblock %}
     

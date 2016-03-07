@@ -199,29 +199,6 @@ class BulletinManager
         return $this->pointDiversRepo->findAll();
     }
 
-    public function getAvailableSessions($count = false, $page = null, $limit = null)
-    {
-        $status = array(CourseSession::SESSION_NOT_STARTED, CourseSession::SESSION_OPEN);
-
-        $qb = $this->em->createQueryBuilder();
-
-        $count ? $qb->select('count(cs)'): $qb->select('cs');
-
-        $qb->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')
-            ->join('cs.course', 'c')
-            ->where('cs.sessionStatus IN (:status)')
-            ->setParameter('status', $status)
-            ->orderBy('c.title', 'ASC');
-        $query = $qb->getQuery();
-
-        if ($limit) {
-            $query->setMaxResults($limit);
-            $query->setFirstResult($page * $limit);
-        }
-
-        return $count ? $query->getSingleScalarResult(): $query->getResult();
-    }
-
     public function getPempByPeriodeAndUserAndMatiere(
         Periode $periode,
         User $eleve,

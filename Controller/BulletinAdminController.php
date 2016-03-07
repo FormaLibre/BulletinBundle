@@ -851,79 +851,6 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/admin/periode/{periode}/page/{page}/limit/{limit}/sessions.json",
-     *     name="formalibre_bulletin_get_sessions",
-     *     defaults={"page"=0, "limit"=99999},
-     *     options = {"expose"=true}
-     * )
-     */
-    public function getAdminSessionAction(Periode $periode, $page, $limit)
-    {
-        $this->checkOpen();
-        $linkedSessionsIds = array();
-
-        foreach ($periode->getCourseSessions() as $link) {
-            $linkedSessionsIds[] = $link->getId();
-        }
-
-        $sessions = $this->bulletinManager->getAvailableSessions(false, $page, $limit);
-
-        foreach ($sessions as $session) {
-            (in_array($session->getId(), $linkedSessionsIds)) ?
-                $session->setExtra(array('linked' => true)):
-                $session->setExtra(array('linked' => false));
-        }
-
-        $context = new SerializationContext();
-        $context->setGroups('bulletin');
-        $data = $this->container->get('serializer')->serialize($sessions, 'json', $context);
-        $sessions = json_decode($data);
-        $response = new JsonResponse(array('sessions' => $sessions, 'total' => $this->bulletinManager->getAvailableSessions(true)));
-
-        return $response;
-    }
-
-    /**
-     * @EXT\Route(
-     *     "/admin/periode/{periode}/page/{page}/limit/{limit}/search/sessions.json",
-     *     name="formalibre_bulletin_search_sessions",
-     *     defaults={"page"=0, "limit"=99999},
-     *     options = {"expose"=true}
-     * )
-     */
-    public function searchAdminSessionAction(Periode $periode, $page, $limit)
-    {
-        $this->checkOpen();
-
-        foreach ($periode->getCourseSessions() as $link) {
-            $linkedSessionsIds[] = $link->getId();
-        }
-
-        $searches = $this->request->query->all();
-        $sessions = $this->bulletinManager->searchAvailableSessions($searches, false, $page, $limit);
-
-        foreach ($sessions as $session) {
-            (in_array($session->getId(), $linkedSessionsIds)) ?
-                $session->setExtra(array('linked' => true)):
-                $session->setExtra(array('linked' => false));
-        }
-
-        $context = new SerializationContext();
-        $context->setGroups('bulletin');
-        $data = $this->container->get('serializer')->serialize($sessions, 'json', $context);
-        $sessions = json_decode($data);
-        $response = new JsonResponse(
-            array(
-                'sessions' => $sessions, 
-                'total' => $this->bulletinManager->searchAvailableSessions($searches, true)
-            )
-        );
-
-        return $response;
-    }
-
-    /**
-     * @EXT\Route(
      *     "/admin/periode/{periode}/add/search/sessions.json",
      *     name="formalibre_bulletin_add_search_sessions",
      *     options = {"expose"=true}
@@ -979,85 +906,6 @@ class BulletinAdminController extends Controller
         $this->om->flush();
 
         return new JsonResponse('done');
-    }
-
-    /**
-     * @EXT\Route(
-     *     "/admin/periode/{periode}/add/session/{session}",
-     *     name="formalibre_bulletin_add_session_to_periode",
-     *     options = {"expose"=true}
-     * )
-     */
-    public function addSessionToPeriode(Periode $periode, CourseSession $session)
-    {
-        $this->checkOpen();
-        $periode->addMatiere($session);
-        $this->om->persist($periode);
-        $this->om->flush();
-
-        return new JsonResponse('done');
-    }
-
-    /**
-     * @EXT\Route(
-     *     "/admin/periode/{periode}/remove/session/{session}",
-     *     name="formalibre_bulletin_remove_session_from_periode",
-     *     options = {"expose"=true}
-     * )
-     */
-    public function removeSessionFromPeriode(Periode $periode, CourseSession $session)
-    {
-        $this->checkOpen();
-        $periode->removeMatiere($session);
-        $this->om->persist($periode);
-        $this->om->flush();
-
-        return new JsonResponse('done');
-    }
-
-    /**
-     * @EXT\Route(
-     *     "/admin/periode/{periode}/invert/sessions",
-     *     name="formalibre_bulletin_invert_session_from_periode",
-     *     options = {"expose"=true}
-     * )
-     */
-    public function invertSessionsPeriode(Periode $periode)
-    {
-        $this->checkOpen();
-        $sessions = $this->request->request->all();
-        $sessionIds = array();
-
-        foreach ($sessions as $session) {
-            $sessionIds[] = $session['id'];
-        }
-
-        $sessions = $this->om->findByIds('Claroline\CursusBundle\Entity\CourseSession', $sessionIds);
-        $this->om->startFlushSuite();
-
-        foreach ($sessions as $session) {
-            $this->bulletinManager->invertSessionPeriode($periode, $session);
-        }
-
-        $this->om->endFlushSuite();
-
-        return new JsonResponse('done');
-    }
-
-    /**
-     * @EXT\Route(
-     *     "/admin/session/fields.json",
-     *     name="formalibre_bulletin_get_sessions_fields",
-     *     options = {"expose"=true}
-     * )
-     */
-    public function getAdminSessionFieldsAction()
-    {
-        return new JsonResponse(array(
-            'title',
-            'name',
-            'code',
-        ));
     }
 
     /**
@@ -1168,51 +1016,6 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/admin/matiereoptions/page/{page}/limit/{limit}/matiereoptions.json",
-     *     name="formalibre_bulletin_get_matiereoptions",
-     *     defaults={"page"=0, "limit"=99999},
-     *     options = {"expose"=true}
-     * )
-     */
-    public function getMatiereOptionsAction($page, $limit)
-    {
-        $matiereOptions = $this->bulletinManager->getAllMatieresOptions(false, $page, $limit);
-        $total = $this->bulletinManager->getAllMatieresOptions(true);
-
-        $context = new SerializationContext();
-        $context->setGroups('bulletin');
-        $data = $this->container->get('serializer')->serialize($matiereOptions, 'json', $context);
-        $matiereOptions = json_decode($data);
-        $response = new JsonResponse(array('options' => $matiereOptions, 'total' => $total));
-
-        return $response;
-    }
-    /**
-     * @EXT\Route(
-     *     "/search/admin/matiereoptions/page/{page}/limit/{limit}/matiereoptions.json",
-     *     name="formalibre_bulletin_search_matiereoptions",
-     *     defaults={"page"=0, "limit"=99999},
-     *     options = {"expose"=true}
-     * )
-     */
-    public function searchMatiereOptionsAction($page, $limit)
-    {
-        $searches = $this->request->query->all();
-        $matiereOptions = $this->bulletinManager->searchMatieresOptions($searches, false, $page, $limit);
-        $total = $this->bulletinManager->searchMatieresOptions($searches, true);
-
-        $context = new SerializationContext();
-        $context->setGroups('bulletin');
-        $data = $this->container->get('serializer')->serialize($matiereOptions, 'json', $context);
-        $matiereOptions = json_decode($data);
-        $response = new JsonResponse(array('options' => $matiereOptions, 'total' => $total));
-
-        return $response;
-    }
-
-
-    /**
-     * @EXT\Route(
      *     "/admin/bulletin/configure/form",
      *     name="formalibre_bulletin_configure_form",
      *     options={"expose"=true}
@@ -1290,40 +1093,6 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $this->bulletinManager->removePeriode($periode);
-
-        return new JsonResponse('success');
-    }
-
-    /**
-     * @EXT\Route(
-     *     "/admin/options/{matiereOptions}/set/position/{position}",
-     *     name="formalibre_bulletin_set_option_position",
-     *     options={"expose"=true}
-     * )
-     */
-    public function setOptionPositionAction(MatiereOptions $matiereOptions, $position)
-    {
-        $this->checkOpen();
-        $matiereOptions->setPosition($position);
-        $this->om->persist($matiereOptions);
-        $this->om->flush();
-
-        return new JsonResponse('success');
-    }
-
-        /**
-     * @EXT\Route(
-     *     "/admin/options/{matiereOptions}/set/total/{total}",
-     *     name="formalibre_bulletin_set_option_total",
-     *     options={"expose"=true}
-     * )
-     */
-    public function setOptionTotalAction(MatiereOptions $matiereOptions, $total)
-    {
-        $this->checkOpen();
-        $matiereOptions->setTotal($total);
-        $this->om->persist($matiereOptions);
-        $this->om->flush();
 
         return new JsonResponse('success');
     }
