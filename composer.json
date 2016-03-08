@@ -19,7 +19,6 @@
         "claroline/pdf-generator-bundle": "~6.0"
     },
     "autoload": {
-        "psr-0": { "FormaLibre\\BulletinBundle": "" }
-    },
-    "target-dir": "FormaLibre/BulletinBundle"
+        "psr-4": { "FormaLibre\\BulletinBundle\\": "" }
+    }
 }

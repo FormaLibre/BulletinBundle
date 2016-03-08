@@ -28,7 +28,7 @@ export default class SessionController {
             footerHeight: 50,
             selectable: true,
             multiSelect: true,
-            checkboxSelection: true,
+            //checkboxSelection: true,
             columns: this.columns,
             loadingMessage: this.translate('loading') + '...',
             paging: {
@@ -51,23 +51,21 @@ export default class SessionController {
         })
     }
 
-    onCheck(rows) {
+    onSelect(rows) {
         const row = rows[0];
-        this.$http.post(
-            Routing.generate('formalibre_bulletin_add_session_to_periode', {'periode': AngularApp.periode, 'session': row.id})
+        this.$http.get(
+            Routing.generate('api_add_session_to_periode', {'periode': AngularApp.periode, 'session': row.id})
         );
     }
 
-    onUncheck(rows) {
+    onUnselect(rows) {
         const row = rows[0];
-        this.post(
-            Routing.generate('formalibre_bulletin_remove_session_from_periode', {'periode': AngularApp.periode, 'session': row.id}),
-            [row]
+        this.$http.get(
+            Routing.generate('api_remove_session_from_periode', {'periode': AngularApp.periode, 'session': row.id})
         );
     }
 
     onHeaderCheckboxChange(isChecked) {
-        console.log('gotcha');
         var route = (isChecked) ?
             Routing.generate('api_check_all_sessions_from_search', {'periode': AngularApp.periode}):
             Routing.generate('api_remove_all_sessions_from_search', {'periode': AngularApp.periode});
@@ -78,9 +76,8 @@ export default class SessionController {
         } 
 
         route += qs;
-        console.log(route);
 
-        this.$http.post(route);
+        this.$http.get(route);
     }
 
     setSessions(data, offset, size) {

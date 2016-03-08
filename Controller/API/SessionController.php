@@ -18,8 +18,10 @@ use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\NamePrefix;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use FormaLibre\BulletinBundle\Entity\Periode;
+use Claroline\CursusBundle\Entity\CourseSession;
 use FormaLibre\BulletinBundle\Manager\BulletinManager;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Claroline\CoreBundle\Persistence\ObjectManager;
 
 /**
  * @NamePrefix("api_")
@@ -30,18 +32,22 @@ class SessionController extends FOSRestController
      * @DI\InjectParams({
      *     "request"         = @DI\Inject("request"),
      *     "bulletinManager" = @DI\Inject("formalibre.manager.bulletin_manager"),
-     *     "authorization"   = @DI\Inject("security.authorization_checker")
+     *     "authorization"   = @DI\Inject("security.authorization_checker"),
+     *     "om"              = @DI\Inject("claroline.persistence.object_manager")
      * })
      */
     public function __construct(
         Request $request,
         BulletinManager $bulletinManager,
-        AuthorizationCheckerInterface $authorization
+        AuthorizationCheckerInterface $authorization,
+        ObjectManager $om
+
     )
     {
         $this->request = $request;
         $this->authorization = $authorization;
         $this->bulletinManager = $bulletinManager;
+        $this->om = $om;
     }
 
     /**
@@ -72,9 +78,9 @@ class SessionController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
-    public function addSessionToPeriode(Periode $periode, CourseSession $session)
+    public function addSessionToPeriodeAction(Periode $periode, CourseSession $session)
     {
-        $this->checkOpen();
+        $this->throwExceptionIfNotBulletinAdmin();
         $periode->addMatiere($session);
         $this->om->persist($periode);
         $this->om->flush();
@@ -85,9 +91,9 @@ class SessionController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
-    public function removeSessionFromPeriode(Periode $periode, CourseSession $session)
+    public function removeSessionFromPeriodeAction(Periode $periode, CourseSession $session)
     {
-        $this->checkOpen();
+        $this->throwExceptionIfNotBulletinAdmin();
         $periode->removeMatiere($session);
         $this->om->persist($periode);
         $this->om->flush();
@@ -98,24 +104,12 @@ class SessionController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
-    public function invertSessionsPeriode(Periode $periode)
+    public function checkAllSessionsFromSearchAction(Periode $periode)
     {
-        $this->checkOpen();
-        $sessions = $this->request->request->all();
-        $sessionIds = array();
-
-        foreach ($sessions as $session) {
-            $sessionIds[] = $session['id'];
-        }
-
-        $sessions = $this->om->findByIds('Claroline\CursusBundle\Entity\CourseSession', $sessionIds);
-        $this->om->startFlushSuite();
-
-        foreach ($sessions as $session) {
-            $this->bulletinManager->invertSessionPeriode($periode, $session);
-        }
-
-        $this->om->endFlushSuite();
+        $this->throwExceptionIfNotBulletinAdmin();
+        $searches = $this->request->query->all();
+        $sessions = $this->bulletinManager->searchAvailableSessions($searches, false);
+        $this->bulletinManager->addSessionsToPeriode($sessions, $periode);
 
         return $periode;
     }
@@ -123,27 +117,14 @@ class SessionController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
-    public function checkAllSessionsFromSearchAction(Periode $periode)
-    {
-        $this->checkOpen();
-        $searches = $this->request->query->all();
-        $sessions = $this->bulletinManager->searchAvailableSessions($searches, false);
-        $this->bulletinManager->addSessionsToPeriode($sessions, $periode);
-
-        return new JsonResponse('success', 200);
-    }
-
-    /**
-     * @View(serializerGroups={"api_bulletin"})
-     */
     public function removeAllSessionsFromSearchAction(Periode $periode)
     {
-        $this->checkOpen();
+        $this->throwExceptionIfNotBulletinAdmin();
         $searches = $this->request->query->all();
         $sessions = $this->bulletinManager->searchAvailableSessions($searches, false);
         $this->bulletinManager->removeSessionsFromPeriode($sessions, $periode);
 
-        return new JsonResponse('success', 200);
+        return $periode;
     }
 
     public function getSessionSearchableFieldsAction()
