@@ -1,0 +1,18 @@
+<div align="center" class="action-bar">
+    <div class="panel-body">
+		<clarolinesearch on-search="sc._onSearch" fields=sc.fields></clarolinesearch>
+    </div>   
+</div>
+<div>
+	<dtable 
+		options="sc.dataTableOptions" 
+		rows="sc.sessions" 
+		class="material" 
+		selected="sc.selectedRows" 
+		on-page="sc.paging(offset, size)"
+		on-select="sc.onSelect(rows)"
+		on-unselect="sc.onUnselect(rows)"
+		on-header-checkbox-changed="sc.onHeaderCheckboxChange(isChecked)"
+	>
+	</dtable>
+</div>

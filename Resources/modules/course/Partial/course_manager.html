@@ -1,0 +1,15 @@
+<div>
+	<div align="center" class="action-bar">
+	    <div class="panel-body">
+			<clarolinesearch on-search="cmc._onSearch" fields="cmc.fields"></clarolinesearch>
+	    </div>   
+	</div>
+	<dtable 
+		options="cmc.dataTableOptions" 
+		rows="cmc.courseOptions" 
+		class="material" 
+		on-page="cmc.paging(offset, size)"
+	>
+	</dtable>
+</div>
+				

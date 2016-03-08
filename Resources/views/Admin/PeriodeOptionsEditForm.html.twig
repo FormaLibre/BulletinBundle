@@ -4,12 +4,9 @@
     <div class="panel-heading">
         <h2>Gestion des options de la période [{{ periode.getName() }}]</h2>
     </div>
-    <div id="sessions-panel" class="panel panel-default" ng-app="sessionsManager">
-        <div class="panel-body" ng-controller="sessionsCtrl">
-            <sessionssearch>
-            </sessionssearch>
-            <sessionslist>
-            </sessionslist>
+    <div id="sessions-panel" class="panel panel-default" ng-app="SessionManager">
+        <div class="panel-body">
+            <session-manager>
         </div>
     </div>
     <form action="{{ path('formalibre_bulletin_periode_options_edit_submit', {'periode': periode.getId()}) }}"
@@ -36,36 +33,20 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link 
-        rel="stylesheet" 
-        href="{{ asset('bundles/clarolineangulardatatable/js/release/dataTable.css') }}"
-    />
-    <link 
-        rel="stylesheet" 
-        href="{{ asset('bundles/clarolineangulardatatable/js/release/material.css') }}"
-    />
-    <link rel="stylesheet" 
-          href="{{ asset('bundles/clarolineangularuiselectize/select.css')}}"
-    />
-    <link href="http://fontastic.s3.amazonaws.com/Jnf54BZCm7mSjGCxNRbfp3/icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('vendor/angular-ui.css')}}"> </link>
+    {# we should be able to remove the following line if it's included in angular-ui.css #}
+    <link rel="stylesheet" href="{{ asset('bundles/clarolinecore/css/common/select.css') }}"></link>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
 
-    <script type="text/javascript" src="{{ asset('vendor/angular/angular.js')}}"> </script>
-    <script type="text/javascript" src="{{ asset('vendor/angular/angular-ui.js')}}"> </script>
-    <script type="text/javascript" src="{{ asset('bundles/clarolineangulardatatable/js/release/dataTable.helpers.min.js') }}">
-    </script>
-    <script type="text/javascript" src="{{ asset('bundles/clarolineangularuiselectize/select.min.js')}}"> </script>
-
     {# Set some vars needed by Angular parts #}
     <script type="text/javascript">
         {# Make Twig variables accessibles by AngularJS #}
         var AngularApp = {};
-        AngularApp.webDir = "{{ asset('') }}";
         AngularApp.periode = {{ periode.getId() }}
     </script>
-    <script type="text/javascript" src="{{ asset('bundles/clarolinecore/js/angular/search/generic/search.app.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('bundles/formalibrebulletin/js/sessionManager/sessions.app.js') }}"></script>
+
+    <script src="{{ hotAsset('dist/formalibre-bulletin-session-management.js') }}"></script>
 {% endblock %} 

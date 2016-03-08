@@ -17,7 +17,7 @@ class MatiereOptions
      * @ORM\Column(type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @Groups({"bulletin"})
+     * @Groups({"api_bulletin"})
      */
     private $id;
 
@@ -25,20 +25,20 @@ class MatiereOptions
      * @ORM\ManyToOne(
      *      targetEntity="Claroline\CursusBundle\Entity\CourseSession"
      * )
-     * @Groups({"bulletin"})
+     * @Groups({"api_bulletin"})
      * @SerializedName("course_session")
      */
     private $matiere;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
-     * @Groups({"bulletin"})
+     * @Groups({"api_bulletin"})
      */
     private $total;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
-     * @Groups({"bulletin"})
+     * @Groups({"api_bulletin"})
      */
     private $position;
 
