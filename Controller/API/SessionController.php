@@ -120,6 +120,32 @@ class SessionController extends FOSRestController
         return $periode;
     }
 
+    /**
+     * @View(serializerGroups={"api_bulletin"})
+     */
+    public function checkAllSessionsFromSearchAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $searches = $this->request->query->all();
+        $sessions = $this->bulletinManager->searchAvailableSessions($searches, false);
+        $this->bulletinManager->addSessionsToPeriode($sessions, $periode);
+
+        return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @View(serializerGroups={"api_bulletin"})
+     */
+    public function removeAllSessionsFromSearchAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $searches = $this->request->query->all();
+        $sessions = $this->bulletinManager->searchAvailableSessions($searches, false);
+        $this->bulletinManager->removeSessionsFromPeriode($sessions, $periode);
+
+        return new JsonResponse('success', 200);
+    }
+
     public function getSessionSearchableFieldsAction()
     {
         return array('title', 'name', 'code');

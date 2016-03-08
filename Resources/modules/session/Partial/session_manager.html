@@ -10,8 +10,8 @@
 		class="material" 
 		selected="sc.selectedRows" 
 		on-page="sc.paging(offset, size)"
-		on-row-click="sc.onRowClick(row)" 
 		on-select="sc.onCheck(rows)"
+		on-checkbox-change="sc.onHeaderCheckboxChange(isChecked)"
 	>
 	</dtable>
 </div>

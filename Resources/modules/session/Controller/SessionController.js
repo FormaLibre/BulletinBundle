@@ -67,9 +67,10 @@ export default class SessionController {
     }
 
     onHeaderCheckboxChange(isChecked) {
+        console.log('gotcha');
         var route = (isChecked) ?
-            Routing.generate('formalibre_bulletin_add_search_sessions', {'periode': AngularApp.periode}):
-            Routing.generate('formalibre_bulletin_remove_search_sessions', {'periode': AngularApp.periode});
+            Routing.generate('api_check_all_sessions_from_search', {'periode': AngularApp.periode}):
+            Routing.generate('api_remove_all_sessions_from_search', {'periode': AngularApp.periode});
 
         var qs = '?';
         for (var i = 0; i < this.savedSearch.length; i++) {
