@@ -11,6 +11,7 @@ use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Entity\MatiereOptions;
 use FormaLibre\BulletinBundle\Entity\Periode;
+use FormaLibre\BulletinBundle\Entity\LockStatus;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use JMS\DiExtraBundle\Annotation as DI;
@@ -60,6 +61,7 @@ class BulletinManager
         $this->pepdpRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
         $this->pempRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
         $this->pointDiversRepo = $om->getRepository('FormaLibreBulletinBundle:PointDivers');
+        $this->lockStatusRepo = $om->getRepository('FormaLibreBulletinBundle:LockStatus');
     }
 
     public function getTaggedGroups()
@@ -433,6 +435,7 @@ class BulletinManager
     }
 
     //this method should not exist
+    //totaux et positions devraient être récupérés depuis la matière et pas les pemps
     public function refresh(Periode $periode)
     {
         $options = array();
@@ -566,5 +569,22 @@ class BulletinManager
     {
         $this->om->remove($periode);
         $this->om->flush();
+    }
+
+    public function getLockStatus(User $user, CourseSession $session, Periode $periode) 
+    {
+        $lockStatus = $this->lockStatusRepo->findOneBy(array('matiere' => $session, 'periode' => $periode));
+
+        if (!$lockStatus) {
+            $lockStatus = new LockStatus();
+            $lockStatus->setMatiere($session);
+            $lockStatus->setPeriode($periode);
+            $lockStatus->setTeacher($user);
+            $lockStatus->setLockStatus(false);
+            $this->om->persist($lockStatus);
+            $this->om->flush();
+        }
+
+        return $lockStatus;
     }
 }

@@ -16,7 +16,11 @@ class MatiereType extends AbstractType
     
     public function buildForm(FormBuilderInterface $builder, array $options){
         $builder->add('pemps', 'collection', array('type' => new PeriodeEleveProfPointType($this->lockStatus)));
-        $builder->add('save', 'submit', array('label'=>'Enregistrer','attr' => array('class' => 'btn btn-primary')));
+        $builder->add(
+            'save', 
+            'submit', 
+            array('label'=>'Enregistrer et verouiller', 'attr' => array('class' => 'btn btn-primary'))
+        );
     }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver){

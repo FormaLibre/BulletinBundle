@@ -305,7 +305,7 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/periode/{periode}/{eleve}/edit/",
+     *     "/periode/{periode}/eleve/{eleve}/edit/",
      *     name="formalibreBulletinEditEleve",
      *     options = {"expose"=true}
      * )
@@ -397,6 +397,7 @@ class BulletinController extends Controller
         $this->checkOpen();
         $eleves = $this->cursusManager->getUsersBySessionAndType($matiere, 0);
         $pempCollection = new Pemps;
+
         foreach ( $eleves as $eleve){
             $pempCollection->getPemps()->add(
                 $this->bulletinManager->getPempByPeriodeAndUserAndMatiere(
@@ -416,6 +417,10 @@ class BulletinController extends Controller
             foreach ($pempCollection as $pemp){
                 $this->em->persist($pemp);
             }
+
+            $lockStatus = $this->bulletinManager->getLockStatus($user, $matiere, $periode);
+            $lockStatus->setLockStatus(true);
+            $this->om->persist($lockStatus);
             $this->em->flush();
 
             return $this->redirect($this->generateUrl(
@@ -805,26 +810,32 @@ class BulletinController extends Controller
      */
     public function lockPointsAction(User $user, CourseSession $session, Periode $periode)
     {   
-        $actualLockStatus = $this->lockStatusRepo->findOneBy(array(
-                                                             'matiere'=>$session,
-                                                             'periode'=>$periode));
-        if (is_null($actualLockStatus))
-        {
-            $newLockStatus = new LockStatus();
-            $newLockStatus -> setMatiere($session);
-            $newLockStatus -> setPeriode($periode);
-            $newLockStatus -> setTeacher($user);
-            $newLockStatus -> setLockStatus(true);
-            $this->em->persist($newLockStatus);
-            $this->em->flush();
-        }
-        else
-        {
-            $this->em->remove($actualLockStatus);
-            $this->em->flush();
-        }
-        
-        return new JsonResponse('success', 200);
+        $lockStatus = $this->bulletinManager->getLockStatus($user, $session, $periode);
+        $lockStatus->setLockStatus(true);
+        $this->om->persist($lockStatus);
+        $this->om->flush();
+
+        return new JsonResponse('success');
+    }
+
+     /**
+     * @EXT\Route(
+     *     "/bulletin/unlockPoints/periode/{periode}/session/{session}",
+     *     name="formalibreBulletinUnlockPoint",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
+     *
+     */
+    public function unlockPointsAction(User $user, CourseSession $session, Periode $periode)
+    {   
+        $lockStatus = $this->bulletinManager->getLockStatus($user, $session, $periode);
+        $lockStatus->setLockStatus(false);
+        $this->om->persist($lockStatus);
+        $this->om->flush();
+
+        return new JsonResponse('success');
     }
 }
 

@@ -39,44 +39,49 @@
                     <tr>
                         <td class="matiere">
                             {% for matiere in matieres %}
-                                {% if matiere.getId()== pemp.vars.value.matiere.getId %}
-                                {{matiere.getCourseTitle()}}
+                                {% if matiere.getId() == pemp.vars.value.matiere.getId %}
+                                {{ matiere.getCourseTitle() }}
                                 {% endif %}
                             {% endfor %}
-                            <td class="point">{{ form_widget(pemp.point) }}</td>
-                            <td class="total">{{ form_widget(pemp.total) }}</td>
-                            {% if periode.onlyPoint != 1 %}
-                                {% if hasSecondPoint %}
-                                    <td class="presence">{{ form_widget(pemp.presence) }}</td>
-                                {% endif %}
+                        </td>
+                        <td class="point">{{ form_widget(pemp.point) }}</td>
+                        <td class="total">{{ form_widget(pemp.total) }}</td>
 
-                                {% if hasThirdPoint %}
-                                    <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
-                                {% endif %}
+                        {% if periode.onlyPoint != 1 %}
+                            {% if hasSecondPoint %}
+                                <td class="presence">{{ form_widget(pemp.presence) }}</td>
                             {% endif %}
 
-                            {% if isBulletinAdmin %}
-                                <td>
-                                    <i class="btn btn-danger fa fa-trash delete-pemp-btn"
-                                       data-periode-id="{{ periode.getId() }}"
-                                       data-eleve-id="{{ eleve.getId() }}"
-                                       data-matiere-id="{{pemp.vars.value.matiere.getId}}"
-                                    >
-                                    </i>
-                                    <button class="btn btn-warning verouiller-btn" 
-                                            data-matiere-id="{{ pemp.vars.value.matiere.getId }}"
-                                            type="submit">
-                                        {% set testUnlock=''%}
-                                        {% for oneLockStatus in allLockStatus if oneLockStatus.getMatiere.getId()==pemp.vars.value.matiere.getId%}
-                                            <i class="fa fa-lock"></i>
-                                            {% set testUnlock = 1%}
-                                        {% endfor %}
-                                        {% if testUnlock !=1 %}
-                                            <i class="fa fa-unlock"></i>
+                            {% if hasThirdPoint %}
+                                <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if isBulletinAdmin %}
+                           <td>
+                                <i class="btn btn-danger fa fa-trash delete-pemp-btn"
+                                   data-periode-id="{{ periode.getId() }}"
+                                   data-eleve-id="{{ eleve.getId() }}"
+                                   data-matiere-id="{{pemp.vars.value.matiere.getId}}"
+                                >
+                                </i>
+                                    {% set locked = false %}
+
+                                    {% for oneLockStatus in allLockStatus %} 
+                                        {% if oneLockStatus.getMatiere.getId() == pemp.vars.value.matiere.getId and oneLockStatus.getPeriode().getId() == periode.getId() %}
+                                            {% set locked = oneLockStatus.getLockStatus() %}
                                         {% endif %}
-                            {% endif %} 
-                                    </button>
-                                 </td>
+                                    {% endfor %}
+      
+                                    {% set params = {'session': pemp.vars.value.matiere.getId, 'periode': periode.getId()} %}
+                                    {% if locked %}
+                                        <a class="btn btn-warning lock-btn" href="{{ path('formalibreBulletinUnlockPoint', params) }}"> <i class="fa fa-unlock" href="{{ path('formalibreBulletinUnlockPoint', params) }}"></i> </a>
+                                    {% else %}
+                                        <a class="btn btn-warning lock-btn" href={{ path('formalibreBulletinLockPoint', params) }}> <i href={{ path('formalibreBulletinLockPoint', params) }} class="fa fa-lock"></i> </a>
+                                    {% endif %}
+                                </button>
+                            </td>
+                        {% endif %} 
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -96,19 +101,19 @@
 {% block javascripts %}
     {{ parent() }}
     <script
-            src='{{ asset('bundles/formalibrebulletin/js/bulletinEdit.js') }}'
-            type="text/javascript">
+        src='{{ asset('bundles/formalibrebulletin/js/bulletinEdit.js') }}'
+        type="text/javascript">
     </script>
     <script>
-        $(".verouiller-btn").on("click",function(){
-        var periode={{periode.getId()}}
-        var matiere=$(this).data("matiere-id");
+        $(".lock-btn").on("click", function(event) {
+        event.preventDefault();
+        var url = $(event.target).attr('href');
         $.ajax({
-                url: Routing.generate("formalibreBulletinLockPoint",{"session":matiere,"periode":periode}),
-                onSuccess: function(data) {
-                    window.location.reload();
-                }    
-            });
+            url: url,
+            success: function(data) {
+               window.location.reload();
+            }
+        });
      });
     </script>
 {% endblock %}

@@ -56,6 +56,7 @@ class SessionController extends FOSRestController
     public function getSearchPeriodeAdminSessionAction(Periode $periode, $page, $limit)
     {
         $this->throwExceptionIfNotBulletinAdmin();
+        $linkedSessionsIds = array();
 
         //wtf
         foreach ($periode->getCourseSessions() as $link) {

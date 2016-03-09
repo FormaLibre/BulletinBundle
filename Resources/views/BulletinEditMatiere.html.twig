@@ -56,13 +56,13 @@
                 {% endfor %}
                 </tbody>
             </table>
-            {{ form_widget(form.save) }}
-            <button class="btn btn-warning verouiller-btn" type="submit">
-            {% if lock == false%}
-            {{ "Verouiller" }}
+            {% if lock == true %}
+                <a class="btn btn-warning unlock-btn">
+                    {{ "Déverouiller" }}
+                </a>
             {% else %}
-            {{ "Déverouiller"  }}
-            {% endif %}</button>
+                {{ form_widget(form.save) }}
+            {% endif %}
         </form>
     </div>
 
@@ -75,11 +75,11 @@
             type="text/javascript">
     </script>
     <script>
-        $(".verouiller-btn").on("click",function(){
-            var matiere ={{matiere.getId()}}
-            var periode ={{periode.getId()}};
+        $(".unlock-btn").on("click",function(){
+            var matiere ={{ matiere.getId() }};
+            var periode ={{ periode.getId() }};
             $.ajax({
-                url: Routing.generate("formalibreBulletinLockPoint",{"session":matiere,"periode":periode}),
+                url: Routing.generate("formalibreBulletinUnlockPoint", {"session":matiere, "periode":periode}),
                 onSuccess: function(data) {
                     window.location.reload();
                 }    
