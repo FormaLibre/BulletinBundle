@@ -58,7 +58,7 @@
             </table>
             {% if lock == true %}
                 <a class="btn btn-warning unlock-btn">
-                    {{ "Déverouiller" }}
+                    {{ "Modifier" }}
                 </a>
             {% else %}
                 {{ form_widget(form.save) }}
@@ -80,7 +80,7 @@
             var periode ={{ periode.getId() }};
             $.ajax({
                 url: Routing.generate("formalibreBulletinUnlockPoint", {"session":matiere, "periode":periode}),
-                onSuccess: function(data) {
+                success: function(data) {
                     window.location.reload();
                 }    
             });
