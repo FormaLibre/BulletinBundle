@@ -32,6 +32,7 @@ class BulletinManager
     private $pempRepo;
     private $pepdpRepo;
     private $pointDiversRepo;
+    private $periodeRepo;
 
     /**
      * @DI\InjectParams({
@@ -62,6 +63,7 @@ class BulletinManager
         $this->pempRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
         $this->pointDiversRepo = $om->getRepository('FormaLibreBulletinBundle:PointDivers');
         $this->lockStatusRepo = $om->getRepository('FormaLibreBulletinBundle:LockStatus');
+        $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
     }
 
     public function getTaggedGroups()
@@ -586,5 +588,10 @@ class BulletinManager
         }
 
         return $lockStatus;
+    }
+
+    public function searchGroupsUsers($groups = array(), $searches = array())
+    {
+        return count($groups) === 0 ? array() : $this->periodeRepo->findSearchedGroupsUsers($groups, $searches);
     }
 }

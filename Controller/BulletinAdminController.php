@@ -1127,5 +1127,20 @@ class BulletinAdminController extends Controller
         return array('periodesGroupId'=>$periodesGroupId,
                      'form' => $form->createView());    
     }
-    
+
+    /**
+     * @EXT\Route(
+     *     "/admin/all/periodes/points/edition",
+     *     name="formalibre_bulletin_all_periodes_points_edition",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/allPeriodesPointsEdition.html.twig")
+     */
+    public function adminAllPeriodesPointsEditionAction()
+    {
+        $this->checkOpen();
+
+        return array();
+    }
 }
