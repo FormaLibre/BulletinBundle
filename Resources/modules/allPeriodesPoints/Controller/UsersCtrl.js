@@ -12,14 +12,14 @@ export default class UsersCtrl {
         name: Translator.trans('first_name', {}, 'platform'),
         prop: "firstName",
         cellRenderer: scope => {
-          return `<a ui-sref="points({userId: ${scope.$row['id']}, groupId: '${scope.$row['groupId']}'})">${scope.$row['firstName']}</a>`
+          return `<a ui-sref="points({userId: ${scope.$row['id']}})">${scope.$row['firstName']}</a>`
         }
       },
       {
         name: Translator.trans('last_name', {}, 'platform'),
         prop: "lastName",
         cellRenderer: scope => {
-          return `<a ui-sref="points({userId: ${scope.$row['id']}, groupId: '${scope.$row['groupId']}'})">${scope.$row['lastName']}</a>`
+          return `<a ui-sref="points({userId: ${scope.$row['id']}})">${scope.$row['lastName']}</a>`
         }
       },
       {

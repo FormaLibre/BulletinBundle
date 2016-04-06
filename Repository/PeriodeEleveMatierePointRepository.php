@@ -60,4 +60,19 @@ class PeriodeEleveMatierePointRepository extends EntityRepository
 
         return $query->getResult();
     }
+
+    public function findPempsByUserAndIds(User $user, array $ids)
+    {
+        $dql = '
+            SELECT pemp
+            FROM FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint pemp
+            WHERE pemp.eleve = :eleve
+            AND pemp.id IN (:ids)
+        ';
+        $query = $this->_em->createQuery($dql);
+        $query->setParameter('eleve', $user);
+        $query->setParameter('ids', $ids);
+
+        return $query->getResult();
+    }
 }

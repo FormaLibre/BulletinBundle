@@ -1,1 +1,52 @@
-Mes points ({{ pc.userId }} - {{ pc.groupId }})
+<h3>{{ pc.user.firstName }} {{ pc.user.lastName }}</h3>
+<hr>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-condensed">
+        <tr>
+            <td></td>
+            <th ng-repeat="periode in pc.periodes">
+                {{ periode['name'] }}
+            </th>
+        </tr>
+        <tr ng-repeat="datas in pc.pointsDatas">
+            <th>
+                {{ datas['matiereName'] }}
+            </th>
+            <td ng-repeat="periode in pc.periodes">
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="pc.pemps[datas['periodes'][periode['id']]['pempId']]">
+                    <span class="input-group-addon">
+                        / {{ datas['total'] * periode['coefficient'] }}
+                    </span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th>{{ 'various_points'|trans:{}:'bulletin' }}</th>
+            <td ng-repeat="periode in pc.periodes">
+                <div class="table-responsive">
+                    <table class="table table-condensed">
+                        <tr ng-repeat="pointDivers in periode['pointsDivers']">
+                            <th>
+                                {{ pointDivers['name'] }}
+                                <span ng-if="pointDivers['withTotal']">
+                                    ({{ pointDivers['total'] }})
+                                </span>
+                            </th>
+                            <td>
+                                <input type="text" class="form-control" ng-model="pc.pepdps[pointDivers['pepdpId']]">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<hr>
+<button class="btn btn-primary" ng-click="pc.validate()">
+    {{ 'ok'|trans:{}:'platform' }}
+</button>
+<button class="btn btn-default" ui-sref="users">
+    {{ 'cancel'|trans:{}:'platform' }}
+</button>

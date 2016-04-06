@@ -7,7 +7,7 @@ export default function($stateProvider, $urlRouterProvider) {
       controllerAs: 'uc'
     })
     .state ('points', {
-      url: '/users/{userId}/group/{groupId}',
+      url: '/users/{userId}',
       template: require('./Partial/points.html'),
       controller: 'PointsCtrl',
       controllerAs: 'pc'

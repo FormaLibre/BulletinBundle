@@ -40,4 +40,19 @@ class PeriodeElevePointDiversPointRepository extends EntityRepository
 
         return $query->getResult();
     }
+
+    public function findPepdpsByUserAndIds(User $user, array $ids)
+    {
+        $dql = '
+            SELECT pepdp
+            FROM FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint pepdp
+            WHERE pepdp.eleve = :eleve
+            AND pepdp.id IN (:ids)
+        ';
+        $query = $this->_em->createQuery($dql);
+        $query->setParameter('eleve', $user);
+        $query->setParameter('ids', $ids);
+
+        return $query->getResult();
+    }
 }
