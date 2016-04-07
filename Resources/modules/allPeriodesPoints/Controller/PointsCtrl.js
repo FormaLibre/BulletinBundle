@@ -8,6 +8,7 @@ export default class PointsCtrl {
     this.matieresPeriodes = {}
     this.pemps = {}
     this.pepdps = {}
+    this.codes = []
     this.initialize()
   }
 
@@ -18,24 +19,10 @@ export default class PointsCtrl {
       this.pointsDatas = d['data']['matieres']
       this.periodes = d['data']['periodes']
       this.matieresPeriodes = d['data']['matieresPeriodes']
+      this.pemps = d['data']['pemps']
+      this.pepdps = d['data']['pepdps']
       console.log(`Nb points : ${d['data']['nbUserPoints']}`)
       console.log(`Nb points divers : ${d['data']['nbUserPointsDivers']}`)
-
-      for (const matiereId in this.pointsDatas) {
-        const periodes = this.pointsDatas[matiereId]['periodes']
-
-        for (const periodeId in periodes) {
-          this.pemps[periodes[periodeId]['pempId']] = periodes[periodeId]['point']
-        }
-      }
-
-      for (const periodeId in this.periodes) {
-        const pointsDivers = this.periodes[periodeId]['pointsDivers']
-
-        for (const pointDiversId in pointsDivers) {
-          this.pepdps[pointsDivers[pointDiversId]['pepdpId']] = pointsDivers[pointDiversId]['point']
-        }
-      }
     })
   }
 
@@ -59,5 +46,28 @@ export default class PointsCtrl {
         this.pepdps[pepdpId] = pointsDiversDatas[pepdpId]
       }
     })
+  }
+
+  computeMatiereTotal (matiereId) {
+    let points = 0
+    let total = 0
+    let percentage = 0
+
+    for (let periodeId in this.pointsDatas[matiereId]['periodes']) {
+      if (this.pointsDatas[matiereId]['periodes'][periodeId]['pempId'] && this.pointsDatas[matiereId]['periodes'][periodeId]['total']) {
+        const pempId = this.pointsDatas[matiereId]['periodes'][periodeId]['pempId']
+        total += parseInt(this.pointsDatas[matiereId]['periodes'][periodeId]['total'])
+        points += this.pemps[pempId] && (this.codes.indexOf(parseFloat(this.pemps[pempId])) === -1) ?
+          parseFloat(this.pemps[pempId]) :
+          0
+      }
+    }
+
+    if (total > 0) {
+      const ratio = total / 100
+      percentage = points / ratio
+    }
+
+    return `${percentage} %`
   }
 }

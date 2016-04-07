@@ -73,31 +73,39 @@ class PeriodeController extends FOSRestController
         $datas = $this->bulletinManager->getAllPeriodesUserMatieresDatas($user);
         $periodesDatas = $datas['periodesDatas'];
         $userMatieresDatas = $datas['userMatieresDatas'];
-        $allUserPoints = $this->bulletinManager->getAllUserPoints($user);
-        $allUserPointsDivers = $this->bulletinManager->getAllUserPointsDivers($user);
+        $pemps = $this->bulletinManager->getAllUserPoints($user);
+        $pepdps = $this->bulletinManager->getAllUserPointsDivers($user);
+        $pempsDatas = array();
+        $pepdpsDatas = array();
 
-        foreach ($allUserPoints as $point) {
-            $matiere = $point->getMatiere();
-            $periode = $point->getPeriode();
+        foreach ($pemps as $pemp) {
+            $pempId = $pemp->getId();
+            $point = $pemp->getPoint();
+            $matiere = $pemp->getMatiere();
+            $periode = $pemp->getPeriode();
             $matiereId = $matiere->getId();
             $periodeId = $periode->getId();
 
             if (isset($userMatieresDatas[$matiereId]['periodes'][$periodeId])) {
-                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $point->getId();
-                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['point'] = $point->getPoint();
-                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $point->getTotal();
+                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $pempId;
+                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['point'] = $point;
+                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $pemp->getTotal();
+                $pempsDatas[$pempId] = $point;
             }
         }
 
-        foreach ($allUserPointsDivers as $pointDiversPoint) {
-            $pointDivers = $pointDiversPoint->getDivers();
+        foreach ($pepdps as $pepdp) {
+            $pepdpId = $pepdp->getId();
+            $point = $pepdp->getPoint();
+            $pointDivers = $pepdp->getDivers();
             $pointDiversId = $pointDivers->getId();
-            $periode = $pointDiversPoint->getPeriode();
+            $periode = $pepdp->getPeriode();
             $periodeId = $periode->getId();
 
             if (isset($periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId])) {
-                $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['pepdpId'] = $pointDiversPoint->getId();
-                $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['point'] = $pointDiversPoint->getPoint();
+                $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['pepdpId'] = $pepdpId;
+                $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['point'] = $point;
+                $pepdpsDatas[$pepdpId] = $point;
             }
         }
 
@@ -106,8 +114,10 @@ class PeriodeController extends FOSRestController
             'matieres' => $userMatieresDatas,
             'periodes' => $periodesDatas['periodes'],
             'matieresPeriodes' => $periodesDatas['matieresPeriodes'],
-            'nbUserPoints' => count($allUserPoints),
-            'nbUserPointsDivers' => count($allUserPointsDivers)
+            'nbUserPoints' => count($pempsDatas),
+            'nbUserPointsDivers' => count($pepdps),
+            'pemps' => $pempsDatas,
+            'pepdps' => $pepdpsDatas
         );
     }
 

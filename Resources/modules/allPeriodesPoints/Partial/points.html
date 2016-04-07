@@ -7,6 +7,9 @@
             <th ng-repeat="periode in pc.periodes">
                 {{ periode['name'] }}
             </th>
+            <th>
+                {{ 'total'|trans:{}:'platform' }}
+            </th>
         </tr>
         <tr ng-repeat="datas in pc.pointsDatas">
             <th>
@@ -16,9 +19,11 @@
                 <div class="input-group">
                     <input type="text" class="form-control" ng-model="pc.pemps[datas['periodes'][periode['id']]['pempId']]">
                     <span class="input-group-addon">
-                        / {{ datas['total'] * periode['coefficient'] }}
+                        / {{ datas['total'] * periode['coefficient'] }} ({{ datas['periodes'][periode['id']]['pempId'] }})
                     </span>
                 </div>
+            </td>
+            <td ng-bind="pc.computeMatiereTotal(datas['matiereId'])">
             </td>
         </tr>
         <tr>
