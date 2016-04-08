@@ -43,6 +43,15 @@
                         {{"Période 4"}}{{ form_widget(form.oldPeriode5) }}</br>
                     </div>
                     {{"Pondération de la période"}}{{ form_widget(form.coefficient) }}
+                    <br>
+                    <div>
+                        <div class="col-md-3">{{ 'locked'|trans({}, 'platform') }}</div>
+                        <div class="col-md-9">{{ form_widget(form.locked) }}</div>
+                    </div>
+                    <div>
+                        <div class="col-md-3">{{ 'published'|trans({}, 'platform') }}</div>
+                        <div class="col-md-9">{{ form_widget(form.published) }}</div>
+                    </div>
                 </div>
             </form>
         </div>

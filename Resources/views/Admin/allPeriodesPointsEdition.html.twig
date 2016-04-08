@@ -1,0 +1,26 @@
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h1>{{ 'class_council'|trans({}, 'bulletin') }}</h1>
+    </div>
+    <div class="panel-body">
+        <div ng-cloak="" ng-app="AllPeriodesPointsModule">
+            <div ui-view>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('vendor/angular-ui.css')}}"> </link>
+    {# we should be able to remove the following line if it's included in angular-ui.css #}
+    {#<link rel="stylesheet" href="{{ asset('bundles/clarolinecore/css/common/select.css') }}"></link>#}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ url('bazinga_jstranslation_js', { 'domain': 'bulletin' }) }}"></script>
+    <script src="{{ hotAsset('dist/formalibre-bulletin-all-periodes-points.js') }}"></script>
+{% endblock %}

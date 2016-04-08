@@ -27,11 +27,14 @@ class BulletinManager
     private $pagerFactory;
     private $platformConfigHandler;
 
+
     private $groupeTitulaireRepo;
     private $matiereOptionsRepo;
     private $pempRepo;
     private $pepdpRepo;
     private $pointDiversRepo;
+    private $periodeRepo;
+    private $pointCodeRepo;
 
     /**
      * @DI\InjectParams({
@@ -62,6 +65,8 @@ class BulletinManager
         $this->pempRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
         $this->pointDiversRepo = $om->getRepository('FormaLibreBulletinBundle:PointDivers');
         $this->lockStatusRepo = $om->getRepository('FormaLibreBulletinBundle:LockStatus');
+        $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
+        $this->pointCodeRepo = $om->getRepository('FormaLibreBulletinBundle:PointCode');
     }
 
     public function getTaggedGroups()
@@ -137,6 +142,13 @@ class BulletinManager
         return $matieres;
     }
 
+    public function getGroupsByPeriode(Periode $periode)
+    {
+        $matieres = $periode->getMatieres();
+
+        return $this->getGroupsByMatieres($matieres);
+    }
+
     public function getGroupsByMatiere(CourseSession $matiere)
     {
         $groups = array();
@@ -156,7 +168,46 @@ class BulletinManager
             $sessionGroups = $query->getResult();
 
             foreach ($sessionGroups as $sessionGroup) {
-                $groups[] = $sessionGroup->getGroup();
+                $group = $sessionGroup->getGroup();
+                $groupId = $group->getId();
+
+                if (!isset($groups[$groupId])) {
+                    $groups[$groupId] = $group;
+                }
+            }
+        }
+
+        return $groups;
+    }
+
+    public function getGroupsByMatieres(array $matieres)
+    {
+        $groups = array();
+
+        if (count($matieres) > 0) {
+            $taggedGroups = $this->getTaggedGroups();
+
+            if (count($taggedGroups) > 0) {
+                $qb = $this->em->createQueryBuilder();
+                $qb->select('csg')
+                    ->from('Claroline\CursusBundle\Entity\CourseSessionGroup', 'csg')
+                    ->where('csg.groupType = :groupType')
+                    ->andWhere('csg.session IN (:sessions)')
+                    ->andWhere('csg.group IN (:groups)')
+                    ->setParameter('groupType', 0)
+                    ->setParameter('sessions', $matieres)
+                    ->setParameter('groups', $taggedGroups);
+                $query = $qb->getQuery();
+                $sessionGroups = $query->getResult();
+
+                foreach ($sessionGroups as $sessionGroup) {
+                    $group = $sessionGroup->getGroup();
+                    $groupId = $group->getId();
+
+                    if (!isset($groups[$groupId])) {
+                        $groups[$groupId] = $group;
+                    }
+                }
             }
         }
 
@@ -210,6 +261,8 @@ class BulletinManager
         $pemp = $this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere);
 
         if (is_null($pemp)) {
+            $defaultPointCode = $this->getDefaultPointCode();
+            $defaultCode = is_null($defaultPointCode) ? null : $defaultPointCode->getCode();
             $matiereOptions = $this->getOptionsByMatiere($matiere);
             $coefficient = $periode->getCoefficient();
             $totalMatiere = $matiereOptions->getTotal();
@@ -220,6 +273,7 @@ class BulletinManager
             $pemp->setEleve($eleve);
             $pemp->setMatiere($matiere);
             $pemp->setTotal($total);
+            $pemp->setPoint($defaultCode);
             $pemp->setPeriode($periode);
             $pemp->setPosition($matiereOptions->getPosition());
             $this->om->persist($pemp);
@@ -234,6 +288,8 @@ class BulletinManager
         $matieres = $this->getMatieresByEleveAndPeriode($eleve, $periode);
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
         $matiereIds = array();
+        $defaultPointCode = $this->getDefaultPointCode();
+        $defaultCode = is_null($defaultPointCode) ? null : $defaultPointCode->getCode();
 
         foreach ($pemps as $pemp) {
             $matiereIds[] = $pemp->getMatiere()->getId();
@@ -254,6 +310,7 @@ class BulletinManager
                 $pemp->setEleve($eleve);
                 $pemp->setMatiere($matiere);
                 $pemp->setTotal($total);
+                $pemp->setPoint($defaultCode);
                 $pemp->setPeriode($periode);
                 $pemp->setPosition($matiereOptions->getPosition());
                 $this->om->persist($pemp);
@@ -586,5 +643,300 @@ class BulletinManager
         }
 
         return $lockStatus;
+    }
+
+    public function searchGroupsUsers($groups = array(), $searches = array())
+    {
+        return count($groups) === 0 ? array() : $this->periodeRepo->findSearchedGroupsUsers($groups, $searches);
+    }
+
+    public function getAllMatieresDatas()
+    {
+        $matieres = array();
+        $periodesDatas = array();
+        $periodes = $this->periodeRepo->findAll();
+
+        foreach ($periodes as $periode) {
+            $periodeId = $periode->getId();
+            $periodeMatieres = $periode->getMatieres();
+
+            foreach ($periodeMatieres as $matiere) {
+                $matiereId = $matiere->getId();
+
+                if (!isset($matieres[$matiereId])) {
+                    $matieres[$matiereId] = $matiere;
+                }
+
+                if (!isset($periodesDatas[$matiereId])) {
+                    $periodesDatas[$matiereId] = array();
+                }
+                $periodesDatas[$matiereId][] = $periode;
+            }
+        }
+
+        return array ('matieres' => $matieres, 'periodesMatieres' => $periodesDatas);
+    }
+
+    public function getAllPeriodesUserMatieresDatas(User $user)
+    {
+//        $matieresDatas = array();
+        $userMatieresDatas = array();
+        $allMatieresDatas = $this->getAllMatieresDatas();
+        $allMatieres = $allMatieresDatas['matieres'];
+        $periodesMatieres = $allMatieresDatas['periodesMatieres'];
+        $userMatieres = $this->getAllUserMatieres($user, $allMatieres);
+        $userPeriodesDatas = $this->getUserPeriodesDatasFromMatieres($userMatieres, $periodesMatieres);
+        $userMatieresPeriodes = $userPeriodesDatas['matieresPeriodes'];
+        $matiereOptions = $this->getMatiereOptionsByMatieres($userMatieres);
+
+        foreach ($matiereOptions as $options) {
+            $matiere = $options->getMatiere();
+            $total = $options->getTotal();
+            $position = $options->getPosition();
+            $matiereId = $matiere->getId();
+            $matiereName = $matiere->getCourseTitle();
+
+            $datas = array(
+                'matiereId' => $matiereId,
+                'matiereName' => $matiereName,
+                'total' => $total,
+                'position' => $position,
+                'periodes' => isset($userMatieresPeriodes[$matiereId]) ? $userMatieresPeriodes[$matiereId] : array()
+            );
+            $userMatieresDatas[$matiereId] = $datas;
+        }
+
+        return array('periodesDatas' => $userPeriodesDatas, 'userMatieresDatas' => $userMatieresDatas);
+    }
+
+    public function getAllUserMatieres(User $user, array $allMatieres)
+    {
+        $matieres = array();
+        $sessionsUsers = count($allMatieres) > 0 ?
+            $this->matiereOptionsRepo->findAllSessionsUsersFromSessions($user, $allMatieres) :
+            array();
+
+        foreach ($sessionsUsers as $sessionUser){
+            $matiere = $sessionUser->getSession();
+            $matiereId = $matiere->getId();
+            $matieres[$matiereId] = $matiere;
+        }
+
+        return $matieres;
+    }
+
+    public function getMatiereOptionsByMatieres(array $matieres)
+    {
+        return $this->matiereOptionsRepo->findMatiereOptionsByMatieres($matieres);
+    }
+
+    private function getUserPeriodesDatasFromMatieres(array $matieres, array $periodesDatas)
+    {
+        $periodes = array();
+        $matieresPeriodes = array();
+
+        foreach ($matieres as $matiere) {
+            $matiereId = $matiere->getId();
+            $matierePeriodes = isset($periodesDatas[$matiereId]) ? $periodesDatas[$matiereId] : array();
+            $matieresPeriodes[$matiereId] = array();
+
+            foreach ($matierePeriodes as $periode) {
+                $periodeId = $periode->getId();
+                $periodeName = $periode->getName();
+                $periodeOnlyPoint = $periode->getOnlyPoint();
+                $periodeDegre = $periode->getDegre();
+                $periodeAnnee = $periode->getAnnee();
+                $periodeCoefficient = $periode->getCoefficient();
+                $pointsDivers = $periode->getPointDivers();
+
+                $periodes[$periodeId] = array(
+                    'id' => $periodeId,
+                    'name' => $periodeName,
+                    'onlyPoint' => $periodeOnlyPoint,
+                    'degre' => $periodeDegre,
+                    'annee' => $periodeAnnee,
+                    'coefficient' => $periodeCoefficient,
+                    'pointsDivers' => array()
+                );
+                $matieresPeriodes[$matiereId][$periodeId] = array(
+                    'id' => $periodeId,
+                    'name' => $periodeName,
+                    'onlyPoint' => $periodeOnlyPoint,
+                    'degre' => $periodeDegre,
+                    'annee' => $periodeAnnee,
+                    'coefficient' => $periodeCoefficient
+                );
+
+                foreach($pointsDivers as $divers) {
+                    $diversId = $divers->getId();
+                    $periodes[$periodeId]['pointsDivers'][$diversId] = array(
+                        'id' => $diversId,
+                        'name' => $divers->getName(),
+                        'officialName' => $divers->getOfficialName(),
+                        'withTotal' => $divers->getWithTotal(),
+                        'total' => $divers->getTotal(),
+                        'position' => $divers->getPosition()
+                    );
+                }
+            }
+        }
+
+        return array('periodes' => $periodes, 'matieresPeriodes' => $matieresPeriodes);
+    }
+
+    public function getAllUserPoints(User $user)
+    {
+        return $this->pempRepo->findByEleve($user);
+    }
+
+    public function getAllUserPointsDivers(User $user)
+    {
+        return $this->pepdpRepo->findByEleve($user);
+    }
+
+    public function getPempsByUserAndIds(User $user, array $ids = array())
+    {
+        return count($ids) > 0 ? $this->pempRepo->findPempsByUserAndIds($user, $ids) : array();
+    }
+
+    public function getPepdpsByUserAndIds(User $user, array $ids = array())
+    {
+        return count($ids) > 0 ? $this->pepdpRepo->findPepdpsByUserAndIds($user, $ids) : array();
+    }
+
+    public function updatePoints(array $pemps, array $pepdps, array $pointsDatas, array $pointsDiversDatas)
+    {
+        $this->om->startFlushSuite();
+        $points = array();
+        $pointsDivers = array();
+
+        foreach ($pemps as $pemp) {
+            $id = $pemp->getId();
+
+            if (isset($pointsDatas[$id])) {
+                $pemp->setPoint(floatval($pointsDatas[$id]));
+                $points[$id] = $pemp->getPoint();
+            }
+        }
+
+        foreach ($pepdps as $pepdp) {
+            $id = $pepdp->getId();
+
+            if (isset($pointsDiversDatas[$id])) {
+                $pepdp->setPoint(floatval($pointsDiversDatas[$id]));
+                $pointsDivers[$id] = $pepdp->getPoint();
+            }
+        }
+        $this->om->endFlushSuite();
+
+        return array('points' => $points, 'pointsDivers' => $pointsDivers);
+    }
+
+    public function generateMissingPemps(User $user, array $matieresDatas)
+    {
+        $pemps = array();
+        $toFlush = false;
+        $defaultPointCode = $this->getDefaultPointCode();
+        $defaultCode = is_null($defaultPointCode) ? null : $defaultPointCode->getCode();
+
+        foreach ($matieresDatas as $matiereId => $datas) {
+            foreach ($datas['periodes'] as $periodeId => $periodeDatas) {
+                if (!isset($periodeDatas['pempId'])) {
+                    $matiereOptions = $this->matiereOptionsRepo->findMatiereOptionsByMatiereId($matiereId);
+                    $periode = $this->periodeRepo->findOneById($periodeId);
+
+                    if (!is_null($matiereOptions) && !is_null($periode)) {
+                        $matiere = $matiereOptions->getMatiere();
+                        $pemp = new PeriodeEleveMatierePoint();
+                        $pemp->setPeriode($periode);
+                        $pemp->setEleve($user);
+                        $pemp->setMatiere($matiere);
+                        $pemp->setTotal($matiereOptions->getTotal() * $periode->getCoefficient());
+                        $pemp->setPoint($defaultCode);
+                        $this->om->persist($pemp);
+                        $pemps[] = $pemp;
+                        $toFlush = true;
+                    }
+                }
+            }
+        }
+
+        if($toFlush) {
+            $this->om->flush();
+        }
+
+        return $pemps;
+    }
+
+    public function generateMissingPepdps(User $user, array $periodesDatas)
+    {
+        $pepdps = array();
+        $toFlush = false;
+
+        foreach ($periodesDatas as $periodeId => $datas) {
+            foreach ($datas['pointsDivers'] as $pointDiversId => $pointDiversDatas) {
+                if (!isset($pointDiversDatas['pepdpId'])) {
+                    $pointDivers = $this->pointDiversRepo->findOneById($pointDiversId);
+                    $periode = $this->periodeRepo->findOneById($periodeId);
+
+                    if (!is_null($pointDivers) && !is_null($periode)) {
+                        $pepdp = new PeriodeElevePointDiversPoint();
+                        $pepdp->setPeriode($periode);
+                        $pepdp->setEleve($user);
+                        $pepdp->setDivers($pointDivers);
+                        $pepdp->setPosition($pointDivers->getPosition());
+                        $pepdp->setTotal($pointDivers->getTotal());
+                        $this->om->persist($pepdp);
+                        $pepdps[] = $pepdp;
+                        $toFlush = true;
+                    }
+                }
+            }
+        }
+
+        if($toFlush) {
+            $this->om->flush();
+        }
+
+        return $pepdps;
+    }
+
+    public function getDefaultPointCode()
+    {
+        $defaultCodes = $this->getDefaultPointCodes();
+
+        return count($defaultCodes) > 0 ? $defaultCodes[0] : null;
+    }
+
+    public function getDefaultPointCodes()
+    {
+        return $this->pointCodeRepo->findDefaultPointCodes();
+    }
+
+    public function getPointCodeByCode($code)
+    {
+        return $this->pointCodeRepo->findOneByCode($code);
+    }
+
+    public function getAllPointCodes()
+    {
+        return $this->pointCodeRepo->findAll();
+    }
+
+    public function getIgnoredCodes()
+    {
+        $ignoredCodes = array();
+        $pointCodes = $this->pointCodeRepo->findIgnoredPointCodes();
+
+        foreach ($pointCodes as $pointCode) {
+            $ignoredCodes[] = $pointCode->getCode();
+        }
+
+        return $ignoredCodes;
+    }
+
+    public function getPublishedPeriodes()
+    {
+        return $this->periodeRepo->findByPublished(true);
     }
 }

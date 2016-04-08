@@ -237,6 +237,9 @@ class PeriodeEleveMatierePoint
         elseif ($this->point == 888){
             $pourcentage = 'CM';
         }
+        elseif ($this->point == 900){
+            $pourcentage = 'PNM';
+        }
         else {
             $pourcentage = empty($this->total) ? 0 : round(($this->point / $this->total) * 100, 1).' %';
         }

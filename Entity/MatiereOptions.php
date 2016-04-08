@@ -8,7 +8,7 @@ use JMS\Serializer\Annotation\Groups;
 use JMS\Serializer\Annotation\SerializedName;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="FormaLibre\BulletinBundle\Repository\MatiereOptionsRepository")
  * @ORM\Table(name="formalibre_bulletin_matiere_options")
  */
 class MatiereOptions
@@ -69,7 +69,7 @@ class MatiereOptions
 
     public function setMatiere(CourseSession $matiere)
     {
-        $this->setCourseSession($matière);
+        $this->setCourseSession($matiere);
     }
 
     public function setCourseSession(CourseSession $matiere)

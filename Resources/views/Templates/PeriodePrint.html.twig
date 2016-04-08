@@ -44,15 +44,10 @@
             </tr></thead>
             <tbody>
             {% for pemp in pemps %}
-            {% if pemp.point == 999 %}
+            {% if pemp.point in codesList %}
                 <tr>
                     <td class="firstcolumn">{{ pemp.matiere.getCourse().getTitle() }}</td>
-                    <td colspan="5" class="center">Non évalué</td>
-                </tr>
-            {% elseif pemp.point == 888 %}
-                <tr>
-                    <td class="firstcolumn">{{ pemp.matiere.getCourse().getTitle() }}</td>
-                    <td colspan="5" class="center">Certificat médical</td>
+                    <td colspan="5" class="center">{{ codesDatas[pemp.point]['info']|trans({}, 'bulletin') }}</td>
                 </tr>
             {% else %}
                 <tr class="">

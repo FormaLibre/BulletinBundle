@@ -96,7 +96,7 @@ class TotauxManager
         return $totalCoefficient;  
     }
   
-     public function getTotalPeriodes(User $eleve, Periode $periode)
+    public function getTotalPeriodes(User $eleve, Periode $periode)
     {
         $periodes = ($periode->getTemplate() === 'ExamPrintWithOnlyOnePeriodePrint') ?
                 array($periode->getOldPeriode1(), $periode):
@@ -104,6 +104,7 @@ class TotauxManager
         $totaux = array();
         $nbPeriodes = array();
         $coefficient = array();
+        $ignoredCodes = $this->bulletinManager->getIgnoredCodes();
 
         foreach ($periodes as $periode){
             $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
@@ -114,8 +115,9 @@ class TotauxManager
                     $nbPeriodes[$key] = 0;
                     $coefficient[$key] = 0;
                 }
+                $percentage = $pemp->getPourcentage();
 
-                if ($pemp->getPourcentage() != 999 && $pemp->getPourcentage() != 888){
+                if (!in_array($percentage, $ignoredCodes)){
                     $totaux[$key] += $pemp->getPourcentage()*$periode->getCoefficient();
                     $nbPeriodes[$key]++;
                     $coefficient[$key]+=$periode->getCoefficient();
@@ -139,6 +141,7 @@ class TotauxManager
         $totaux = array();
         $nbPeriodes = array();
         $coefficient = array();
+        $ignoredCodes = $this->bulletinManager->getIgnoredCodes();
 
         foreach ($periodes as $periode){
             $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
@@ -149,8 +152,9 @@ class TotauxManager
                     $nbPeriodes[$key] = 0;
                     $coefficient[$key] = 0;
                 }
+                $percentage = $pemp->getPourcentage();
 
-                if ($pemp->getPourcentage() != 999 && $pemp->getPourcentage() != 888){
+                if (!in_array($percentage, $ignoredCodes)){
                     $totaux[$key] += $pemp->getPourcentage()*$periode->getCoefficient();
                     $nbPeriodes[$key]++;
                     $coefficient[$key]+=$periode->getCoefficient();
@@ -171,6 +175,7 @@ class TotauxManager
     {
         $periodes = $this->periodeRepo->findAll();
         $totaux = array();
+        $ignoredCodes = $this->bulletinManager->getIgnoredCodes();
         
         foreach ($periodes as $periode) {
             $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
@@ -187,8 +192,9 @@ class TotauxManager
                     $totaux[$matiereId]['nbPeriodes'] = 0;
                     $totaux[$matiereId]['color'] = $matiereOptions->getColor();
                 }
+                $percentage = $pemp->getPourcentage();
                 
-                if ($pemp->getPourcentage() != 999 && $pemp->getPourcentage() != 888){
+                if (!in_array($percentage, $ignoredCodes)){
                     $totaux[$matiereId]['pourcentage'] += $pemp->getPourcentage();
                     $totaux[$matiereId]['nbPeriodes']++;
                 }
@@ -271,13 +277,18 @@ class TotauxManager
     {
         $periodes = $this->periodeRepo->findAll();
         $pourcPeriode = array();
+        $ignoredCodes = $this->bulletinManager->getIgnoredCodes();
 
         foreach ($periodes as $periode){
             $pemp = $this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere);
 
-            if (is_null($pemp) || $pemp->getPourcentage() == 999 || $pemp->getPourcentage() == 888){
+            if (!is_null($pemp)) {
+                $percentage = $pemp->getPourcentage();
+            }
+
+            if (is_null($pemp) || in_array($percentage, $ignoredCodes)) {
                 $pourcPeriode[] = '';
-            } else{
+            } else {
                 $pourcPeriode[] = round($pemp->getPourcentage(), 1);
             }
 
