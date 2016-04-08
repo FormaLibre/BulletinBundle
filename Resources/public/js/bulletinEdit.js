@@ -1,12 +1,22 @@
+var codes = [];
+
 $( document ).ready(function() {
+    $.ajax({
+        url: Routing.generate('api_get_point_codes'),
+        type: 'GET',
+        async: false,
+        success: function (datas) {
+            for (var i = 0; i < datas.length; i++) {
+                codes.push(datas[i]['code']);
+            }
+        }
+    });
+
     $('.point').each(function(){
         var point = parseFloat($(this).children('input').val());
         var total = parseFloat($(this).nextAll('.total').children('input').val());
-        if (point === 0 || point === 888 || point === 999){
-            $(this).addClass('has-success has-feedback');
-            $(this).append('<span class="fa fa-check form-control-feedback"></span>');
-        }
-        else if (( point > 0) && (point <= total)){
+
+        if (( point >= 0) && (point <= total) || codes.indexOf(point) !== -1){
             $(this).addClass('has-success has-feedback');
             $(this).append('<span class="fa fa-check form-control-feedback"></span>');
         }
@@ -55,11 +65,8 @@ $('.point').focusout(function(){
     $(this).children('span').remove();
     $(this).removeClass("has-error");
     $(this).removeClass("has-success");
-    if (point === 0 || point === 888 || point === 999){
-        $(this).addClass('has-success has-feedback');
-        $(this).append('<span class="fa fa-check form-control-feedback"></span>');
-    }
-    else if (( point > 0) && (point <= total)){
+
+    if (( point >= 0) && (point <= total) || codes.indexOf(point) !== -1){
         $(this).addClass('has-success has-feedback');
         $(this).append('<span class="fa fa-check form-control-feedback"></span>');
     }

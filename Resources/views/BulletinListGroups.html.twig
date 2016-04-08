@@ -1,6 +1,7 @@
 {% extends "ClarolineCoreBundle:Workspace:layout.html.twig" %}
 
 {% block section_content %}
+    {% set locked = periode.isLocked() %}
     <div class="panel-heading">
         <h1>Mes matières</h1>
     </div>
@@ -19,7 +20,7 @@
                             )
                         }}">
                             {{ group.getName() }}
-                        </a> 
+                        </a>
                     </td>
                 </tr>
             {% endfor %}
@@ -27,6 +28,7 @@
             {% for matiere in matieres %}
                 <tr>
                     <td>
+                        {% if not locked %}
                         <a href="{{
                             path (
                                 'formalibreBulletinListEleveProf', 
@@ -36,8 +38,14 @@
                                 }
                             )
                         }}">
+                        {% endif %}
+                            {% if locked %}
+                                <i class="fa fa-lock"></i>
+                            {% endif %}
                             {{ matiere.getCourse().getTitle() }} - {{ matiere.getName() }}
-                        </a> 
+                        {% if not locked %}
+                        </a>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}

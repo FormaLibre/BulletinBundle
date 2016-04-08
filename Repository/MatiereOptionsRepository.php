@@ -39,4 +39,19 @@ class MatiereOptionsRepository extends EntityRepository
 
         return $query->getResult();
     }
+
+    public function findMatiereOptionsByMatiereId($matiereId)
+    {
+        $dql = '
+            SELECT mo
+            FROM FormaLibre\BulletinBundle\Entity\MatiereOptions mo
+            JOIN mo.matiere m
+            WHERE m.id = :matiereId
+            ORDER BY mo.position ASC
+        ';
+        $query = $this->_em->createQuery($dql);
+        $query->setParameter('matiereId', $matiereId);
+
+        return $query->getOneOrNullResult();
+    }
 }

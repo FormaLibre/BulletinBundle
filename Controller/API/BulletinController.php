@@ -16,7 +16,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 /**
  * @NamePrefix("api_")
  */
-class PeriodeController extends FOSRestController
+class BulletinController extends FOSRestController
 {
     private $authorization;
     private $bulletinManager;
@@ -108,27 +108,66 @@ class PeriodeController extends FOSRestController
                 $pepdpsDatas[$pepdpId] = $point;
             }
         }
+        $createdPemps = $this->bulletinManager->generateMissingPemps($user, $userMatieresDatas);
+        $createdPepdps = $this->bulletinManager->generateMissingPepdps($user, $periodesDatas['periodes']);
+
+        foreach ($createdPemps as $pemp) {
+            $pempId = $pemp->getId();
+            $point = $pemp->getPoint();
+            $periodeId = $pemp->getPeriode()->getId();
+            $matiereId = $pemp->getMatiere()->getId();
+            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $pempId;
+            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['$point'] = $point;
+            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $pemp->getTotal();
+            $pempsDatas[$pempId] = $point;
+        }
+
+        foreach ($createdPepdps as $pepdp) {
+            $pepdpId = $pepdp->getId();
+            $point = $pepdp->getPoint();
+            $pointDiversId = $pepdp->getDivers()->getId();
+            $periodeId = $pepdp->getPeriode()->getId();
+            $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['pepdpId'] = $pepdpId;
+            $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['point'] = $point;
+            $pepdpsDatas[$pepdpId] = $point;
+        }
+        $codes = array();
+        $pointCodes = $this->bulletinManager->getAllPointCodes();
+
+        foreach ($pointCodes as $pointCode) {
+            $code = $pointCode->getCode();
+            $codes[$code] = array(
+                'code' => $code,
+                'info' => $pointCode->getInfo(),
+                'isDefaultValue' => $pointCode->getIsDefaultValue(),
+                'ignored' => $pointCode->getIgnored()
+            );
+        }
 
         return array(
             'user' => $userDatas,
             'matieres' => $userMatieresDatas,
             'periodes' => $periodesDatas['periodes'],
             'matieresPeriodes' => $periodesDatas['matieresPeriodes'],
-            'nbUserPoints' => count($pempsDatas),
+            'nbUserPoints' => count($pemps),
             'nbUserPointsDivers' => count($pepdps),
+            'nbCreatedUserPoints' => count($createdPemps),
+            'nbCreatedUserPointsDivers' => count($createdPepdps),
             'pemps' => $pempsDatas,
-            'pepdps' => $pepdpsDatas
+            'pepdps' => $pepdpsDatas,
+            'codes' => $codes
         );
     }
 
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
-    public function putAllUsersPointsAction(User $user, $points, $pointsDivers)
+    public function putAllUsersPointsAction(User $user)
     {
         $this->checkBulletinAdmin();
-        $pointsDatas = json_decode($points, true);
-        $pointsDiversDatas = json_decode($pointsDivers, true);
+        $datas = $this->request->query->all();
+        $pointsDatas = isset($datas['points']) ? $datas['points'] : array();
+        $pointsDiversDatas = isset($datas['pointsDivers']) ? $datas['pointsDivers'] : array();
         $pointsIds = array();
         $pointsDiversIds = array();
 
@@ -144,6 +183,28 @@ class PeriodeController extends FOSRestController
         $datas = $this->bulletinManager->updatePoints($pemps, $pepdps, $pointsDatas, $pointsDiversDatas);
 
         return $datas;
+    }
+
+    /**
+     * @View(serializerGroups={"api_bulletin"})
+     */
+    public function getPointCodesAction()
+    {
+        $codes = array();
+        $pointCodes = $this->bulletinManager->getAllPointCodes();
+
+        foreach ($pointCodes as $pointCode) {
+            $codes[] = array(
+                'id' => $pointCode->getId(),
+                'code' => $pointCode->getCode(),
+                'info' => $pointCode->getInfo(),
+                'shortInfo' => $pointCode->getShortInfo(),
+                'isDefaultValue' => $pointCode->getIsDefaultValue(),
+                'ignored' => $pointCode->getIgnored()
+            );
+        }
+
+        return $codes;
     }
 
     private function checkBulletinAdmin()

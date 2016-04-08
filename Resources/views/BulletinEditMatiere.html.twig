@@ -8,8 +8,11 @@
         <div class="panel panel-info">
             <div class="panel-heading">Valeurs particulières</div>
             <div class="panel-body">
-                Certificat médical : <b>888</b><br />
-                Non évalué : <b>999</b><br/>
+                {% for pointCode in pointCodes %}
+                    <div>
+                        {{ pointCode.getInfo()|trans({}, 'bulletin') }} : <b>{{ pointCode.getCode() }}</b>
+                    </div>
+                {% endfor %}
                 N'oubliez pas d'<b>enregistrer</b> en cliquant sur le bouton en bas de page
             </div>
         </div>

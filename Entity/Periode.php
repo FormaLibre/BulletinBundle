@@ -129,6 +129,16 @@ class Periode
      */
     protected $oldPeriode5;
 
+    /**
+     * @ORM\Column(name="locked", type="boolean", options={"default" = 0})
+     */
+    private $locked = false;
+
+    /**
+     * @ORM\Column(name="published", type="boolean", options={"default" = 1})
+     */
+    private $published = true;
+
     public function __construct()
     {
         $this->matieres = new ArrayCollection();
@@ -416,6 +426,35 @@ class Periode
         $this->oldPeriode5 = $oldPeriode5;
     }
 
+    /**
+     * @return mixed
+     */
+    public function isLocked()
+    {
+        return $this->locked;
+    }
 
+    /**
+     * @param mixed $locked
+     */
+    public function setLocked($locked)
+    {
+        $this->locked = $locked;
+    }
 
+    /**
+     * @return mixed
+     */
+    public function isPublished()
+    {
+        return $this->published;
+    }
+
+    /**
+     * @param mixed $published
+     */
+    public function setPublished($published)
+    {
+        $this->published = $published;
+    }
 }

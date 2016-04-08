@@ -127,6 +127,20 @@ class PeriodeType extends AbstractType
                 array(
                     'label' => 'Coefficient'
                 )
+            )
+            ->add(
+                'locked',
+                'checkbox',
+                array(
+                    'label' => 'locked'
+                )
+            )
+            ->add(
+                'published',
+                'checkbox',
+                array(
+                    'label' => 'published'
+                )
             );
     }
 

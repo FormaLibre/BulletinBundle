@@ -8,7 +8,7 @@ export default class PointsCtrl {
     this.matieresPeriodes = {}
     this.pemps = {}
     this.pepdps = {}
-    this.codes = []
+    this.codes = {}
     this.initialize()
   }
 
@@ -19,19 +19,29 @@ export default class PointsCtrl {
       this.pointsDatas = d['data']['matieres']
       this.periodes = d['data']['periodes']
       this.matieresPeriodes = d['data']['matieresPeriodes']
-      this.pemps = d['data']['pemps']
-      this.pepdps = d['data']['pepdps']
+
+      for (let pempId in d['data']['pemps']) {
+        this.pemps[pempId] = d['data']['pemps'][pempId]
+      }
+
+      for (let pepdpId in d['data']['pepdps']) {
+        this.pepdps[pepdpId] = d['data']['pepdps'][pepdpId]
+      }
+
+      for (let code in d['data']['codes']) {
+        this.codes[code] = d['data']['codes'][code]
+      }
       console.log(`Nb points : ${d['data']['nbUserPoints']}`)
       console.log(`Nb points divers : ${d['data']['nbUserPointsDivers']}`)
+      console.log(`Nb created points : ${d['data']['nbCreatedUserPoints']}`)
+      console.log(`Nb created points divers : ${d['data']['nbCreatedUserPointsDivers']}`)
     })
   }
 
   validate () {
-    const pointsJson = JSON.stringify(this.pemps)
-    const pointsDiversJson = JSON.stringify(this.pepdps)
     const route = Routing.generate(
       'api_put_all_users_points',
-      {user: this.userId,  points: pointsJson, pointsDivers: pointsDiversJson}
+      {user: this.userId,  points: this.pemps, pointsDivers: this.pepdps}
     )
     this.$http.put(route).then(d => {
       //console.log(d)
@@ -56,10 +66,13 @@ export default class PointsCtrl {
     for (let periodeId in this.pointsDatas[matiereId]['periodes']) {
       if (this.pointsDatas[matiereId]['periodes'][periodeId]['pempId'] && this.pointsDatas[matiereId]['periodes'][periodeId]['total']) {
         const pempId = this.pointsDatas[matiereId]['periodes'][periodeId]['pempId']
-        total += parseInt(this.pointsDatas[matiereId]['periodes'][periodeId]['total'])
-        points += this.pemps[pempId] && (this.codes.indexOf(parseFloat(this.pemps[pempId])) === -1) ?
-          parseFloat(this.pemps[pempId]) :
-          0
+        const isCode = this.codes[parseFloat(this.pemps[pempId])] ? true : false
+        const ignored = isCode ? this.codes[parseFloat(this.pemps[pempId])]['ignored'] : false
+
+        if (!ignored) {
+          total += parseInt(this.pointsDatas[matiereId]['periodes'][periodeId]['total'])
+          points += this.pemps[pempId] && !isCode ? parseFloat(this.pemps[pempId]) : 0
+        }
       }
     }
 

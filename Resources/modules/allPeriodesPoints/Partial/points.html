@@ -1,7 +1,7 @@
 <h3>{{ pc.user.firstName }} {{ pc.user.lastName }}</h3>
 <hr>
 <div class="table-responsive">
-    <table class="table table-striped table-bordered table-condensed">
+    <table class="table table-bordered table-condensed">
         <tr>
             <td></td>
             <th ng-repeat="periode in pc.periodes">
@@ -16,11 +16,15 @@
                 {{ datas['matiereName'] }}
             </th>
             <td ng-repeat="periode in pc.periodes">
-                <div class="input-group">
+                <div class="input-group" ng-if="datas['periodes'][periode['id']]['pempId']">
                     <input type="text" class="form-control" ng-model="pc.pemps[datas['periodes'][periode['id']]['pempId']]">
                     <span class="input-group-addon">
-                        / {{ datas['total'] * periode['coefficient'] }} ({{ datas['periodes'][periode['id']]['pempId'] }})
+                        / {{ datas['total'] * periode['coefficient'] }}
+                        <!--[{{ datas['periodes'][periode['id']]['pempId'] }}]-->
                     </span>
+                </div>
+                <div class="text-center" ng-if="!datas['periodes'][periode['id']]['pempId']">
+                    -
                 </div>
             </td>
             <td ng-bind="pc.computeMatiereTotal(datas['matiereId'])">
@@ -37,6 +41,7 @@
                                 <span ng-if="pointDivers['withTotal']">
                                     ({{ pointDivers['total'] }})
                                 </span>
+                                <!--[{{ pointDivers['pepdpId'] }}]-->
                             </th>
                             <td>
                                 <input type="text" class="form-control" ng-model="pc.pepdps[pointDivers['pepdpId']]">

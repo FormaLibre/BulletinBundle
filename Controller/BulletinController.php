@@ -107,9 +107,7 @@ class BulletinController extends Controller
     public function indexAction()
     {
         $this->checkOpen();
-
-        $periodes = $this->periodeRepo->findAll();
-        
+        $periodes = $this->bulletinManager->getPublishedPeriodes();
         $periodesGroup =$this->periodesGroupRepo->findBy(Array(),Array('id'=>'DESC'));
 
         $periodeCompleted = array();
@@ -215,11 +213,11 @@ class BulletinController extends Controller
         $this->bulletinManager->refresh($periode);
         $groups = array();
         if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN')){
-            $groups = $this->bulletinManager->getTaggedGroups();
+            $groups = $this->bulletinManager->getGroupsByPeriode($periode);
 
             $content = $this->renderView('FormaLibreBulletinBundle::Admin/BulletinListClasses.html.twig',
                 array('periode' => $periode, 'groups' => $groups)
-                );
+            );
             return new Response($content);
         }
 
@@ -364,6 +362,7 @@ class BulletinController extends Controller
         $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
         $secondPointName = $this->bulletinManager->getSecondPointName();
         $thirdPointName = $this->bulletinManager->getThirdPointName();
+        $pointCodes = $this->bulletinManager->getAllPointCodes();
 
         return array(
             'form' => $form->createView(),
@@ -375,7 +374,8 @@ class BulletinController extends Controller
             'thirdPointName' => $thirdPointName,
             'isBulletinAdmin' => $isBulletinAdmin,
             'matieres'=> $matiere,
-            'allLockStatus'=> $allLockStatus
+            'allLockStatus'=> $allLockStatus,
+            'pointCodes' => $pointCodes
         );
     }
 
@@ -435,6 +435,7 @@ class BulletinController extends Controller
         $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
         $secondPointName = $this->bulletinManager->getSecondPointName();
         $thirdPointName = $this->bulletinManager->getThirdPointName();
+        $pointCodes = $this->bulletinManager->getAllPointCodes();
 
         return array(
             'form' => $form->createView(),
@@ -445,7 +446,8 @@ class BulletinController extends Controller
             'secondPointName' => $secondPointName,
             'thirdPointName' => $thirdPointName,
             'eleves' => $eleves,
-            'lock' => $lock
+            'lock' => $lock,
+            'pointCodes' => $pointCodes
         );
     }
 
@@ -516,6 +518,29 @@ class BulletinController extends Controller
         $classe = $this->bulletinManager->getClasseByEleve($eleve);
         $isBulletinAdmin = $this->isBulletinAdmin();
 
+        $codesList = array();
+        $codesDatas = array();
+        $allPointCodes = $this->bulletinManager->getAllPointCodes();
+
+        foreach ($allPointCodes as $pointCode) {
+            $id = $pointCode->getId();
+            $code = $pointCode->getCode();
+            $info = $pointCode->getInfo();
+            $shortInfo = $pointCode->getShortInfo();
+            $isDefaultValue = $pointCode->getIsDefaultValue();
+            $ignored = $pointCode->getIgnored();
+            $codesList[] = $code;
+            $codesDatas[$code] = array(
+                'id' => $id,
+                'code' => $code,
+                'info' => $info,
+                'shortInfo' => $shortInfo,
+                'isDefaultValue' => $isDefaultValue,
+                'ignored' => $ignored
+            );
+        }
+
+
         $params = array(
             'pemps' => $pemps,
             'pemds' => $pemds,
@@ -529,7 +554,9 @@ class BulletinController extends Controller
             'secondPointName' => $secondPointName,
             'thirdPointName' => $thirdPointName,
             'classe' => $classe,
-            'isBulletinAdmin' => $isBulletinAdmin
+            'isBulletinAdmin' => $isBulletinAdmin,
+            'codesList' => $codesList,
+            'codesDatas' => $codesDatas
         );
 
         return $this->render($template, $params);

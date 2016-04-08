@@ -41,25 +41,13 @@
             {% set periodeId = periode.getId() %}
                 
             {% for key, pemp in pemps %}
-                {% if pemp.point == 999 %}
+                {% if pemp.point in codesList %}
                     <tr>
                         <td>
                             {{ pemp.matiere.getCourse().getTitle() }}
                         </td>
                         <td colspan="3" class="center">
-                            Non évalué
-                        </td>
-                        <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">
-                            {{ totauxMatieres[key] }} %
-                        </td>
-                    </tr>
-                {% elseif pemp.point == 888 %}
-                    <tr>
-                        <td>
-                            {{ pemp.matiere.getCourse().getTitle() }}
-                        </td>
-                        <td colspan="3" class="center">
-                            Certificat médical
+                            {{ codesDatas[pemp.point]['info']|trans({}, 'bulletin') }}
                         </td>
                         <td class="center{% if totauxMatieres[key] < 50%} echec {% endif %}">
                             {{ totauxMatieres[key] }} %
