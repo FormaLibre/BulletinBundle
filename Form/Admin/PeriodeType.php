@@ -71,14 +71,17 @@ class PeriodeType extends AbstractType
             ))
             ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
             ->add('template',
-                'choice',array(
+                'choice',
+                array(
                     'label' => 'Template',
-                    'choices'=>array(
-                    'ExamPrint'=>'Examen Premier trimestre (2 périodes)',
-                    'FinalExamPrint'=>'Bulletin final',
-                    'PeriodePrint'=>'Une période',
-                    'ExamPrintWithOnlyOnePeriodePrint'=>'Examen Premier trimestre (1 période)'    
-                            )),
+                    'choices'=> array(
+                        'ExamPrint'=>'Examen Premier trimestre (2 périodes)',
+                        'FinalExamPrint'=>'Bulletin final',
+                        'PeriodePrint'=>'Une période',
+                        'ExamPrintWithOnlyOnePeriodePrint'=>'Examen Premier trimestre (1 période)',
+                        'CompletePrint' => 'Bulletin complet'
+                    )
+                ),
                 $templateOptions
             )
             ->add('oldPeriode1','entity',array(
