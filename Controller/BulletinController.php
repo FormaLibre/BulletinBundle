@@ -471,6 +471,9 @@ class BulletinController extends Controller
         if ($periode->getTemplate() === 'FinalExamPrint') {
 
             return $this->printFinalExam($periode, $eleve);
+        } else if ($periode->getTemplate() === 'CompletePrint') {
+
+            return $this->printComplete($eleve);
         }
         $totaux = [];
         $totauxMatieres = [];
@@ -791,6 +794,16 @@ class BulletinController extends Controller
         );
 
         return $this->render('FormaLibreBulletinBundle::Templates/FinalExamPrint.html.twig', $params);
+    }
+
+    private function printComplete(User $eleve)
+    {
+        $params = $this->bulletinManager->getAllUserPointsDatas($eleve);
+        $params['eleve'] = $eleve;
+        $params['classe'] = $this->bulletinManager->getClasseByEleve($eleve);
+        $params['isBulletinAdmin'] = $this->isBulletinAdmin();
+
+        return $this->render('FormaLibreBulletinBundle::Templates/CompletePrint.html.twig', $params);
     }
 
     private function checkOpen()

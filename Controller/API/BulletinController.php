@@ -70,93 +70,10 @@ class BulletinController extends FOSRestController
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName()
         );
-        $datas = $this->bulletinManager->getAllPeriodesUserMatieresDatas($user);
-        $periodesDatas = $datas['periodesDatas'];
-        $userMatieresDatas = $datas['userMatieresDatas'];
-        $pemps = $this->bulletinManager->getAllUserPoints($user);
-        $pepdps = $this->bulletinManager->getAllUserPointsDivers($user);
-        $pempsDatas = array();
-        $pepdpsDatas = array();
+        $datas = $this->bulletinManager->getAllUserPointsDatas($user);
+        $datas['user'] = $userDatas;
 
-        foreach ($pemps as $pemp) {
-            $pempId = $pemp->getId();
-            $point = $pemp->getPoint();
-            $matiere = $pemp->getMatiere();
-            $periode = $pemp->getPeriode();
-            $matiereId = $matiere->getId();
-            $periodeId = $periode->getId();
-
-            if (isset($userMatieresDatas[$matiereId]['periodes'][$periodeId])) {
-                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $pempId;
-                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['point'] = $point;
-                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $pemp->getTotal();
-                $pempsDatas[$pempId] = $point;
-            }
-        }
-
-        foreach ($pepdps as $pepdp) {
-            $pepdpId = $pepdp->getId();
-            $point = $pepdp->getPoint();
-            $pointDivers = $pepdp->getDivers();
-            $pointDiversId = $pointDivers->getId();
-            $periode = $pepdp->getPeriode();
-            $periodeId = $periode->getId();
-
-            if (isset($periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId])) {
-                $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['pepdpId'] = $pepdpId;
-                $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['point'] = $point;
-                $pepdpsDatas[$pepdpId] = $point;
-            }
-        }
-        $createdPemps = $this->bulletinManager->generateMissingPemps($user, $userMatieresDatas);
-        $createdPepdps = $this->bulletinManager->generateMissingPepdps($user, $periodesDatas['periodes']);
-
-        foreach ($createdPemps as $pemp) {
-            $pempId = $pemp->getId();
-            $point = $pemp->getPoint();
-            $periodeId = $pemp->getPeriode()->getId();
-            $matiereId = $pemp->getMatiere()->getId();
-            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $pempId;
-            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['$point'] = $point;
-            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $pemp->getTotal();
-            $pempsDatas[$pempId] = $point;
-        }
-
-        foreach ($createdPepdps as $pepdp) {
-            $pepdpId = $pepdp->getId();
-            $point = $pepdp->getPoint();
-            $pointDiversId = $pepdp->getDivers()->getId();
-            $periodeId = $pepdp->getPeriode()->getId();
-            $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['pepdpId'] = $pepdpId;
-            $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['point'] = $point;
-            $pepdpsDatas[$pepdpId] = $point;
-        }
-        $codes = array();
-        $pointCodes = $this->bulletinManager->getAllPointCodes();
-
-        foreach ($pointCodes as $pointCode) {
-            $code = $pointCode->getCode();
-            $codes[$code] = array(
-                'code' => $code,
-                'info' => $pointCode->getInfo(),
-                'isDefaultValue' => $pointCode->getIsDefaultValue(),
-                'ignored' => $pointCode->getIgnored()
-            );
-        }
-
-        return array(
-            'user' => $userDatas,
-            'matieres' => $userMatieresDatas,
-            'periodes' => $periodesDatas['periodes'],
-            'matieresPeriodes' => $periodesDatas['matieresPeriodes'],
-            'nbUserPoints' => count($pemps),
-            'nbUserPointsDivers' => count($pepdps),
-            'nbCreatedUserPoints' => count($createdPemps),
-            'nbCreatedUserPointsDivers' => count($createdPepdps),
-            'pemps' => $pempsDatas,
-            'pepdps' => $pepdpsDatas,
-            'codes' => $codes
-        );
+        return $datas;
     }
 
     /**
@@ -168,8 +85,11 @@ class BulletinController extends FOSRestController
         $datas = $this->request->query->all();
         $pointsDatas = isset($datas['points']) ? $datas['points'] : array();
         $pointsDiversDatas = isset($datas['pointsDivers']) ? $datas['pointsDivers'] : array();
+        $eleveMatiereOptionsDatas = isset($datas['eleveMatiereOptions']) ? $datas['eleveMatiereOptions'] : array();
+        $deliberatedDatas = array();
         $pointsIds = array();
         $pointsDiversIds = array();
+        $eleveMatieresOptionsIds = array();
 
         foreach ($pointsDatas as $pempId => $point) {
             $pointsIds[] = $pempId;
@@ -178,9 +98,15 @@ class BulletinController extends FOSRestController
         foreach ($pointsDiversDatas as $pepdpId => $point) {
             $pointsDiversIds[] = $pepdpId;
         }
+
+        foreach ($eleveMatiereOptionsDatas as $datas) {
+            $eleveMatieresOptionsIds[] = $datas['id'];
+            $deliberatedDatas[$datas['id']] = $datas['deliberated'];
+        }
         $pemps = $this->bulletinManager->getPempsByUserAndIds($user, $pointsIds);
         $pepdps = $this->bulletinManager->getPepdpsByUserAndIds($user, $pointsDiversIds);
-        $datas = $this->bulletinManager->updatePoints($pemps, $pepdps, $pointsDatas, $pointsDiversDatas);
+        $eleveMatieresOptions = $this->bulletinManager->getEleveMatiereOptionsByUserAndIds($user, $eleveMatieresOptionsIds);
+        $datas = $this->bulletinManager->updatePoints($pemps, $pepdps, $eleveMatieresOptions, $pointsDatas, $pointsDiversDatas, $deliberatedDatas);
 
         return $datas;
     }

@@ -9,6 +9,7 @@ use Claroline\CoreBundle\Pager\PagerFactory;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
+use FormaLibre\BulletinBundle\Entity\EleveMatiereOptions;
 use FormaLibre\BulletinBundle\Entity\MatiereOptions;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\LockStatus;
@@ -35,6 +36,7 @@ class BulletinManager
     private $pointDiversRepo;
     private $periodeRepo;
     private $pointCodeRepo;
+    private $eleveMatiereOptionsRepo;
 
     /**
      * @DI\InjectParams({
@@ -67,6 +69,7 @@ class BulletinManager
         $this->lockStatusRepo = $om->getRepository('FormaLibreBulletinBundle:LockStatus');
         $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->pointCodeRepo = $om->getRepository('FormaLibreBulletinBundle:PointCode');
+        $this->eleveMatiereOptionsRepo = $om->getRepository('FormaLibreBulletinBundle:EleveMatiereOptions');
     }
 
     public function getTaggedGroups()
@@ -679,7 +682,6 @@ class BulletinManager
 
     public function getAllPeriodesUserMatieresDatas(User $user)
     {
-//        $matieresDatas = array();
         $userMatieresDatas = array();
         $allMatieresDatas = $this->getAllMatieresDatas();
         $allMatieres = $allMatieresDatas['matieres'];
@@ -695,12 +697,16 @@ class BulletinManager
             $position = $options->getPosition();
             $matiereId = $matiere->getId();
             $matiereName = $matiere->getCourseTitle();
+            $eleveMatiereOptions = $this->getEleveMatiereOptions($user, $matiere);
 
             $datas = array(
                 'matiereId' => $matiereId,
                 'matiereName' => $matiereName,
                 'total' => $total,
                 'position' => $position,
+                'optionsId' => $eleveMatiereOptions->getId(),
+                'deliberated' => $eleveMatiereOptions->isDeliberated(),
+                'options' => $eleveMatiereOptions->getOptions(),
                 'periodes' => isset($userMatieresPeriodes[$matiereId]) ? $userMatieresPeriodes[$matiereId] : array()
             );
             $userMatieresDatas[$matiereId] = $datas;
@@ -734,6 +740,7 @@ class BulletinManager
     {
         $periodes = array();
         $matieresPeriodes = array();
+        $pointsDiversDatas = array();
 
         foreach ($matieres as $matiere) {
             $matiereId = $matiere->getId();
@@ -777,11 +784,22 @@ class BulletinManager
                         'total' => $divers->getTotal(),
                         'position' => $divers->getPosition()
                     );
+
+                    if (!isset($pointsDiversDatas[$diversId])) {
+                        $pointsDiversDatas[$diversId] = array(
+                            'id' => $diversId,
+                            'name' => $divers->getName(),
+                            'officialName' => $divers->getOfficialName(),
+                            'withTotal' => $divers->getWithTotal(),
+                            'total' => $divers->getTotal(),
+                            'position' => $divers->getPosition()
+                        );
+                    }
                 }
             }
         }
 
-        return array('periodes' => $periodes, 'matieresPeriodes' => $matieresPeriodes);
+        return array('periodes' => $periodes, 'matieresPeriodes' => $matieresPeriodes, 'pointsDiversDatas' => $pointsDiversDatas);
     }
 
     public function getAllUserPoints(User $user)
@@ -804,7 +822,12 @@ class BulletinManager
         return count($ids) > 0 ? $this->pepdpRepo->findPepdpsByUserAndIds($user, $ids) : array();
     }
 
-    public function updatePoints(array $pemps, array $pepdps, array $pointsDatas, array $pointsDiversDatas)
+    public function getEleveMatiereOptionsByUserAndIds(User $user, array $ids = array())
+    {
+        return count($ids) > 0 ? $this->eleveMatiereOptionsRepo->findEleveMatiereOptionsByUserAndIds($user, $ids) : array();
+    }
+
+    public function updatePoints(array $pemps, array $pepdps, array $eleveMatieresOptions, array $pointsDatas, array $pointsDiversDatas, array $delibaratedDatas)
     {
         $this->om->startFlushSuite();
         $points = array();
@@ -825,6 +848,16 @@ class BulletinManager
             if (isset($pointsDiversDatas[$id])) {
                 $pepdp->setPoint(floatval($pointsDiversDatas[$id]));
                 $pointsDivers[$id] = $pepdp->getPoint();
+            }
+        }
+
+        foreach ($eleveMatieresOptions as $emo) {
+            $id = $emo->getId();
+
+            if (isset($delibaratedDatas[$id])) {
+                $deliberated = $delibaratedDatas[$id] === 'true';
+                $emo->setDeliberated($deliberated);
+                $this->om->persist($emo);
             }
         }
         $this->om->endFlushSuite();
@@ -938,5 +971,214 @@ class BulletinManager
     public function getPublishedPeriodes()
     {
         return $this->periodeRepo->findByPublished(true);
+    }
+
+    public function getAllUserPointsDatas(User $user)
+    {
+        $datas = $this->getAllPeriodesUserMatieresDatas($user);
+        $periodesDatas = $datas['periodesDatas'];
+        $userMatieresDatas = $datas['userMatieresDatas'];
+        $pointsDiversDatas = $periodesDatas['pointsDiversDatas'];
+        $pemps = $this->getAllUserPoints($user);
+        $pepdps = $this->getAllUserPointsDivers($user);
+        $pempsDatas = array();
+        $pepdpsDatas = array();
+        $totalMatieres = array();
+        $totalPeriodes = array();
+        $totalPointsDivers = array();
+        $finalPercentage = 0;
+        $finalPoints = 0;
+        $finalTotal = 0;
+
+        foreach ($pemps as $pemp) {
+            $pempId = $pemp->getId();
+            $point = $pemp->getPoint();
+            $matiere = $pemp->getMatiere();
+            $periode = $pemp->getPeriode();
+            $matiereId = $matiere->getId();
+            $periodeId = $periode->getId();
+
+            if (isset($userMatieresDatas[$matiereId]['periodes'][$periodeId])) {
+                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $pempId;
+                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['point'] = $point;
+                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $pemp->getTotal();
+                $pempsDatas[$pempId] = $point;
+            }
+        }
+
+        foreach ($pepdps as $pepdp) {
+            $pepdpId = $pepdp->getId();
+            $point = $pepdp->getPoint();
+            $pointDivers = $pepdp->getDivers();
+            $pointDiversId = $pointDivers->getId();
+            $periode = $pepdp->getPeriode();
+            $periodeId = $periode->getId();
+
+            if (isset($periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId])) {
+                $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['pepdpId'] = $pepdpId;
+                $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['point'] = $point;
+                $pepdpsDatas[$pepdpId] = $point;
+            }
+        }
+        $createdPemps = $this->generateMissingPemps($user, $userMatieresDatas);
+        $createdPepdps = $this->generateMissingPepdps($user, $periodesDatas['periodes']);
+
+        foreach ($createdPemps as $pemp) {
+            $pempId = $pemp->getId();
+            $point = $pemp->getPoint();
+            $periodeId = $pemp->getPeriode()->getId();
+            $matiereId = $pemp->getMatiere()->getId();
+            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $pempId;
+            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['point'] = $point;
+            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $pemp->getTotal();
+            $pempsDatas[$pempId] = $point;
+        }
+
+        foreach ($createdPepdps as $pepdp) {
+            $pepdpId = $pepdp->getId();
+            $point = $pepdp->getPoint();
+            $pointDiversId = $pepdp->getDivers()->getId();
+            $periodeId = $pepdp->getPeriode()->getId();
+            $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['pepdpId'] = $pepdpId;
+            $periodesDatas['periodes'][$periodeId]['pointsDivers'][$pointDiversId]['point'] = $point;
+            $pepdpsDatas[$pepdpId] = $point;
+        }
+        $codes = array();
+        $pointCodes = $this->getAllPointCodes();
+
+        foreach ($pointCodes as $pointCode) {
+            $code = $pointCode->getCode();
+            $codes[$code] = array(
+                'code' => $code,
+                'info' => $pointCode->getInfo(),
+                'shortInfo' => $pointCode->getShortInfo(),
+                'isDefaultValue' => $pointCode->getIsDefaultValue(),
+                'ignored' => $pointCode->getIgnored()
+            );
+        }
+
+        foreach ($userMatieresDatas as $matiereId => $matiereDatas) {
+            $points = 0;
+            $total = 0;
+
+            foreach ($matiereDatas['periodes'] as $datas) {
+                if (isset($datas['point']) && isset($datas['total'])) {
+                    $ignored = isset($codes[$datas['point']]) && $codes[$datas['point']]['ignored'];
+
+                    if (!$ignored) {
+                        $total += $datas['total'];
+                        $points += $datas['point'];
+                        $finalTotal += $datas['total'];
+                        $finalPoints += $datas['point'];
+                    }
+                }
+            }
+
+            if ($total > 0) {
+                $ratio = $total / 100;
+                $percentage = round($points / $ratio, 1);
+                $totalMatieres[$matiereId] = $percentage;
+            }
+        }
+
+        if ($finalTotal > 0) {
+            $ratio = $finalTotal / 100;
+            $finalPercentage = round($finalPoints / $ratio, 1);
+        }
+
+        if (isset($periodesDatas['periodes'])) {
+            foreach ($periodesDatas['periodes'] as $periodeId => $periodeDatas) {
+                $points = 0;
+                $total = 0;
+
+                foreach ($userMatieresDatas as $matiereDatas) {
+                    if (isset($matiereDatas['periodes'][$periodeId]) &&
+                        isset($matiereDatas['periodes'][$periodeId]['point']) &&
+                        isset($matiereDatas['periodes'][$periodeId]['total'])) {
+
+                        $point = $matiereDatas['periodes'][$periodeId]['point'];
+                        $ignored = isset($codes[$point]) && $codes[$point]['ignored'];
+
+                        if (!$ignored) {
+                            $total += $matiereDatas['periodes'][$periodeId]['total'];
+                            $points += $point;
+                        }
+                    }
+                }
+
+                if ($total > 0) {
+                    $ratio = $total / 100;
+                    $percentage = round($points / $ratio, 1);
+                    $totalPeriodes[$periodeId] = $percentage;
+                }
+            }
+        }
+
+        foreach ($pointsDiversDatas as $diversDatas) {
+            $points = 0;
+            $total = 0;
+            $pointDiversId = $diversDatas['id'];
+
+            foreach ($periodesDatas['periodes'] as $periodeDatas) {
+                if (isset($periodeDatas['pointsDivers'][$pointDiversId])) {
+                    if ($periodeDatas['pointsDivers'][$pointDiversId]['withTotal']) {
+                        $total += $periodeDatas['pointsDivers'][$pointDiversId]['total'];
+                    }
+                    $pepdpId = $periodeDatas['pointsDivers'][$pointDiversId]['pepdpId'];
+
+                    if (!empty($pepdpId) && isset($pepdpsDatas[$pepdpId])) {
+                        $points += $pepdpsDatas[$pepdpId];
+                    }
+                }
+            }
+
+            if ($total > 0) {
+                $ratio = $total / 100;
+                $percentage = round($points / $ratio, 1);
+                $totalPointsDivers[$pointDiversId] = $percentage;
+            } else {
+                $totalPointsDivers[$pointDiversId] = $points;
+            }
+        }
+        ksort($userMatieresDatas);
+        ksort($periodesDatas['periodes']);
+
+        return array(
+            'matieres' => $userMatieresDatas,
+            'periodes' => $periodesDatas['periodes'],
+            'matieresPeriodes' => $periodesDatas['matieresPeriodes'],
+            'nbUserPoints' => count($pemps),
+            'nbUserPointsDivers' => count($pepdps),
+            'nbCreatedUserPoints' => count($createdPemps),
+            'nbCreatedUserPointsDivers' => count($createdPepdps),
+            'pemps' => $pempsDatas,
+            'pepdps' => $pepdpsDatas,
+            'codes' => $codes,
+            'totalMatieres' => $totalMatieres,
+            'totalPeriodes' => $totalPeriodes,
+            'totalPointsDivers' => $totalPointsDivers,
+            'finalPercentage' => $finalPercentage,
+            'pointsDiversDatas' => $pointsDiversDatas
+        );
+    }
+
+    public function getEleveMatiereOptions(User $eleve, CourseSession $matiere)
+    {
+        $eleveMatiereOptions = $this->getEleveMatiereOptionsByEleveAndMatiere($eleve, $matiere);
+
+        if (is_null($eleveMatiereOptions)) {
+            $eleveMatiereOptions = new EleveMatiereOptions();
+            $eleveMatiereOptions->setEleve($eleve);
+            $eleveMatiereOptions->setMatiere($matiere);
+            $this->om->persist($eleveMatiereOptions);
+            $this->om->flush();
+        }
+
+        return $eleveMatiereOptions;
+    }
+
+    public function getEleveMatiereOptionsByEleveAndMatiere(User $eleve, CourseSession $matiere)
+    {
+        return $this->eleveMatiereOptionsRepo->findEleveMatiereOptionsByEleveAndMatiere($eleve, $matiere);
     }
 }

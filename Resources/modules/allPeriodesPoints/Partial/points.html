@@ -7,9 +7,11 @@
             <th ng-repeat="periode in pc.periodes">
                 {{ periode['name'] }}
             </th>
+            <th></th>
             <th>
                 {{ 'total'|trans:{}:'platform' }}
             </th>
+            <th></th>
         </tr>
         <tr ng-repeat="datas in pc.pointsDatas">
             <th>
@@ -27,28 +29,55 @@
                     -
                 </div>
             </td>
-            <td ng-bind="pc.computeMatiereTotal(datas['matiereId'])">
+            <td ng-bind="pc.computeMatiereTotal(datas['matiereId'], false)" nowrap="nowrap">
+            </td>
+            <td ng-bind="pc.computeMatiereTotal(datas['matiereId'])" nowrap="nowrap">
+            </td>
+            <td class="text-center">
+                <input type="checkbox" ng-model="pc.eleveMatiereOptions[datas['matiereId']]['deliberated']">
             </td>
         </tr>
         <tr>
-            <th>{{ 'various_points'|trans:{}:'bulletin' }}</th>
+            <th></th>
             <td ng-repeat="periode in pc.periodes">
-                <div class="table-responsive">
-                    <table class="table table-condensed">
-                        <tr ng-repeat="pointDivers in periode['pointsDivers']">
-                            <th>
-                                {{ pointDivers['name'] }}
-                                <span ng-if="pointDivers['withTotal']">
-                                    ({{ pointDivers['total'] }})
-                                </span>
-                                <!--[{{ pointDivers['pepdpId'] }}]-->
-                            </th>
-                            <td>
-                                <input type="text" class="form-control" ng-model="pc.pepdps[pointDivers['pepdpId']]">
-                            </td>
-                        </tr>
-                    </table>
+                <span class="pull-right" ng-bind="pc.computePeriodeTotal(periode['id'], false)">
+                </span>
+            </td>
+            <th ng-bind="pc.computeFinalTotal(false)" nowrap="nowrap">
+            </th>
+            <td></td>
+        </tr>
+        <tr>
+            <th>{{ 'total'|trans:{}:'platform' }}</th>
+            <td ng-repeat="periode in pc.periodes">
+                <span class="pull-right" ng-bind="pc.computePeriodeTotal(periode['id'])">
+                </span>
+            </td>
+            <td></td>
+            <th ng-bind="pc.computeFinalTotal()" nowrap="nowrap"></th>
+        </tr>
+        <tr>
+            <td></td>
+        </tr>
+        <tr>
+            <th class="text-center" colspan="{{ pc.computeTabNbCol() }}">{{ 'various_points'|trans:{}:'bulletin' }}</th>
+        </tr>
+        <tr ng-repeat="pointDivers in pc.pointsDiversDatas">
+            <th>
+                {{ pointDivers['name'] }}
+            </th>
+            <td ng-repeat="periode in pc.periodes">
+                <div ng-class="pointDivers['withTotal'] ? 'input-group' : ''" ng-if="pc.hasPointDivers(periode['id'], pointDivers['id'])">
+                    <input type="text" class="form-control" ng-model="pc.pepdps[pc.getPepdpId(periode['id'], pointDivers['id'])]">
+                    <span class="input-group-addon" ng-if="pointDivers['withTotal']">
+                        {{ pointDivers['total'] }}
+                    </span>
                 </div>
+                <span ng-if="!pc.hasPointDivers(periode['id'], pointDivers['id'])">
+                    -
+                </span>
+            </td>
+            <td class="text-center" colspan="2" ng-bind="pc.computePointsDiversTotal(pointDivers['id'], pointDivers['withTotal'])">
             </td>
         </tr>
     </table>
