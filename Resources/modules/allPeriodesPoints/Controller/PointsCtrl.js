@@ -106,7 +106,7 @@ export default class PointsCtrl {
         const ratio = total / 100
         percentage = Math.round((points / ratio) * 10) / 10
       }
-      result = `${percentage} %`
+      result = percentage
     } else {
       result = `${points} / ${total}`
     }
@@ -141,7 +141,7 @@ export default class PointsCtrl {
         const ratio = total / 100
         percentage = Math.round((points / ratio) * 10) / 10
       }
-      result = `${percentage} %`
+      result = percentage
     } else {
       result = `${points} / ${total}`
     }
@@ -178,7 +178,7 @@ export default class PointsCtrl {
         const ratio = total / 100
         percentage = Math.round((points / ratio) * 10) / 10
       }
-      result = `${percentage} %`
+      result = percentage
     } else {
       result = `${points} / ${total}`
     }
@@ -189,7 +189,6 @@ export default class PointsCtrl {
   computePointsDiversTotal (pointDiversId, withTotal = true) {
     let points = 0
     let total = 0
-    let result = ''
 
     for (let periodeId in this.periodes) {
       for (let id in this.periodes[periodeId]['pointsDivers']) {
@@ -210,12 +209,9 @@ export default class PointsCtrl {
     if (withTotal && total > 0) {
       const ratio = total / 100
       points = Math.round((points / ratio) * 10) / 10
-      result = `${points} %`
-    } else {
-      result = points
     }
 
-    return result
+    return points
   }
 
   computeTabNbCol () {
@@ -238,7 +234,49 @@ export default class PointsCtrl {
     return hasPointDivers
   }
 
+  hasPointDiversTotal (pointDiversId) {
+    const index = this.pointsDiversDatas.findIndex(pd => pd['id'] === pointDiversId)
+
+    return (index > -1) && this.pointsDiversDatas[index]['withTotal']
+  }
+
   getPepdpId (periodeId, pointDiversId) {
     return this.periodes[periodeId]['pointsDivers'][pointDiversId]['pepdpId']
+  }
+
+  getMatiereStyle (matiereId) {
+    const green = '#8FD86A'
+    const red = '#FF4C4C'
+    let style = ''
+
+    if (this.eleveMatiereOptions[matiereId]['deliberated']) {
+      style = `background-color: ${green}`
+    } else if (this.computeMatiereTotal(matiereId) < 50) {
+      style = `background-color: ${red}`
+    }
+
+    return style
+  }
+
+  getPointDiversStyle (pointDiversId) {
+    const red = '#FF4C4C'
+    let style = ''
+
+    if (this.hasPointDiversTotal(pointDiversId) && this.computePointsDiversTotal(pointDiversId) < 50) {
+      style = `background-color: ${red}`
+    }
+
+    return style
+  }
+
+  getFinalTotalStyle () {
+    const red = '#FF4C4C'
+    let style = ''
+
+    if (this.computeFinalTotal() < 50) {
+      style = `background-color: ${red}`
+    }
+
+    return style
   }
 }
