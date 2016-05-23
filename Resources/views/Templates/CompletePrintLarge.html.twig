@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr" moznomarginboxes mozdisallowselectionprint>
+<head>
+    <meta charset="utf-8">
+    <title>Bulletin</title>
+    <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bootstrap.css')}}"/>
+    <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/completePrintLarge.css')}}"/>
+</head>
+<body>
+<div class="container" id="content">
+    <div class="row">
+        <div class="col-xs-3"><img src="http://www.fransfischer.be/logoFFnb.png" height="150px"></div>
+        <div class="col-xs-7" id="title-box">
+            <h1>Bulletin</h1>
+        </div>
+        <div class="col-xs-2" id="NomEleve">
+            2015-2016<br>
+            {{ eleve.getLastName() }}<br>
+            {{ eleve.getFirstName() }}
+
+            {% if classe is defined and classe is not empty %}
+                <br>
+                {{ classe.getName() }}
+            {% endif %}
+        </div>
+    </div>
+    <hr style="visibility: hidden;">
+
+    <div class="row">
+        <table id="TableauRes" class="table table-bordered">
+            <thead>
+            <tr>
+                <th class="firstcolumn">Intitulé matière</th>
+
+                {% for periodeDatas in periodes %}
+                    <th class="center">{{ periodeDatas['name'] }}</th>
+                {% endfor %}
+                <th class="center">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for matiereDatas in matieres %}
+                {% set matiereId = matiereDatas['matiereId'] %}
+                <tr>
+                    <td>{{ matiereDatas['matiereName'] }}</td>
+
+                    {% for periodeDatas in periodes %}
+                        {% set periodeId = periodeDatas['id'] %}
+                        <td class="text-center" nowrap="nowrap">
+                            {% if matiereDatas['periodes'][periodeId]['pempId'] is defined %}
+                                {% set pempId = matiereDatas['periodes'][periodeId]['pempId'] %}
+                                {% set point = pemps[pempId] %}
+
+                                {% if codes[point] is defined %}
+                                    {{ codes[point]['info']|trans({}, 'bulletin') }}
+                                {% else %}
+                                    {{ pemps[pempId] }}
+                                    /
+                                    {{ matiereDatas['periodes'][periodeId]['total'] }}
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+
+                    <td class="text-center" nowrap="nowrap">
+                        {% if totalMatieres[matiereId] is defined %}
+                            {{ totalMatieres[matiereId] }} %
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if matiereDatas['deliberated'] %}
+                            D
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <th>Total</th>
+
+                {% for periodeDatas in periodes %}
+                    {% set periodeId = periodeDatas['id'] %}
+                    <td class="text-center" nowrap="nowrap">
+                        {% if totalPeriodes[periodeId] is defined %}
+                            {{ totalPeriodes[periodeId] }} %
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                {% endfor %}
+                <td>{{ finalPercentage }} %</td>
+            </tr>
+            <tr>
+                <th colspan="{{ (periodes|length) + 2 }}"></th>
+            </tr>
+            <tr>
+                <th class="text-center" colspan="{{ (periodes|length) + 2 }}">
+                    Points divers
+                </th>
+            </tr>
+
+            {% for pointDivers in pointsDiversDatas %}
+                {% set pointDiversId = pointDivers['id'] %}
+                <tr>
+                    <td>{{ pointDivers['name'] }}</td>
+
+                    {% for periodeDatas in periodes %}
+                        {% set periodeId = periodeDatas['id'] %}
+                        <td class="text-center">
+                            {% if periodeDatas['pointsDivers'][pointDiversId] is defined %}
+                                {{ periodeDatas['pointsDivers'][pointDiversId]['point'] }}
+
+                                {% if pointDivers['withTotal'] %}
+                                    /
+                                    {{ pointDivers['total'] }}
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+
+                    <td class="text-center">
+                        {% if totalPointsDivers[pointDiversId] is defined %}
+                            {{ totalPointsDivers[pointDiversId] }}
+
+                            {% if pointDivers['withTotal'] %}
+                                %
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature du directeur
+                </div>
+                <div class="panel-body">
+                    {% if isBulletinAdmin is defined and isBulletinAdmin %}
+                        <img src="{{ asset('bundles/formalibrebulletin/images/Signature.jpg') }}"
+                             alt=""
+                             id="signature-directeur"
+                        >
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature du titulaire
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature de l'élève
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 signature">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Signature des parents
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

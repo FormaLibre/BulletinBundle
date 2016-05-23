@@ -69,6 +69,16 @@ class PeriodeType extends AbstractType
                 'empty_value' => 'Non classées',
                 'required' => false
             ))
+            ->add('periodeSet',
+                'choice',
+                array(
+                    'label' => 'Semestre',
+                    'choices'=> array(
+                        1 => '1er semestre',
+                        2 => '2ème semestre'
+                    )
+                )
+            )
             ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
             ->add('template',
                 'choice',

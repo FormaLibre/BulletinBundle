@@ -755,6 +755,7 @@ class BulletinManager
                 $periodeAnnee = $periode->getAnnee();
                 $periodeCoefficient = $periode->getCoefficient();
                 $pointsDivers = $periode->getPointDivers();
+                $periodeSet = $periode->getPeriodeSet();
 
                 $periodes[$periodeId] = array(
                     'id' => $periodeId,
@@ -763,7 +764,8 @@ class BulletinManager
                     'degre' => $periodeDegre,
                     'annee' => $periodeAnnee,
                     'coefficient' => $periodeCoefficient,
-                    'pointsDivers' => array()
+                    'pointsDivers' => array(),
+                    'periodeSet' => $periodeSet
                 );
                 $matieresPeriodes[$matiereId][$periodeId] = array(
                     'id' => $periodeId,
@@ -771,7 +773,8 @@ class BulletinManager
                     'onlyPoint' => $periodeOnlyPoint,
                     'degre' => $periodeDegre,
                     'annee' => $periodeAnnee,
-                    'coefficient' => $periodeCoefficient
+                    'coefficient' => $periodeCoefficient,
+                    'periodeSet' => $periodeSet
                 );
 
                 foreach($pointsDivers as $divers) {
@@ -986,6 +989,7 @@ class BulletinManager
         $totalMatieres = array();
         $totalPeriodes = array();
         $totalPointsDivers = array();
+        $totalPeriodeSets = array();
         $finalPercentage = 0;
         $finalPoints = 0;
         $finalTotal = 0;
@@ -1060,8 +1064,19 @@ class BulletinManager
         foreach ($userMatieresDatas as $matiereId => $matiereDatas) {
             $points = 0;
             $total = 0;
+            $periodeSetsDatas = array();
 
             foreach ($matiereDatas['periodes'] as $datas) {
+                $periodeSet = $datas['periodeSet'];
+
+                if (!isset($periodeSetsDatas[$periodeSet])) {
+                    $periodeSetsDatas[$periodeSet] = array('point' => 0, 'total' => 0);
+                }
+
+                if (!isset($totalPeriodeSets[$periodeSet])) {
+                    $totalPeriodeSets[$periodeSet] = array('point' => 0, 'total' => 0);
+                }
+
                 if (isset($datas['point']) && isset($datas['total'])) {
                     $ignored = isset($codes[$datas['point']]) && $codes[$datas['point']]['ignored'];
 
@@ -1070,14 +1085,38 @@ class BulletinManager
                         $points += $datas['point'];
                         $finalTotal += $datas['total'];
                         $finalPoints += $datas['point'];
+                        $periodeSetsDatas[$periodeSet]['total'] += $datas['total'];
+                        $periodeSetsDatas[$periodeSet]['point'] += $datas['point'];
+                        $totalPeriodeSets[$periodeSet]['total'] += $datas['total'];
+                        $totalPeriodeSets[$periodeSet]['point'] += $datas['point'];
                     }
+                }
+            }
+            $totalMatieres[$matiereId] = array();
+            $totalMatieres[$matiereId]['periodeSetsTotal'] = array();
+
+            foreach ($periodeSetsDatas as $periodeSet => $periodeSetsData) {
+                if ($periodeSetsData['total'] > 0) {
+                    $ratio = $periodeSetsData['total'] / 100;
+                    $percentage = round($periodeSetsData['point'] / $ratio, 1);
+                    $totalMatieres[$matiereId]['periodeSetsTotal'][$periodeSet]['percentage'] = $percentage;
+                    $totalMatieres[$matiereId]['periodeSetsTotal'][$periodeSet]['total'] = $periodeSetsData['total'];
+                    $totalMatieres[$matiereId]['periodeSetsTotal'][$periodeSet]['point'] = $periodeSetsData['point'];
                 }
             }
 
             if ($total > 0) {
                 $ratio = $total / 100;
                 $percentage = round($points / $ratio, 1);
-                $totalMatieres[$matiereId] = $percentage;
+                $totalMatieres[$matiereId]['final'] = $percentage;
+            }
+        }
+
+        foreach ($totalPeriodeSets as $periodeSet => $totalPeriodeSet) {
+            if ($totalPeriodeSet['total'] > 0) {
+                $ratio = $totalPeriodeSet['total'] / 100;
+                $percentage = round($totalPeriodeSet['point'] / $ratio, 1);
+                $totalPeriodeSets[$periodeSet]['percentage'] = $percentage;
             }
         }
 
@@ -1158,7 +1197,8 @@ class BulletinManager
             'totalPeriodes' => $totalPeriodes,
             'totalPointsDivers' => $totalPointsDivers,
             'finalPercentage' => $finalPercentage,
-            'pointsDiversDatas' => $pointsDiversDatas
+            'pointsDiversDatas' => $pointsDiversDatas,
+            'totalPeriodeSets' => $totalPeriodeSets
         );
     }
 

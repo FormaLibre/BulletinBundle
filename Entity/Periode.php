@@ -139,6 +139,11 @@ class Periode
      */
     private $published = true;
 
+    /**
+     * @ORM\Column(name="periode_set", type="integer", nullable=false, options={"default" = 1})
+     */
+    private $periodeSet = 1;
+
     public function __construct()
     {
         $this->matieres = new ArrayCollection();
@@ -456,5 +461,21 @@ class Periode
     public function setPublished($published)
     {
         $this->published = $published;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPeriodeSet()
+    {
+        return $this->periodeSet;
+    }
+
+    /**
+     * @param mixed $periodeSet
+     */
+    public function setPeriodeSet($periodeSet)
+    {
+        $this->periodeSet = $periodeSet;
     }
 }

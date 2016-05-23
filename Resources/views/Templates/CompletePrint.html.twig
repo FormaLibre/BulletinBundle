@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <title>Bulletin</title>
         <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bootstrap.css')}}"/>
-        <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bulletin.css')}}"/>
+        <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/completePrint.css')}}"/>
     </head>
     <body>
         <div class="container" id="content">
@@ -33,9 +33,20 @@
                             <th class="firstcolumn">Intitulé matière</th>
 
                             {% for periodeDatas in periodes %}
-                                <th class="center">{{ periodeDatas['name'] }}</th>
+                                {% if periodeDatas['periodeSet'] == 1 %}
+                                    <th class="center">{{ periodeDatas['name'] }}</th>
+                                {% endif %}
                             {% endfor %}
-                            <th class="center">Total</th>
+                            <th>% intermédiaire 1</th>
+                            <td class="empty-column"></td>
+
+                            {% for periodeDatas in periodes %}
+                                {% if periodeDatas['periodeSet'] == 2 %}
+                                    <th class="center">{{ periodeDatas['name'] }}</th>
+                                {% endif %}
+                            {% endfor %}
+                            <th>% intermédiaire 2</th>
+                            <th class="center">% final</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -45,28 +56,75 @@
                                 <td>{{ matiereDatas['matiereName'] }}</td>
 
                                 {% for periodeDatas in periodes %}
-                                    {% set periodeId = periodeDatas['id'] %}
-                                    <td class="text-center" nowrap="nowrap">
-                                        {% if matiereDatas['periodes'][periodeId]['pempId'] is defined %}
-                                            {% set pempId = matiereDatas['periodes'][periodeId]['pempId'] %}
-                                            {% set point = pemps[pempId] %}
+                                    {% if periodeDatas['periodeSet'] == 1 %}
+                                        {% set periodeId = periodeDatas['id'] %}
+                                        <td class="text-center" nowrap="nowrap">
+                                            {% if matiereDatas['periodes'][periodeId]['pempId'] is defined %}
+                                                {% set pempId = matiereDatas['periodes'][periodeId]['pempId'] %}
+                                                {% set point = pemps[pempId] %}
 
-                                            {% if codes[point] is defined %}
-                                                {{ codes[point]['info']|trans({}, 'bulletin') }}
+                                                {% if codes[point] is defined %}
+                                                    {{ codes[point]['info']|trans({}, 'bulletin') }}
+                                                {% else %}
+                                                    {{ pemps[pempId] }}
+                                                    /
+                                                    {{ matiereDatas['periodes'][periodeId]['total'] }}
+                                                {% endif %}
                                             {% else %}
-                                                {{ pemps[pempId] }}
-                                                /
-                                                {{ matiereDatas['periodes'][periodeId]['total'] }}
+                                                -
                                             {% endif %}
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </td>
+                                        </td>
+                                    {% endif %}
                                 {% endfor %}
+                                <td class="text-center" nowrap="nowrap">
+                                    {% if totalMatieres[matiereId] is defined and
+                                          totalMatieres[matiereId]['periodeSetsTotal'] is defined and
+                                          totalMatieres[matiereId]['periodeSetsTotal'][1] is defined and
+                                          totalMatieres[matiereId]['periodeSetsTotal'][1]['percentage']
+                                    %}
+                                        {{ totalMatieres[matiereId]['periodeSetsTotal'][1]['percentage'] }} %
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="empty-column"></td>
+
+                                {% for periodeDatas in periodes %}
+                                    {% if periodeDatas['periodeSet'] == 2 %}
+                                        {% set periodeId = periodeDatas['id'] %}
+                                        <td class="text-center" nowrap="nowrap">
+                                            {% if matiereDatas['periodes'][periodeId]['pempId'] is defined %}
+                                                {% set pempId = matiereDatas['periodes'][periodeId]['pempId'] %}
+                                                {% set point = pemps[pempId] %}
+
+                                                {% if codes[point] is defined %}
+                                                    {{ codes[point]['info']|trans({}, 'bulletin') }}
+                                                {% else %}
+                                                    {{ pemps[pempId] }}
+                                                    /
+                                                    {{ matiereDatas['periodes'][periodeId]['total'] }}
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                {% endfor %}
+                                <td class="text-center" nowrap="nowrap">
+                                    {% if totalMatieres[matiereId] is defined and
+                                          totalMatieres[matiereId]['periodeSetsTotal'] is defined and
+                                          totalMatieres[matiereId]['periodeSetsTotal'][2] is defined and
+                                          totalMatieres[matiereId]['periodeSetsTotal'][2]['percentage']
+                                    %}
+                                        {{ totalMatieres[matiereId]['periodeSetsTotal'][2]['percentage'] }} %
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
 
                                 <td class="text-center" nowrap="nowrap">
-                                    {% if totalMatieres[matiereId] is defined %}
-                                        {{ totalMatieres[matiereId] }} %
+                                    {% if totalMatieres[matiereId] is defined and totalMatieres[matiereId]['final'] is defined %}
+                                        {{ totalMatieres[matiereId]['final'] }} %
                                     {% else %}
                                         -
                                     {% endif %}
@@ -82,22 +140,52 @@
                             <th>Total</th>
 
                             {% for periodeDatas in periodes %}
-                                {% set periodeId = periodeDatas['id'] %}
-                                <td class="text-center" nowrap="nowrap">
-                                    {% if totalPeriodes[periodeId] is defined %}
-                                        {{ totalPeriodes[periodeId] }} %
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
+                                {% if periodeDatas['periodeSet'] == 1 %}
+                                    {% set periodeId = periodeDatas['id'] %}
+                                    <td class="text-center" nowrap="nowrap">
+                                        {% if totalPeriodes[periodeId] is defined %}
+                                            <b>{{ totalPeriodes[periodeId] }} %</b>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
                             {% endfor %}
-                            <td>{{ finalPercentage }} %</td>
+                            <td class="text-center" nowrap="nowrap">
+                                {% if totalPeriodeSets[1] is defined and totalPeriodeSets[1]['percentage'] is defined %}
+                                    <b>{{ totalPeriodeSets[1]['percentage'] }} %</b>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="empty-column"></td>
+
+                            {% for periodeDatas in periodes %}
+                                {% if periodeDatas['periodeSet'] == 2 %}
+                                    {% set periodeId = periodeDatas['id'] %}
+                                    <td class="text-center" nowrap="nowrap">
+                                        {% if totalPeriodes[periodeId] is defined %}
+                                            <b>{{ totalPeriodes[periodeId] }} %</b>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                            <td class="text-center" nowrap="nowrap">
+                                {% if totalPeriodeSets[2] is defined and totalPeriodeSets[2]['percentage'] is defined %}
+                                    <b>{{ totalPeriodeSets[2]['percentage'] }} %</b>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-center"><b>{{ finalPercentage }} %</b></td>
+                        </tr>
+                        <tr class="empty-row">
+                            <th colspan="{{ (periodes|length) + 5 }}"></th>
                         </tr>
                         <tr>
-                            <th colspan="{{ (periodes|length) + 2 }}"></th>
-                        </tr>
-                        <tr>
-                            <th class="text-center" colspan="{{ (periodes|length) + 2 }}">
+                            <th class="text-center" colspan="{{ (periodes|length) + 5 }}">
                                 Points divers
                             </th>
                         </tr>
@@ -108,20 +196,43 @@
                                 <td>{{ pointDivers['name'] }}</td>
 
                                 {% for periodeDatas in periodes %}
-                                    {% set periodeId = periodeDatas['id'] %}
-                                    <td class="text-center">
-                                        {% if periodeDatas['pointsDivers'][pointDiversId] is defined %}
-                                            {{ periodeDatas['pointsDivers'][pointDiversId]['point'] }}
+                                    {% if periodeDatas['periodeSet'] == 1 %}
+                                        {% set periodeId = periodeDatas['id'] %}
+                                        <td class="text-center">
+                                            {% if periodeDatas['pointsDivers'][pointDiversId] is defined %}
+                                                {{ periodeDatas['pointsDivers'][pointDiversId]['point'] }}
 
-                                            {% if pointDivers['withTotal'] %}
-                                                /
-                                                {{ pointDivers['total'] }}
+                                                {% if pointDivers['withTotal'] %}
+                                                    /
+                                                    {{ pointDivers['total'] }}
+                                                {% endif %}
+                                            {% else %}
+                                                -
                                             {% endif %}
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </td>
+                                        </td>
+                                    {% endif %}
                                 {% endfor %}
+                                <td class="empty-column"></td>
+                                <td class="empty-column"></td>
+
+                                {% for periodeDatas in periodes %}
+                                    {% if periodeDatas['periodeSet'] == 2 %}
+                                        {% set periodeId = periodeDatas['id'] %}
+                                        <td class="text-center">
+                                            {% if periodeDatas['pointsDivers'][pointDiversId] is defined %}
+                                                {{ periodeDatas['pointsDivers'][pointDiversId]['point'] }}
+
+                                                {% if pointDivers['withTotal'] %}
+                                                    /
+                                                    {{ pointDivers['total'] }}
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
+                                {% endfor %}
+                                <td class="empty-column"></td>
 
                                 <td class="text-center">
                                     {% if totalPointsDivers[pointDiversId] is defined %}
