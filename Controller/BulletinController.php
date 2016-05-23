@@ -471,7 +471,7 @@ class BulletinController extends Controller
         if ($periode->getTemplate() === 'FinalExamPrint') {
 
             return $this->printFinalExam($periode, $eleve);
-        } else if ($periode->getTemplate() === 'CompletePrint') {
+        } else if ($periode->getTemplate() === 'CompletePrint' || $periode->getTemplate() === 'CompletePrintLarge' ) {
 
             return $this->printComplete($eleve);
         }

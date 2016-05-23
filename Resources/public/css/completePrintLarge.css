@@ -4,7 +4,7 @@
     }
 }
 
-@media print and (width: 21cm) and (height: 29.7cm) {
+@media print and (width: 42cm) and (height: 29.7cm) {
     .page {
         margin: 0;
         border: initial;
@@ -22,7 +22,7 @@
 }
 
 @page {
-    size: A4;
+    size: A3;
     margin : 2cm;
     background-color: red;
 }

@@ -89,7 +89,8 @@ class PeriodeType extends AbstractType
                         'FinalExamPrint'=>'Bulletin final',
                         'PeriodePrint'=>'Une période',
                         'ExamPrintWithOnlyOnePeriodePrint'=>'Examen Premier trimestre (1 période)',
-                        'CompletePrint' => 'Bulletin complet'
+                        'CompletePrint' => 'Bulletin complet',
+                        'CompletePrintLarge' => 'Bulletin complet (Large)'
                     )
                 ),
                 $templateOptions
