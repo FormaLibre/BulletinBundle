@@ -625,9 +625,8 @@ class BulletinController extends Controller
      */
     public function bulletinWidgetAction(User $user)
     {
-
         $totauxMatieres = $this->totauxManager->getTotalPeriodesMatiere($user);
-        $periodes = $this->periodeRepo->findAll();
+        $periodes = $this->bulletinManager->getPeriodesDatasByUser($user);
 
         $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
         $cebWithPoints = array();
@@ -664,7 +663,6 @@ class BulletinController extends Controller
     public function printableBulletinWidgetAction(User $user)
     {
         $totauxMatieres = $this->totauxManager->getTotalPeriodesMatiere($user);
-        $periodes = $this->periodeRepo->findAll();
 
         $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
         $cebWithPoints = array();
@@ -682,8 +680,7 @@ class BulletinController extends Controller
         $params = array(
             'user' => $user,
             'totauxMatieresCeb' => $cebWithPoints,
-            'totauxMatieresNoCeb' => $nocebWithPoints,
-            'periodes' => $periodes
+            'totauxMatieresNoCeb' => $nocebWithPoints
         );
 
         return $this->render('FormaLibreBulletinBundle::printableBulletinWidget.html.twig', $params);

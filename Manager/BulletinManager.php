@@ -805,6 +805,17 @@ class BulletinManager
         return array('periodes' => $periodes, 'matieresPeriodes' => $matieresPeriodes, 'pointsDiversDatas' => $pointsDiversDatas);
     }
 
+    public function getPeriodesDatasByUser(User $user)
+    {
+        $allMatieresDatas = $this->getAllMatieresDatas();
+        $allMatieres = $allMatieresDatas['matieres'];
+        $periodesMatieres = $allMatieresDatas['periodesMatieres'];
+        $userMatieres = $this->getAllUserMatieres($user, $allMatieres);
+        $userPeriodesDatas = $this->getUserPeriodesDatasFromMatieres($userMatieres, $periodesMatieres);
+
+        return $userPeriodesDatas['periodes'];
+    }
+
     public function getAllUserPoints(User $user)
     {
         return $this->pempRepo->findByEleve($user);
