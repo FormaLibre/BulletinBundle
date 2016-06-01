@@ -70,7 +70,6 @@ class MatiereController extends FOSRestController
         return array('title', 'code', 'name');
     }
 
-
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
@@ -91,6 +90,19 @@ class MatiereController extends FOSRestController
     {
         $this->throwExceptionIfNotBulletinAdmin();
         $matiereOptions->setTotal($total);
+        $this->om->persist($matiereOptions);
+        $this->om->flush();
+
+        return $matiereOptions;
+    }
+
+    /**
+     * @View(serializerGroups={"api_bulletin"})
+     */
+    public function setMatiereoptionColorAction(MatiereOptions $matiereOptions, $color)
+    {
+        $this->throwExceptionIfNotBulletinAdmin();
+        $matiereOptions->setColor($color);
         $this->om->persist($matiereOptions);
         $this->om->flush();
 

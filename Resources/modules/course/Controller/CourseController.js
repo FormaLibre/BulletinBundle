@@ -49,6 +49,13 @@ export default class CourseController {
 			        cellRenderer: function() {
 	        			return '<input type="number" value="{{ $row.position }}" ng-model=$row.position class="form-control" ng-model-options="{ debounce: 1000 }" ng-change="cmc.editPosition($row)"></input>';
 	        		}
+	 			},
+	 			{
+	 				name: this.translate('color', {}, 'platform'),
+	 				prop: 'color',
+			        cellRenderer: function() {
+	        			return '<input colorpicker="hex" type="colorpicker" value="{{ $row.color }}" ng-model=$row.color class="form-control" ng-model-options="{ debounce: 1000 }" ng-change="cmc.editColor($row)"></input>';
+	        		}
 	 			}
 	 		]
 	 	};
@@ -79,6 +86,10 @@ export default class CourseController {
 
 	editPosition($row) {
 		this.CourseAPIService.editPosition($row.id, $row.position)
+	}
+
+	editColor($row) {
+		this.CourseAPIService.editColor($row.id, $row.color)
 	}
 
     translate(key, data = {}) {
