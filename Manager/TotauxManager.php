@@ -215,12 +215,12 @@ class TotauxManager
 
     public function getDataChart(User $eleve, $isCeb = true)
     {
-        $periodes = $this->periodeRepo->findAll();
+        $periodesDatas = $this->bulletinManager->getPeriodesDatasByUser($eleve);
         $periodeNames = array();
         $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
 
-        foreach ($periodes as $periode) {
-            $periodeNames[] = $periode->getName();
+        foreach ($periodesDatas as $datas) {
+            $periodeNames[] = $datas['name'];
         }
         $data = new \StdClass();
         $data->labels = $periodeNames;
@@ -256,7 +256,7 @@ class TotauxManager
         }
         $redLines = array();
         
-        foreach ($periodes as $periode) {
+        foreach ($periodeNames as $periodeName) {
             $redLines[] = 50;
         }
         $object = new \StdClass();
@@ -275,11 +275,12 @@ class TotauxManager
 
     private function getPourcentageMatierePeriode(CourseSession $matiere, User $eleve)
     {
-        $periodes = $this->periodeRepo->findAll();
+        $periodesDatas = $this->bulletinManager->getPeriodesDatasByUser($eleve);
         $pourcPeriode = array();
         $ignoredCodes = $this->bulletinManager->getIgnoredCodes();
 
-        foreach ($periodes as $periode){
+        foreach ($periodesDatas as $datas){
+            $periode = $this->periodeRepo->findOneById($datas['id']);
             $pemp = $this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere);
 
             if (!is_null($pemp)) {
