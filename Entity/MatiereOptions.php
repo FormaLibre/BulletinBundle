@@ -44,6 +44,7 @@ class MatiereOptions
 
     /**
      * @ORM\Column(name="color", nullable=true)
+     * @Groups({"api_bulletin"})
      */
     protected $color;
 

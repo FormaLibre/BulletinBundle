@@ -54,7 +54,7 @@ export default class CourseController {
 	 				name: this.translate('color', {}, 'platform'),
 	 				prop: 'color',
 			        cellRenderer: function() {
-	        			return '<input colorpicker="hex" type="colorpicker" value="{{ $row.color }}" ng-model=$row.color class="form-control" ng-model-options="{ debounce: 1000 }" ng-change="cmc.editColor($row)"></input>';
+	        			return '<input colorpicker="hex" type="text" value="{{ $row.color }}" ng-model=$row.color class="form-control" ng-model-options="{ debounce: 1000 }" ng-change="cmc.editColor($row)"></input>';
 	        		}
 	 			}
 	 		]
@@ -65,6 +65,7 @@ export default class CourseController {
 
 	setCourseOptions(data, offset, size) {
 		var courseOptions = data.options
+    console.log(data.options)
 
 		for (var i = 0; i < offset * size; i++) {
 			courseOptions.unshift({})
