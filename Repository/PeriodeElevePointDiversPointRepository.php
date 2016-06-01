@@ -23,13 +23,14 @@ class PeriodeElevePointDiversPointRepository extends EntityRepository
         return $results = $query->getResult();
     }
 
-    public function findPEPDPByUserAndNonOnlyPointPeriode(User $user)
+    public function findPEPDPByUserAndNonOnlyPointPeriode(User $user, array $periodesIds)
     {
         $dql = '
             SELECT pepdp
             FROM FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint pepdp
             JOIN pepdp.periode p
             WHERE pepdp.eleve = :eleve
+            AND p.id IN (:periodesIds)
             AND (
                 p.onlyPoint IS NULL
                 OR p.onlyPoint = false
@@ -37,6 +38,7 @@ class PeriodeElevePointDiversPointRepository extends EntityRepository
         ';
         $query = $this->_em->createQuery($dql);
         $query->setParameter('eleve', $user);
+        $query->setParameter('periodesIds', $periodesIds);
 
         return $query->getResult();
     }

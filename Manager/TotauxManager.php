@@ -300,8 +300,7 @@ class TotauxManager
     public function getMoyennePresence(User $user)
     {
         $results = array();
-        $periodes = $this->periodeRepo->findNonOnlyPointPeriodes();
-        $nbPeriodes = count($periodes);
+        $nbPeriodes = $this->getNbPeriodesWithoutOnlyPointByUser($user);
         $points = $this->pempRepo->findPEMPByUserAndNonOnlyPointPeriode($user);
 
         foreach ($points as $point) {
@@ -328,8 +327,7 @@ class TotauxManager
     public function getMoyenneComportement(User $user)
     {
         $results = array();
-        $periodes = $this->periodeRepo->findNonOnlyPointPeriodes();
-        $nbPeriodes = count($periodes);
+        $nbPeriodes = $this->getNbPeriodesWithoutOnlyPointByUser($user);
         $points = $this->pempRepo->findPEMPByUserAndNonOnlyPointPeriode($user);
 
         foreach ($points as $point) {
@@ -349,7 +347,9 @@ class TotauxManager
         }
 
         foreach ($results as $key => $result) {
-            $results[$key]['comportement'] /= $nbPeriodes;
+            $results[$key]['comportement'] = $nbPeriodes > 0 ?
+                round($results[$key]['comportement'] / $nbPeriodes, 1) :
+                $results[$key]['comportement'];
         }
 
         return $results;
@@ -358,7 +358,13 @@ class TotauxManager
     public function getMoyennePointsDivers(User $user)
     {
         $results = array();
-        $pointsDiversPoints = $this->pemdRepo->findPEPDPByUserAndNonOnlyPointPeriode($user);
+        $periodesDatas = $this->bulletinManager->getPeriodesDatasByUser($user);
+        $periodesIds = [];
+
+        foreach ($periodesDatas as $datas) {
+            $periodesIds[] = $datas['id'];
+        }
+        $pointsDiversPoints = $this->pemdRepo->findPEPDPByUserAndNonOnlyPointPeriode($user, $periodesIds);
 
         foreach ($pointsDiversPoints as $pointsDiversPoint) {
             $pointDivers = $pointsDiversPoint->getDivers();
@@ -393,5 +399,19 @@ class TotauxManager
         }
 
         return $results;
+    }
+
+    private function getNbPeriodesWithoutOnlyPointByUser(User $user)
+    {
+        $periodes = $this->bulletinManager->getPeriodesDatasByUser($user);
+        $nbPeriodes = 0;
+
+        foreach ($periodes as $periode) {
+            if (!$periode['onlyPoint']) {
+                $nbPeriodes++;
+            }
+        }
+
+        return $nbPeriodes;
     }
 }
