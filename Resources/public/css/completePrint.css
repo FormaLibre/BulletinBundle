@@ -1,10 +1,11 @@
-@media screen {
-    #content{
-        width: 800px;
-    }
-}
+/*@media print and (width: 42cm) and (height: 29.7cm) {*/
+@media print {
 
-@media print and (width: 42cm) and (height: 29.7cm) {
+    @page {
+    size: A3 landscape;
+    margin : 1cm;
+    }
+
     .page {
         margin: 0;
         border: initial;
@@ -17,14 +18,11 @@
     }
 
     #content{
-        margin:4%
+        margin:0px;
     }
-}
 
-@page {
-    size: A3;
-    margin : 2cm;
-    background-color: red;
+   .table
+
 }
 
 .firstcolumn{
@@ -98,8 +96,4 @@
 
 .echec{
     background-color: rgb(213, 213, 213);
-}
-
-.empty-column {
-    border: none !important;
 }

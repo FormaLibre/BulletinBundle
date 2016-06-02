@@ -4,12 +4,12 @@
     <meta charset="utf-8">
     <title>Bulletin</title>
     <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/bootstrap.css')}}"/>
-    <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/completePrint.css')}}"/>
+    <link rel="stylesheet" href="{{ asset('bundles/formalibrebulletin/css/completePrintLarge.css')}}"/>
 </head>
 <body>
 <div class="container" id="content">
     <div class="row">
-        <div class="col-xs-3"><img src="http://www.fransfischer.be/logoFFnb.png" height="150px"></div>
+        <div class="col-xs-3"><img src="http://www.fransfischer.be/logoFFnb.png" height="125px"></div>
         <div class="col-xs-7" id="title-box">
             <h1>Bulletin</h1>
         </div>
@@ -24,7 +24,6 @@
             {% endif %}
         </div>
     </div>
-    <hr style="visibility: hidden;">
 
     <div class="row">
         <table id="TableauRes" class="table table-bordered">
@@ -53,8 +52,7 @@
             {% for matiereDatas in matieres %}
                 {% set matiereId = matiereDatas['matiereId'] %}
                 <tr>
-                    <td>{{ matiereDatas['matiereName'] }}</td>
-
+                    <td class="text-nowrap">{{ matiereDatas['matiereName'] }}</td>
                     {% for periodeDatas in periodes %}
                         {% if periodeDatas['periodeSet'] == 1 %}
                             {% set periodeId = periodeDatas['id'] %}
