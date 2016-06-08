@@ -756,6 +756,7 @@ class BulletinManager
                 $periodeCoefficient = $periode->getCoefficient();
                 $pointsDivers = $periode->getPointDivers();
                 $periodeSet = $periode->getPeriodeSet();
+                $template = $periode->getTemplate();
 
                 $periodes[$periodeId] = array(
                     'id' => $periodeId,
@@ -765,7 +766,8 @@ class BulletinManager
                     'annee' => $periodeAnnee,
                     'coefficient' => $periodeCoefficient,
                     'pointsDivers' => array(),
-                    'periodeSet' => $periodeSet
+                    'periodeSet' => $periodeSet,
+                    'template' => $template
                 );
                 $matieresPeriodes[$matiereId][$periodeId] = array(
                     'id' => $periodeId,
@@ -774,7 +776,8 @@ class BulletinManager
                     'degre' => $periodeDegre,
                     'annee' => $periodeAnnee,
                     'coefficient' => $periodeCoefficient,
-                    'periodeSet' => $periodeSet
+                    'periodeSet' => $periodeSet,
+                    'template' => $template
                 );
 
                 foreach($pointsDivers as $divers) {

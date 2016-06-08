@@ -1,4 +1,9 @@
-<h3>{{ pc.user.firstName }} {{ pc.user.lastName }}</h3>
+<h3>
+    {{ pc.user.firstName }} {{ pc.user.lastName }}
+    <button class="btn btn-default" ng-click="pc.print()" ng-if="pc.getCompletePrintPeriodeId()">
+        <i class="fa fa-print"></i>
+    </button>
+</h3>
 <hr>
 <div class="table-responsive">
     <table class="table table-bordered table-condensed">

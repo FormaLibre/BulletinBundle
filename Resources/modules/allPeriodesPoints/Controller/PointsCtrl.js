@@ -279,4 +279,25 @@ export default class PointsCtrl {
 
     return style
   }
+
+  getCompletePrintPeriodeId () {
+    let id = null
+
+    for (let periodeId in this.periodes) {
+      if (this.periodes[periodeId]['template'] === 'CompletePrint' || this.periodes[periodeId]['template'] === 'CompletePrintLarge') {
+        id = periodeId
+        break
+      }
+    }
+
+    return id
+  }
+
+  print () {
+    const periodeId = this.getCompletePrintPeriodeId()
+
+    if (periodeId) {
+      this.$http.get(Routing.generate('formalibreBulletinPrintElevePdf', {periode: periodeId, user: this.userId}))
+    }
+  }
 }

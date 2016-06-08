@@ -203,8 +203,11 @@ class BulletinAdminController extends Controller
         foreach ($eleves as $eleve){
             $elevesUrl[] = $this->generateUrl('formalibreBulletinPrintEleve', array('periode' => $periode->getId(), 'eleve' => $eleve->getId()), true);
         }
-
-        $this->get('knp_snappy.pdf')->generate($elevesUrl, $dir);
+        $template = $periode->getTemplate();
+        $options = ($template === 'CompletePrint' || $template === 'CompletePrintLarge') ?
+            ['orientation' => 'landscape', 'page-size' => 'A3'] :
+            [];
+        $this->get('knp_snappy.pdf')->generate($elevesUrl, $dir, $options);
 
         $headers = array(
             'Content-Type'          => 'application/pdf',
@@ -242,8 +245,12 @@ class BulletinAdminController extends Controller
             'formalibreBulletinPrintEleve',
             array('periode' => $periode->getId(), 'eleve' => $user->getId()), true
         );
+        $template = $periode->getTemplate();
+        $options = ($template === 'CompletePrint' || $template === 'CompletePrintLarge') ?
+            ['orientation' => 'landscape', 'page-size' => 'A3'] :
+            [];
 
-        $this->get('knp_snappy.pdf')->generate($eleveUrl, $dir);
+        $this->get('knp_snappy.pdf')->generate($eleveUrl, $dir, $options);
 
         $headers = array(
             'Content-Type'          => 'application/pdf',
