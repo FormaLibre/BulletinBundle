@@ -108,7 +108,7 @@ export default class PointsCtrl {
       }
       result = percentage
     } else {
-      result = `${points} / ${total}`
+      result = `${Math.round(points * 10) / 10} / ${total}`
     }
 
     return result
@@ -143,7 +143,7 @@ export default class PointsCtrl {
       }
       result = percentage
     } else {
-      result = `${points} / ${total}`
+      result = `${Math.round(points * 10) / 10} / ${total}`
     }
 
     return result
@@ -180,7 +180,7 @@ export default class PointsCtrl {
       }
       result = percentage
     } else {
-      result = `${points} / ${total}`
+      result = `${Math.round(points * 10) / 10} / ${total}`
     }
 
     return result
