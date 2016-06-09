@@ -1,8 +1,8 @@
 <h3>
     {{ pc.user.firstName }} {{ pc.user.lastName }}
-    <button class="btn btn-default" ng-click="pc.print()" ng-if="pc.getCompletePrintPeriodeId()">
+    <a class="btn btn-default" href="{{ 'formalibreBulletinPrintElevePdf'|path:{periode: pc.getCompletePrintPeriodeId(), user: pc.user.id} }}" ng-if="pc.getCompletePrintPeriodeId()">
         <i class="fa fa-print"></i>
-    </button>
+    </a>
 </h3>
 <hr>
 <div class="table-responsive">
