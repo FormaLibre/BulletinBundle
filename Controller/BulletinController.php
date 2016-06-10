@@ -466,7 +466,7 @@ class BulletinController extends Controller
      */
     public function printEleveAction(Request $request, Periode $periode, User $eleve)
     {
-        $this->checkOpenPrintPdf($request);
+//        $this->checkOpenPrintPdf($request);
 
         if ($periode->getTemplate() === 'FinalExamPrint') {
 

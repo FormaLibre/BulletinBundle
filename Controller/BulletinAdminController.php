@@ -233,7 +233,7 @@ class BulletinAdminController extends Controller
      */
     public function PrintPdfEleveAction(Periode $periode, User $user)
     {
-        $this->checkOpen();
+//        $this->checkOpen();
 
         $classe = $this->bulletinManager->getClasseByEleve($user);
         $dirName = is_null($classe) ? 'CLASSE_INDEFINIE' : $classe->getName();
