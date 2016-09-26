@@ -543,7 +543,6 @@ class BulletinController extends Controller
             );
         }
 
-
         $params = array(
             'pemps' => $pemps,
             'pemds' => $pemds,
@@ -779,6 +778,27 @@ class BulletinController extends Controller
         $userDecisions = $this->periodeEleveDecisionRepo->findBy(
             array('user' => $eleve->getId(), 'periode' => $periode->getId())
         );
+        $codesList = [];
+        $codesDatas = [];
+        $allPointCodes = $this->bulletinManager->getAllPointCodes();
+
+        foreach ($allPointCodes as $pointCode) {
+            $id = $pointCode->getId();
+            $code = $pointCode->getCode();
+            $info = $pointCode->getInfo();
+            $shortInfo = $pointCode->getShortInfo();
+            $isDefaultValue = $pointCode->getIsDefaultValue();
+            $ignored = $pointCode->getIgnored();
+            $codesList[] = $code;
+            $codesDatas[$code] = [
+                'id' => $id,
+                'code' => $code,
+                'info' => $info,
+                'shortInfo' => $shortInfo,
+                'isDefaultValue' => $isDefaultValue,
+                'ignored' => $ignored
+            ];
+        }
 
         $params = array(
             'pemps' => $pemps,
@@ -787,7 +807,9 @@ class BulletinController extends Controller
             'totaux' => $totaux,
             'totauxMatieres' => $totauxMatieres,
             'recap' => $recap,
-            'userDecisions' => $userDecisions
+            'userDecisions' => $userDecisions,
+            'codesList' => $codesList,
+            'codesDatas' => $codesDatas
         );
 
         return $this->render('FormaLibreBulletinBundle::Templates/FinalExamPrint.html.twig', $params);

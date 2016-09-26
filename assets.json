@@ -1,9 +1,9 @@
 {
   "webpack": {
     "entry": {
-      "session-management": "modules/session/module",
-      "course-management": "modules/course/module",
-      "all-periodes-points": "modules/allPeriodesPoints/allPeriodesPoints"
+      "session-management": "session/module",
+      "course-management": "course/module",
+      "all-periodes-points": "allPeriodesPoints/allPeriodesPoints"
     }
   }
 }

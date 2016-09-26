@@ -37,6 +37,7 @@ class BulletinManager
     private $periodeRepo;
     private $pointCodeRepo;
     private $eleveMatiereOptionsRepo;
+    private $sessionRepo;
 
     /**
      * @DI\InjectParams({
@@ -70,6 +71,7 @@ class BulletinManager
         $this->periodeRepo = $om->getRepository('FormaLibreBulletinBundle:Periode');
         $this->pointCodeRepo = $om->getRepository('FormaLibreBulletinBundle:PointCode');
         $this->eleveMatiereOptionsRepo = $om->getRepository('FormaLibreBulletinBundle:EleveMatiereOptions');
+        $this->sessionRepo = $om->getRepository('ClarolineCursusBundle:CourseSession');
     }
 
     public function getTaggedGroups()
@@ -255,30 +257,23 @@ class BulletinManager
         return $this->pointDiversRepo->findAll();
     }
 
-    public function getPempByPeriodeAndUserAndMatiere(
-        Periode $periode,
-        User $eleve,
-        CourseSession $matiere
-    )
+    public function getPempByPeriodeAndUserAndMatiere(Periode $periode, User $eleve, CourseSession $matiere)
     {
         $pemp = $this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere);
 
         if (is_null($pemp)) {
             $defaultPointCode = $this->getDefaultPointCode();
             $defaultCode = is_null($defaultPointCode) ? null : $defaultPointCode->getCode();
-            $matiereOptions = $this->getOptionsByMatiere($matiere);
             $coefficient = $periode->getCoefficient();
-            $totalMatiere = $matiereOptions->getTotal();
-            $total = empty($totalMatiere) ?
-                null :
-                ceil($coefficient * $totalMatiere);
+            $totalMatiere = $matiere->getTotal();
+            $total = empty($totalMatiere) ? null : ceil($coefficient * $totalMatiere);
             $pemp = new PeriodeEleveMatierePoint();
             $pemp->setEleve($eleve);
             $pemp->setMatiere($matiere);
             $pemp->setTotal($total);
             $pemp->setPoint($defaultCode);
             $pemp->setPeriode($periode);
-            $pemp->setPosition($matiereOptions->getPosition());
+            $pemp->setPosition($matiere->getDisplayOrder());
             $this->om->persist($pemp);
             $this->om->flush();
         }
@@ -301,12 +296,9 @@ class BulletinManager
 
         foreach ($matieres as $matiere) {
             $matiereId = $matiere->getId();
-            $matiereOptions = $this->getOptionsByMatiere($matiere);
             $coefficient = $periode->getCoefficient();
-            $totalMatiere = $matiereOptions->getTotal();
-            $total = empty($totalMatiere) ?
-                null :
-                ceil($coefficient * $totalMatiere);
+            $totalMatiere = $matiere->getTotal();
+            $total = empty($totalMatiere) ? null : ceil($coefficient * $totalMatiere);
 
             if (!in_array($matiereId, $matiereIds)) {
                 $pemp = new PeriodeEleveMatierePoint();
@@ -315,7 +307,7 @@ class BulletinManager
                 $pemp->setTotal($total);
                 $pemp->setPoint($defaultCode);
                 $pemp->setPeriode($periode);
-                $pemp->setPosition($matiereOptions->getPosition());
+                $pemp->setPosition($matiere->getDisplayOrder());
                 $this->om->persist($pemp);
                 $pemps[] = $pemp;
             }
@@ -382,6 +374,35 @@ class BulletinManager
         $qb = $this->em->createQueryBuilder();
         $count ? $qb->select('count(mo)'): $qb->select('mo');
         $qb->from('FormaLibre\BulletinBundle\Entity\MatiereOptions', 'mo');
+        $query = $qb->getQuery();
+
+        if ($limit) {
+            $query->setMaxResults($limit);
+            $query->setFirstResult($page * $limit);
+        }
+
+        return $count ? $query->getSingleScalarResult(): $query->getResult();
+    }
+
+    public function searchSessions($searches = array(), $count = false, $page = null, $limit = null)
+    {
+        $qb = $this->em->createQueryBuilder();
+        $count ? $qb->select('count(cs)'): $qb->select('cs');
+        $qb->from('Claroline\CursusBundle\Entity\CourseSession', 'cs')->join('cs.course', 'c');
+        $courseProperties = array('title', 'code');
+        $sessionProperties = array('name');
+
+        foreach ($searches as $key => $search) {
+            foreach ($search as $id => $el) {
+                if (in_array($key, $courseProperties)) {
+                    $qb->andWhere("UPPER (c.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                } elseif (in_array($key, $sessionProperties)) {
+                    $qb->andWhere("UPPER (cs.{$key}) LIKE :{$key}{$id}");
+                    $qb->setParameter($key . $id, '%' . strtoupper($el) . '%');
+                }
+            }
+        }
         $query = $qb->getQuery();
 
         if ($limit) {
@@ -498,20 +519,17 @@ class BulletinManager
     //totaux et positions devraient être récupérés depuis la matière et pas les pemps
     public function refresh(Periode $periode)
     {
-        $options = array();
+        $options = [];
         $coefficient = $periode->getCoefficient();
         $sessions = $periode->getCourseSessions();
-        $allMatieresOptions = $this->getMatiereOptionsBySessions($sessions);
 
-        foreach ($allMatieresOptions as $matiereOptions) {
-            $matiereId = $matiereOptions->getMatiere()->getId();
-            $totalMatiere = $matiereOptions->getTotal();
-            $total = empty($totalMatiere) ?
-                null :
-                ceil($coefficient * $totalMatiere);
-            $options[$matiereId] = array();
+        foreach ($sessions as $session) {
+            $matiereId = $session->getId();
+            $totalMatiere = $session->getTotal();
+            $total = empty($totalMatiere) ? null : ceil($coefficient * $totalMatiere);
+            $options[$matiereId] = [];
             $options[$matiereId]['total'] = $total;
-            $options[$matiereId]['position'] = $matiereOptions->getPosition();
+            $options[$matiereId]['position'] = $session->getDisplayOrder();
         }
 
         $pemps = $this->getPempsByPeriode($periode);
@@ -528,16 +546,14 @@ class BulletinManager
         }
         $this->om->endFlushSuite();
 
-        $optionsDivers = array();
+        $optionsDivers = [];
         $pointsDivers = $periode->getPointDivers();
 
         foreach ($pointsDivers as $divers) {
             $pointDiversId = $divers->getId();
             $totalDivers = $divers->getTotal();
-            $total = empty($totalDivers) || !$divers->getWithTotal() ?
-                null :
-                ceil($coefficient * $totalDivers);
-            $optionsDivers[$pointDiversId] = array();
+            $total = empty($totalDivers) || !$divers->getWithTotal() ? null : ceil($coefficient * $totalDivers);
+            $optionsDivers[$pointDiversId] = [];
             $optionsDivers[$pointDiversId]['total'] = $total;
             $optionsDivers[$pointDiversId]['position'] = $divers->getPosition();
         }
@@ -689,12 +705,10 @@ class BulletinManager
         $userMatieres = $this->getAllUserMatieres($user, $allMatieres);
         $userPeriodesDatas = $this->getUserPeriodesDatasFromMatieres($userMatieres, $periodesMatieres);
         $userMatieresPeriodes = $userPeriodesDatas['matieresPeriodes'];
-        $matiereOptions = $this->getMatiereOptionsByMatieres($userMatieres);
 
-        foreach ($matiereOptions as $options) {
-            $matiere = $options->getMatiere();
-            $total = $options->getTotal();
-            $position = $options->getPosition();
+        foreach ($userMatieres as $matiere) {
+            $total = $matiere->getTotal();
+            $position = $matiere->getDisplayOrder();
             $matiereId = $matiere->getId();
             $matiereName = $matiere->getCourseTitle();
             $eleveMatiereOptions = $this->getEleveMatiereOptions($user, $matiere);
@@ -892,16 +906,17 @@ class BulletinManager
         foreach ($matieresDatas as $matiereId => $datas) {
             foreach ($datas['periodes'] as $periodeId => $periodeDatas) {
                 if (!isset($periodeDatas['pempId'])) {
-                    $matiereOptions = $this->matiereOptionsRepo->findMatiereOptionsByMatiereId($matiereId);
+                    $matiere = $this->sessionRepo->findOneById($matiereId);
                     $periode = $this->periodeRepo->findOneById($periodeId);
 
-                    if (!is_null($matiereOptions) && !is_null($periode)) {
-                        $matiere = $matiereOptions->getMatiere();
+                    if (!is_null($matiere) && !is_null($periode)) {
                         $pemp = new PeriodeEleveMatierePoint();
                         $pemp->setPeriode($periode);
                         $pemp->setEleve($user);
                         $pemp->setMatiere($matiere);
-                        $pemp->setTotal($matiereOptions->getTotal() * $periode->getCoefficient());
+                        $matiereTotal = $matiere->getTotal();
+                        $total = !empty($matiereTotal) ? $matiereTotal * $periode->getCoefficient() : null;
+                        $pemp->setTotal($total);
                         $pemp->setPoint($defaultCode);
                         $this->om->persist($pemp);
                         $pemps[] = $pemp;
@@ -1019,7 +1034,9 @@ class BulletinManager
             if (isset($userMatieresDatas[$matiereId]['periodes'][$periodeId])) {
                 $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $pempId;
                 $userMatieresDatas[$matiereId]['periodes'][$periodeId]['point'] = $point;
-                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $pemp->getTotal();
+                $matiereTotal = $matiere->getTotal();
+                $total = !empty($matiereTotal) ? $matiereTotal * $periode->getCoefficient() : null;
+                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $total;
                 $pempsDatas[$pempId] = $point;
             }
         }
@@ -1044,11 +1061,15 @@ class BulletinManager
         foreach ($createdPemps as $pemp) {
             $pempId = $pemp->getId();
             $point = $pemp->getPoint();
-            $periodeId = $pemp->getPeriode()->getId();
-            $matiereId = $pemp->getMatiere()->getId();
+            $periode = $pemp->getPeriode();
+            $matiere = $pemp->getMatiere();
+            $periodeId = $periode->getId();
+            $matiereId = $matiere->getId();
             $userMatieresDatas[$matiereId]['periodes'][$periodeId]['pempId'] = $pempId;
             $userMatieresDatas[$matiereId]['periodes'][$periodeId]['point'] = $point;
-            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $pemp->getTotal();
+            $matiereTotal = $matiere->getTotal();
+            $total = !empty($matiereTotal) ? $matiereTotal * $periode->getCoefficient() : null;
+            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $total;
             $pempsDatas[$pempId] = $point;
         }
 

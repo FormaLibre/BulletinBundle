@@ -12,11 +12,11 @@ class PeriodeElevePointDiversPointRepository extends EntityRepository
     {
         $em = $this->getEntityManager();
         $qb = $em->createQueryBuilder();
-        $qb->select('pemp')
-            ->from('FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint', 'pemp')
-            ->where('pemp.periode = :periode')
-            ->andWhere('pemp.eleve = :user')
-            ->orderBy('pemp.position')
+        $qb->select('pepdp')
+            ->from('FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint', 'pepdp')
+            ->where('pepdp.periode = :periode')
+            ->andWhere('pepdp.eleve = :user')
+            ->orderBy('pepdp.position')
             ->setParameter('periode', $periode)
             ->setParameter('user', $user);
         $query = $qb->getQuery();

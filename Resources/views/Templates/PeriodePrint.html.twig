@@ -50,11 +50,18 @@
                     <td colspan="5" class="center">{{ codesDatas[pemp.point]['info']|trans({}, 'bulletin') }}</td>
                 </tr>
             {% else %}
+                {% set matiereTotal = pemp.getMatiere().getTotal() %}
+                {% set coefficient = pemp.getPeriode().getCoefficient() %}
+                {% set total = matiereTotal * coefficient %}
                 <tr class="">
                     <td class="firstcolumn">{{ pemp.matiere.getCourse().getTitle() }}</td>
-                    <td class="center point">{{ pemp.point }}</td>
-                    <td class="center total">{{ pemp.total }}</td>
-                    <td class="center pourcent" data="{{ pemp.total }}">{{ pemp.getDisplayPourcentage() }}</td>
+                    <td class="center point">
+                        {{ pemp.point }}
+                    </td>
+                    <td class="center total">
+                        {{ total }}
+                    </td>
+                    <td class="center pourcent" data="{{ total }}">{{ pemp.getDisplayPourcentage() }}</td>
                     
                     {% if hasThirdPoint %}
                         {% if pemp.comportement < 850 %}

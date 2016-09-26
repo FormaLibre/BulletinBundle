@@ -48,7 +48,12 @@
                             {% endfor %}
                         </td>
                         <td class="point">{{ form_widget(pemp.point) }}</td>
-                        <td class="total">{{ form_widget(pemp.total) }}</td>
+                        <td class="total">
+                            {% set matiereTotal = pemp.vars.value.matiere.getTotal() %}
+                            {% set coefficient = pemp.vars.value.periode.getCoefficient() %}
+                            {% set total = matiereTotal * coefficient %}
+                            <input class="form-control" value="{{ total }}" disabled>
+                        </td>
 
                         {% if periode.onlyPoint != 1 %}
                             {% if hasSecondPoint %}

@@ -11,6 +11,7 @@
 
 namespace FormaLibre\BulletinBundle\Controller\API;
 
+use Claroline\CursusBundle\Entity\CourseSession;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations\View;
 use JMS\DiExtraBundle\Annotation as DI;
@@ -52,6 +53,20 @@ class MatiereController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
+    public function getSearchSessionsAction($page, $limit)
+    {
+        $this->throwExceptionIfNotBulletinAdmin();
+
+        $searches = $this->request->query->all();
+        $sessions = $this->bulletinManager->searchSessions($searches, false, $page, $limit);
+        $total = $this->bulletinManager->searchSessions($searches, true);
+
+        return array('sessions' => $sessions, 'total' => $total);
+    }
+
+    /**
+     * @View(serializerGroups={"api_bulletin"})
+     */
     public function getSearchMatiereOptionsAction($page, $limit)
     {
         $this->throwExceptionIfNotBulletinAdmin();
@@ -73,40 +88,40 @@ class MatiereController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
-    public function setMatiereoptionPositionAction(MatiereOptions $matiereOptions, $position)
+    public function putSessionDisplayOrderAction(CourseSession $session, $displayOrder)
     {
         $this->throwExceptionIfNotBulletinAdmin();
-        $matiereOptions->setPosition($position);
-        $this->om->persist($matiereOptions);
+        $session->setDisplayOrder($displayOrder);
+        $this->om->persist($session);
         $this->om->flush();
 
-        return $matiereOptions;
+        return $session;
     }
 
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
-    public function setMatiereoptionTotalAction(MatiereOptions $matiereOptions, $total)
+    public function putSessionTotalAction(CourseSession $session, $total)
     {
         $this->throwExceptionIfNotBulletinAdmin();
-        $matiereOptions->setTotal($total);
-        $this->om->persist($matiereOptions);
+        $session->setTotal($total);
+        $this->om->persist($session);
         $this->om->flush();
 
-        return $matiereOptions;
+        return $session;
     }
 
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
-    public function setMatiereoptionColorAction(MatiereOptions $matiereOptions, $color)
+    public function putSessionColorAction(CourseSession $session, $color)
     {
         $this->throwExceptionIfNotBulletinAdmin();
-        $matiereOptions->setColor($color);
-        $this->om->persist($matiereOptions);
+        $session->setColor($color);
+        $this->om->persist($session);
         $this->om->flush();
 
-        return $matiereOptions;
+        return $session;
     }
 
     private function throwExceptionIfNotBulletinAdmin()

@@ -53,7 +53,10 @@ class TotauxManager
         foreach ($pemps as $pemp) {
             if ($pemp->getPoint() < 850){
                 $totalPoint += $pemp->getPoint();
-                $totalTotal += $pemp->getTotal();
+                $matiere = $pemp->getMatiere();
+                $matiereTotal = $matiere->getTotal();
+                $total = !is_null($matiereTotal) ? $matiereTotal * $periode->getCoefficient() : 0;
+                $totalTotal += $total;
             }
         }
 
@@ -62,9 +65,10 @@ class TotauxManager
             $totalPourcentageAffiche = '0 %';
         } else {
             $totalPourcentageAffiche = round(($totalPoint / $totalTotal) * 100, 1).' %';
-        if($periode->getTemplate()==="PeriodePrint"){
-            $totalPourcentage = round(($totalPoint / $totalTotal) * 100, 1).' %';
-        }
+
+            if($periode->getTemplate()==="PeriodePrint"){
+                $totalPourcentage = round(($totalPoint / $totalTotal) * 100, 1).' %';
+            }
             else{    
                 $totalPourcentage = round(($totalPoint*$periode->getCoefficient() / $totalTotal) * 100, 1).' %';
             }
@@ -182,7 +186,6 @@ class TotauxManager
 
             foreach ($pemps as $pemp){
                 $matiere = $pemp->getMatiere();
-                $matiereOptions = $this->bulletinManager->getOptionsByMatiere($matiere);
                 $matiereId = $matiere->getId();
                 
                 if (!isset($totaux[$matiereId])) {
@@ -190,7 +193,7 @@ class TotauxManager
                     $totaux[$matiereId]['name'] = $matiere->getCourse()->getTitle();
                     $totaux[$matiereId]['pourcentage'] = 0;
                     $totaux[$matiereId]['nbPeriodes'] = 0;
-                    $totaux[$matiereId]['color'] = $matiereOptions->getColor();
+                    $totaux[$matiereId]['color'] = $matiere->getColor();
                 }
                 $percentage = $pemp->getPourcentage();
                 
@@ -232,9 +235,8 @@ class TotauxManager
 
         foreach ($pemps as $pemp) {
             $matiere = $pemp->getMatiere();
-            $matiereOptions = $this->bulletinManager->getOptionsByMatiere($matiere);
             $matiereName = $matiere->getCourse()->getTitle();
-            $matiereColor = $matiereOptions->getColor();
+            $matiereColor = $matiere->getColor();
             $pempInCeb = in_array($matiereName, $matCeb) ? true: false;
             $object = new \StdClass();
             $object->label = $matiereName;

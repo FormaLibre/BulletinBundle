@@ -3,18 +3,18 @@ export default class CourseAPIService {
 		this.$http = $http
 	}
 
-	editPosition(id, position) {
-		let route = Routing.generate('api_set_matiereoption_position', {'matiereOptions': id, 'position': position});
-		this.$http.patch(route);
+	editPosition(id, displayOrder) {
+		const route = Routing.generate('api_put_session_display_order', {session: id, displayOrder: displayOrder})
+		this.$http.put(route)
 	}
 
 	editTotal(id, total) {
-		let route = Routing.generate('api_set_matiereoption_total', {'matiereOptions': id, 'total': total});
-		this.$http.patch(route);
+    const route = Routing.generate('api_put_session_total', {'session': id, 'total': total})
+		this.$http.put(route)
 	}
 
 	editColor(id, color) {
-		let route = Routing.generate('api_set_matiereoption_color', {'matiereOptions': id, 'color': color});
-		this.$http.patch(route);
+    const route = Routing.generate('api_put_session_color', {'session': id, 'color': color})
+		this.$http.put(route)
 	}
 }

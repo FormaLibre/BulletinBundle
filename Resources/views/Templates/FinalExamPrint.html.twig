@@ -62,7 +62,10 @@
                             {{ pemp.getPoint() }}
                         </td>
                         <td class="center total{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">
-                            {{ pemp.getTotal() }}
+                            {% set matiereTotal = pemp.getMatiere().getTotal() %}
+                            {% set coefficient = pemp.getPeriode().getCoefficient() %}
+                            {% set total = matiereTotal * coefficient %}
+                            {{ total }}
                         </td>
                         <td class="center{% if pemp.getDisplayPourcentage() < 50%} echec {% endif %}">
                             {{ pemp.getDisplayPourcentage() }}

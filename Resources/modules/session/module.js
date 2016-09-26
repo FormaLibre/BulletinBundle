@@ -5,8 +5,8 @@ import translation from 'angular-ui-translation/angular-translation'
 import SessionManagerDirective from './Directive/SessionManagerDirective'
 
 //claroline
-import ClarolineSearch from '#/main/core/Resources/modules/search/module'
-import ClarolineAPI from '#/main/core/Resources/modules/services/module'
+import ClarolineSearch from '#/main/core/search/module'
+import ClarolineAPI from '#/main/core/services/module'
 
 angular.module('SessionManager', [
     'ClarolineSearch',

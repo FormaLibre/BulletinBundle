@@ -1,8 +1,8 @@
 import SessionController from '../Controller/SessionController'
 
 //claroline
-import ClarolineSearch from '#/main/core/Resources/modules/search/module'
-import ClarolineAPI from '#/main/core/Resources/modules/services/module'
+import ClarolineSearch from '#/main/core/search/module'
+import ClarolineAPI from '#/main/core/services/module'
 
 export default class SessionManagerDirective {
     constructor() {

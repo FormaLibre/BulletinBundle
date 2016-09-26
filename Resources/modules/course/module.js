@@ -7,8 +7,8 @@ import CourseManagerDirective from './Directive/CourseManagerDirective'
 import CourseAPIService from './Service/CourseAPIService'
 
 //claroline
-import ClarolineSearch from '#/main/core/Resources/modules/search/module'
-import ClarolineAPI from '#/main/core/Resources/modules/services/module'
+import ClarolineSearch from '#/main/core/search/module'
+import ClarolineAPI from '#/main/core/services/module'
 
 angular.module('CourseManager', [
     'ClarolineSearch',

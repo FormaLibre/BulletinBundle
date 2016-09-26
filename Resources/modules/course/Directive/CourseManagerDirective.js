@@ -2,8 +2,8 @@ import CourseController from '../Controller/CourseController'
 import CourseAPIService from '../Service/CourseAPIService'
 
 //claroline
-import ClarolineSearch from '#/main/core/Resources/modules/search/module'
-import ClarolineAPI from '#/main/core/Resources/modules/services/module'
+import ClarolineSearch from '#/main/core/search/module'
+import ClarolineAPI from '#/main/core/services/module'
 
 export default class CourseManagerDirective {
     constructor() {

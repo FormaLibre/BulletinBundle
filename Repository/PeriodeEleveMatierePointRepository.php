@@ -16,10 +16,10 @@ class PeriodeEleveMatierePointRepository extends EntityRepository
         $qb->select('pemp')
             ->from('FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint', 'pemp')
             ->join('pemp.matiere', 'matiere' )
-	    ->join('matiere.course', 'course' )
+	        ->join('matiere.course', 'course' )
             ->where('pemp.periode = :periode')
             ->andWhere('pemp.eleve = :user')
-            ->addOrderBy('pemp.position')
+            ->addOrderBy('matiere.displayOrder')
             ->setParameter('periode', $periode)
             ->setParameter('user', $user);
         $query = $qb->getQuery();

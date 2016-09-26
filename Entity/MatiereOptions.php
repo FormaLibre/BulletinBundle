@@ -25,6 +25,7 @@ class MatiereOptions
      * @ORM\ManyToOne(
      *      targetEntity="Claroline\CursusBundle\Entity\CourseSession"
      * )
+     * @ORM\JoinColumn(name="matiere_id", nullable=false, onDelete="CASCADE")
      * @Groups({"api_bulletin"})
      * @SerializedName("course_session")
      */
