@@ -1,0 +1,31 @@
+{% extends "ClarolineCoreBundle:Administration:layout.html.twig" %}
+
+{% block section_content %}
+    <div class="panel-heading">
+        <h1>{{ 'class_management'|trans({}, 'bulletin') }}</h1>
+    </div>
+    <div class="panel-body">
+        <div ng-cloak="" ng-app="GroupsModule">
+            <div ui-view>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('packages/angular-loading-bar/build/loading-bar.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('packages/ng-table/dist/ng-table.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        window.classes = {{ classes|json_encode|raw }}
+    </script>
+    <script type='text/javascript' src="{{ asset('packages/angular/angular.min.js') }}"></script>
+    <script type='text/javascript' src="{{ asset('packages/angular-loading-bar/build/loading-bar.min.js') }}"></script>
+    <script type='text/javascript' src="{{ asset('packages/ng-table/dist/ng-table.js') }}"></script>
+    <script type="text/javascript" src="{{ url('bazinga_jstranslation_js', { 'domain': 'bulletin' }) }}"></script>
+    <script src="{{ hotAsset('dist/formalibre-bulletin-groups.js') }}"></script>
+{% endblock %}

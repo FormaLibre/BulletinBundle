@@ -9,6 +9,7 @@ use Claroline\CoreBundle\Manager\RoleManager;
 use Claroline\CoreBundle\Manager\ToolManager;
 use Claroline\CoreBundle\Manager\UserManager;
 use Claroline\CoreBundle\Persistence\ObjectManager;
+use Claroline\TagBundle\Manager\TagManager;
 use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Entity\Decision;
 use FormaLibre\BulletinBundle\Entity\PeriodesGroup;
@@ -55,6 +56,7 @@ class BulletinAdminController extends Controller
     private $request;
     private $roleManager;
     private $router;
+    private $tagManager;
     private $toolManager;
     private $userManager;
 
@@ -86,6 +88,7 @@ class BulletinAdminController extends Controller
      *     "requestStack"          = @DI\Inject("request_stack"),
      *     "roleManager"           = @DI\Inject("claroline.manager.role_manager"),
      *     "router"                = @DI\Inject("router"),
+     *     "tagManager"            = @DI\Inject("claroline.manager.tag_manager"),
      *     "toolManager"           = @DI\Inject("claroline.manager.tool_manager"),
      *     "userManager"           = @DI\Inject("claroline.manager.user_manager")
      * })
@@ -100,6 +103,7 @@ class BulletinAdminController extends Controller
         RequestStack $requestStack,
         RoleManager $roleManager,
         RouterInterface $router,
+        TagManager $tagManager,
         ToolManager $toolManager,
         UserManager $userManager
     )
@@ -113,6 +117,7 @@ class BulletinAdminController extends Controller
         $this->request = $requestStack->getCurrentRequest();
         $this->roleManager = $roleManager;
         $this->router = $router;
+        $this->tagManager = $tagManager;
         $this->toolManager = $toolManager;
         $this->userManager = $userManager;
 
@@ -1149,5 +1154,59 @@ class BulletinAdminController extends Controller
         $this->checkOpen();
 
         return array();
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/groups/management",
+     *     name="formalibre_bulletin_groups_management",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @EXT\Template("FormaLibreBulletinBundle::Admin/groupsManagement.html.twig")
+     */
+    public function adminGroupsManagementAction()
+    {
+        $data = [];
+        $this->checkOpen();
+        $groups = $this->bulletinManager->getTaggedGroups();
+
+        foreach ($groups as $group) {
+            $data[] = ['id' => $group->getId(), 'name' => $group->getName()];
+        }
+
+        return ['classes' => $data];
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/group/{group}/tag/as/class",
+     *     name="formalibre_bulletin_group_tag_as_class",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function adminGroupTagAsClassAction(Group $group)
+    {
+        $this->tagManager->tagObject(['Classe'], $group);
+
+        return new JsonResponse(['id' => $group->getId(), 'name' => $group->getName()], 200);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/group/{group}/remove/class/tag",
+     *     name="formalibre_bulletin_group_remove_class_tag",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function adminGroupRemoveClassTagAction(Group $group)
+    {
+        $this->tagManager->removeTaggedObjectByTagNameAndObjectIdAndClass(
+            'Classe',
+            $group->getId(),
+            'Claroline\CoreBundle\Entity\Group'
+        );
+
+        return new JsonResponse(['id' => $group->getId()], 200);
     }
 }

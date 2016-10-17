@@ -132,6 +132,20 @@ class BulletinController extends FOSRestController
 
         return $codes;
     }
+    /**
+     * @View(serializerGroups={"api_group_min"})
+     */
+    public function getUntaggedGroupsAction()
+    {
+        $groups = [];
+        $untaggedGroups = $this->bulletinManager->getUntaggedGroups();
+
+        foreach ($untaggedGroups as $group) {
+            $groups[] = ['id' => $group->getId(), 'name' => $group->getName()];
+        }
+
+        return $groups;
+    }
 
     private function checkBulletinAdmin()
     {

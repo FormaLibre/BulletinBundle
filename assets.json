@@ -3,7 +3,8 @@
     "entry": {
       "session-management": "session/module",
       "course-management": "course/module",
-      "all-periodes-points": "allPeriodesPoints/allPeriodesPoints"
+      "all-periodes-points": "allPeriodesPoints/allPeriodesPoints",
+      "groups": "groups/groups"
     }
   }
 }

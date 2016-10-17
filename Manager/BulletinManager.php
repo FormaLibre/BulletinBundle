@@ -28,8 +28,8 @@ class BulletinManager
     private $pagerFactory;
     private $platformConfigHandler;
 
-
     private $groupeTitulaireRepo;
+    private $groupRepo;
     private $matiereOptionsRepo;
     private $pempRepo;
     private $pepdpRepo;
@@ -63,6 +63,7 @@ class BulletinManager
         $this->platformConfigHandler = $platformConfigHandler;
 
         $this->groupeTitulaireRepo = $om->getRepository('FormaLibreBulletinBundle:GroupeTitulaire');
+        $this->groupRepo = $om->getRepository('ClarolineCoreBundle:Group');
         $this->matiereOptionsRepo = $om->getRepository('FormaLibreBulletinBundle:MatiereOptions');
         $this->pepdpRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeElevePointDiversPoint');
         $this->pempRepo = $om->getRepository('FormaLibreBulletinBundle:PeriodeEleveMatierePoint');
@@ -93,6 +94,21 @@ class BulletinManager
         $groups = empty($taggedGroups) ? array() : $taggedGroups;
 
         return $groups;
+    }
+
+    public function getUntaggedGroups()
+    {
+        $untaggedGroups = [];
+        $classIds = $this->getTaggedGroupIds();
+        $groups = $this->groupRepo->findBy([], ['name' => 'ASC']);
+
+        foreach ($groups as $group) {
+            if (!in_array($group->getId(),$classIds)) {
+                $untaggedGroups[] = $group;
+            }
+        }
+
+        return $untaggedGroups;
     }
 
     public function getTaggedGroupIds()

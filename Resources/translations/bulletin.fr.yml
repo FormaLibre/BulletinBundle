@@ -1,6 +1,11 @@
+add_class: Ajouter une classe
 class: Classe
 class_council: Conseil de classe
+class_management: Gestion des classes
 medical_certificate: Certificat médical
+no_class: Aucune classe
 no_set_point: Pas de points mis
 not_evaluated: Non évalué
+remove_class: Retirer la classe
+remove_class_confirm_message: Êtes-vous sûr de vouloir retirer cette classe ?
 various_points: Points divers

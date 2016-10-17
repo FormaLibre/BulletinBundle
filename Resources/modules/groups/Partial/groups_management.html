@@ -1,0 +1,27 @@
+<button class="btn btn-primary" ng-click="gmc.addClass()">
+    {{ 'add_class'|trans:{}:'bulletin' }}
+</button>
+<br>
+<br>
+<div class="table-responsive" ng-if="gmc.classes.length > 0">
+    <table class="table" ng-table="gmc.tableParams" show-filter="true">
+        <tr ng-repeat="group in $data">
+            <td data-title="'name'|trans:{}:'platform'" filter="{name: 'text'}" sortable="'name'">
+                {{ group['name'] }}
+            </td>
+            <td class="text-center" data-title="'actions'|trans:{}:'platform'">
+                <button class="btn btn-danger btn-sm"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="{{ 'remove_class'|trans:{}:'bulletin' }}"
+                        ng-click="gmc.removeClass(group['id'])"
+                >
+                    <i class="fa fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="alert alert-warning" ng-if="gmc.classes.length === 0">
+    {{ 'no_class'|trans:{}:'bulletin' }}
+</div>
