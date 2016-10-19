@@ -44,7 +44,7 @@ class LockStatus
      /**
      * @ORM\Column(type="boolean")
      */
-    protected $lockStatus = false;
+    protected $lockStatus = true;
     
     function getId() {
         return $this->id;

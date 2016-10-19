@@ -73,19 +73,22 @@
                                    data-matiere-id="{{pemp.vars.value.matiere.getId}}"
                                 >
                                 </i>
-                                    {% set locked = false %}
+                                    {% set locked = allLockStatus[pemp.vars.value.matiere.getId] %}
 
-                                    {% for oneLockStatus in allLockStatus %} 
-                                        {% if oneLockStatus.getMatiere.getId() == pemp.vars.value.matiere.getId and oneLockStatus.getPeriode().getId() == periode.getId() %}
-                                            {% set locked = oneLockStatus.getLockStatus() %}
-                                        {% endif %}
-                                    {% endfor %}
-      
-                                    {% set params = {'session': pemp.vars.value.matiere.getId, 'periode': periode.getId()} %}
                                     {% if locked %}
-                                        <a class="btn btn-warning lock-btn" href="{{ path('formalibreBulletinUnlockPoint', params) }}"> <i class="fa fa-unlock" href="{{ path('formalibreBulletinUnlockPoint', params) }}"></i> </a>
+                                        <button class="btn btn-warning lock-btn"
+                                                data-session-id="{{ pemp.vars.value.matiere.getId() }}"
+                                                data-periode-id="{{ periode.getId() }}"
+                                        >
+                                            <i class="fa fa-unlock"></i>
+                                        </button>
                                     {% else %}
-                                        <a class="btn btn-warning lock-btn" href={{ path('formalibreBulletinLockPoint', params) }}> <i href={{ path('formalibreBulletinLockPoint', params) }} class="fa fa-lock"></i> </a>
+                                        <button class="btn btn-warning lock-btn"
+                                                data-session-id="{{ pemp.vars.value.matiere.getId() }}"
+                                                data-periode-id="{{ periode.getId() }}" }}
+                                        >
+                                            <i class="fa fa-lock"></i>
+                                        </button>
                                     {% endif %}
                                 </button>
                             </td>
@@ -100,6 +103,7 @@
                 <tr><td>{{ form_widget(pemd.divers) }}</td><td>{{ form_widget(pemd.point) }}</td><td>{{ form_widget(pemd.total) }}</td></tr>
                 {% endfor %}
             </table>
+            <br>
             {{ form_widget(form.save) }}
         </form>
     </div>
@@ -114,14 +118,16 @@
     </script>
     <script>
         $(".lock-btn").on("click", function(event) {
-        event.preventDefault();
-        var url = $(event.target).attr('href');
-        $.ajax({
-            url: url,
-            success: function(data) {
-               window.location.reload();
-            }
-        });
+            event.preventDefault();
+            var sessionId = $(this).data('session-id');
+            var periodeId = $(this).data('periode-id');
+            var url = Routing.generate('formalibreBulletinLockStatusSwitch', {'periode': periodeId, 'session': sessionId});
+            $.ajax({
+                url: url,
+                success: function(data) {
+                   window.location.reload();
+                }
+            });
      });
     </script>
 {% endblock %}

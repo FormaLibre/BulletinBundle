@@ -71,7 +71,7 @@ class PeriodeEleveMatierePoint
      */
     protected $comment;
     
-    protected $isLocked = false;
+    protected $isLocked = true;
    
 
     /**

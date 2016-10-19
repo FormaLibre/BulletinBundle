@@ -25,7 +25,7 @@ class LockStatusRepository extends EntityRepository
         $lockStatus= $query->getOneOrNullResult();
         
         if(is_null($lockStatus)){
-            return $lockStatus=false;
+            return $lockStatus=true;
         }
         else {
            return $lockStatus->getLockStatus();

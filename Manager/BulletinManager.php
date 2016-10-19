@@ -672,7 +672,7 @@ class BulletinManager
             $lockStatus->setMatiere($session);
             $lockStatus->setPeriode($periode);
             $lockStatus->setTeacher($user);
-            $lockStatus->setLockStatus(false);
+            $lockStatus->setLockStatus(true);
             $this->om->persist($lockStatus);
             $this->om->flush();
         }
@@ -1271,5 +1271,53 @@ class BulletinManager
     public function getEleveMatiereOptionsByEleveAndMatiere(User $eleve, CourseSession $matiere)
     {
         return $this->eleveMatiereOptionsRepo->findEleveMatiereOptionsByEleveAndMatiere($eleve, $matiere);
+    }
+
+    public function checkLockStatus(User $user, CourseSession $session, Periode $periode)
+    {
+        $isLocked = true;
+        $locks = $this->lockStatusRepo->findBy(['matiere' => $session, 'periode' => $periode]);
+
+        if (count($locks) === 0) {
+            $lockStatus = new LockStatus();
+            $lockStatus->setMatiere($session);
+            $lockStatus->setPeriode($periode);
+            $lockStatus->setTeacher($user);
+            $lockStatus->setLockStatus(true);
+            $this->om->persist($lockStatus);
+            $this->om->flush();
+        } else {
+            $isLocked = $locks[0]->getLockStatus();
+        }
+
+        return $isLocked;
+    }
+
+    public function editLockStatus(CourseSession $session, Periode $periode, $lockValue)
+    {
+        $locks = $this->lockStatusRepo->findBy(['matiere' => $session->getId(), 'periode' => $periode->getId()]);
+        $this->om->startFlushSuite();
+
+        foreach ($locks as $lock) {
+            $lock->setLockStatus($lockValue);
+            $this->om->persist($lock);
+        }
+        $this->om->endFlushSuite();
+    }
+
+    public function switchLockStatus(CourseSession $session, Periode $periode)
+    {
+        $locks = $this->lockStatusRepo->findBy(['matiere' => $session->getId(), 'periode' => $periode->getId()], ['id' => 'ASC']);
+
+        if (count($locks) > 0) {
+            $value = !$locks[0]->getLockStatus();
+            $this->om->startFlushSuite();
+
+            foreach ($locks as $lock) {
+                $lock->setLockStatus($value);
+                $this->om->persist($lock);
+            }
+            $this->om->endFlushSuite();
+        }
     }
 }
