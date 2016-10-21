@@ -419,7 +419,7 @@ class BulletinController extends Controller
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
 
-            foreach ($pempCollection as $pemp){
+            foreach ($pempCollection->getPemps() as $pemp){
                 $this->em->persist($pemp);
             }
             $this->bulletinManager->editlockStatus($matiere, $periode, true);
