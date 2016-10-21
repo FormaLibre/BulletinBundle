@@ -61,7 +61,7 @@
                     <td class="center total">
                         {{ total }}
                     </td>
-                    <td class="center pourcent" data="{{ total }}">{{ pemp.getDisplayPourcentage() }}</td>
+                    <td class="center pourcent" data="{{ total }}">{% if isEmpty is not defined %}{{ pemp.getDisplayPourcentage() }}{% endif %}</td>
                     
                     {% if hasThirdPoint %}
                         {% if pemp.comportement < 850 %}
@@ -73,7 +73,7 @@
                     
                     {% if hasSecondPoint %}
                         {% if pemp.comportement < 850 %}
-                            <td class="center">{{ pemp.presence }} %</td>
+                            <td class="center">{% if isEmpty is not defined %}{{ pemp.presence }} %{% endif %}</td>
                         {% else %}
                             <td class="center">NE</td>
                         {% endif %}

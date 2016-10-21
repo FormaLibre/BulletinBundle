@@ -565,6 +565,129 @@ class BulletinController extends Controller
         return $this->render($template, $params);
     }
 
+    /**
+     * @EXT\Route(
+     *     "/periode/{periode}/eleve/{eleve}/empty/print/",
+     *     name="formalibreBulletinPrintEleveEmpty",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param User $eleve
+     *
+     * @return array|Response
+     */
+    public function printEmptyEleveAction(Request $request, Periode $periode, User $eleve)
+    {
+//        $this->checkOpenPrintPdf($request);
+
+        if ($periode->getTemplate() === 'FinalExamPrint') {
+
+            return $this->printFinalExam($periode, $eleve);
+        } else if ($periode->getTemplate() === 'CompletePrint' || $periode->getTemplate() === 'CompletePrintLarge' ) {
+
+            return $this->printComplete($eleve, $periode->getTemplate());
+        }
+        $totaux = [];
+        $totauxMatieres = [];
+        $recap = null;
+
+        if ($periode->getTemplate() === 'PeriodePrint'){
+            $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+            $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
+            $totaux = $this->totauxManager->getTotalPeriode($periode, $eleve);
+        } else {
+            $pemps = array();
+            $pemds = array();
+
+            $periodes = ($periode->getTemplate() === 'ExamPrintWithOnlyOnePeriodePrint') ?
+                array($periode->getOldPeriode1(), $periode):
+                array($periode->getOldPeriode1(), $periode->getOldPeriode2(), $periode);
+
+
+            foreach ($periodes as $per){
+                $periode = $this->periodeRepo->findOneById($per);
+                $pemps[] = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+                $pemds[] = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
+
+                $totaux[] = $this->totauxManager->getTotalPeriode($periode, $eleve);
+
+            }
+
+            $totalCoefficient=$this->totauxManager->getTotalCoefficient($periode);
+            foreach ($totaux as $total) {
+
+                    $recap += $total['totalPourcentage'] / $totalCoefficient;
+            }
+
+            $totauxMatieres = $this->totauxManager->getTotalPeriodes($eleve,$periode);
+        }
+
+        $template = 'FormaLibreBulletinBundle::Templates/'.$periode->getTemplate().'.html.twig';
+
+        $hasSecondPoint = $this->bulletinManager->hasSecondPoint();
+        $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
+        $secondPointName = $this->bulletinManager->getSecondPointName();
+        $thirdPointName = $this->bulletinManager->getThirdPointName();
+        $classe = $this->bulletinManager->getClasseByEleve($eleve);
+        $isBulletinAdmin = $this->isBulletinAdmin();
+
+        $codesList = array();
+        $codesDatas = array();
+        $allPointCodes = $this->bulletinManager->getAllPointCodes();
+
+        foreach ($allPointCodes as $pointCode) {
+            $id = $pointCode->getId();
+            $code = $pointCode->getCode();
+            $info = $pointCode->getInfo();
+            $shortInfo = $pointCode->getShortInfo();
+            $isDefaultValue = $pointCode->getIsDefaultValue();
+            $ignored = $pointCode->getIgnored();
+            $codesList[] = $code;
+            $codesDatas[$code] = array(
+                'id' => $id,
+                'code' => $code,
+                'info' => $info,
+                'shortInfo' => $shortInfo,
+                'isDefaultValue' => $isDefaultValue,
+                'ignored' => $ignored
+            );
+        }
+        foreach ($pemps as $pemp) {
+            $pemp->setPoint(null);
+            $pemp->setPresence(null);
+            $pemp->setComportement(null);
+        }
+        foreach ($pemds as $pemd) {
+            $pemd->setPoint(null);
+        }
+        $totaux['totalPoint'] = null;
+        $totaux['totalPourcentage'] = null;
+        $totaux['totalPourcentageAffiche'] = null;
+
+        $params = array(
+            'pemps' => $pemps,
+            'pemds' => $pemds,
+            'eleve' => $eleve,
+            'periode' => $periode,
+            'totaux' => $totaux,
+            'totauxMatieres' => $totauxMatieres,
+            'recap' => $recap,
+            'hasSecondPoint' => $hasSecondPoint,
+            'hasThirdPoint' => $hasThirdPoint,
+            'secondPointName' => $secondPointName,
+            'thirdPointName' => $thirdPointName,
+            'classe' => $classe,
+            'isBulletinAdmin' => $isBulletinAdmin,
+            'codesList' => $codesList,
+            'codesDatas' => $codesDatas,
+            'isEmpty' => true
+        );
+
+        return $this->render($template, $params);
+    }
+
 
     /**
      * @EXT\Route(

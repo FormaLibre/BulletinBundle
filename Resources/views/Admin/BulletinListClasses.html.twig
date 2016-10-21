@@ -10,6 +10,7 @@
             <tr>
                 <td><a href="{{ path ('formalibreBulletinListEleve', {'periode' : periode.id(), 'group' : group.id()}) }}">{{ group.Name }}</a> </td>
                 <td><a href="{{ path ('formalibreBulletinPrintGroupPdf', {'periode' : periode.id(), 'group' : group.id()})  }}">Imprimer la classe</a> </td>
+                <td><a href="{{ path ('formalibreBulletinPrintGroupPdfEmpty', {'periode' : periode.id(), 'group' : group.id()})  }}">Imprimer un bulletin vide pour la classe</a> </td>
             </tr>
         {% endfor %}
         </table>

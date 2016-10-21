@@ -224,6 +224,45 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/admin/periode/{periode}/group/{group}/empty/pdf/",
+     *     name="formalibreBulletinPrintGroupPdfEmpty",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param Group $group
+     *
+     *@EXT\Template("FormaLibreBulletinBundle::Admin/BulletinPrintPdf.html.twig")
+     *
+     */
+    public function PrintEmptyPdfGroupAction(Periode $periode, Group $group)
+    {
+        $this->checkOpen();
+        $filename = $group->getName(). '-'. date("Y-m-d-H-i-s") . '.pdf';
+        $dir = $this->pdfDir . $group->getName() . '/' . $filename;
+
+        $eleves = $this->userRepo->findByGroup($group);
+        $elevesUrl = array();
+        foreach ($eleves as $eleve){
+            $elevesUrl[] = $this->generateUrl('formalibreBulletinPrintEleveEmpty', array('periode' => $periode->getId(), 'eleve' => $eleve->getId()), true);
+        }
+        $template = $periode->getTemplate();
+        $options = ($template === 'CompletePrint' || $template === 'CompletePrintLarge') ?
+            ['orientation' => 'landscape', 'page-size' => 'A3'] :
+            [];
+        $this->get('knp_snappy.pdf')->generate($elevesUrl, $dir, $options);
+
+        $headers = array(
+            'Content-Type'          => 'application/pdf',
+            'Content-Disposition'   => 'attachment; filename="'.$filename.'"'
+        );
+
+        return new Response(file_get_contents($dir), 200, $headers);
+    }
+
+    /**
+     * @EXT\Route(
      *     "/admin/periode/{periode}/eleve/{user}/pdf/",
      *     name="formalibreBulletinPrintElevePdf",
      *     options = {"expose"=true}
