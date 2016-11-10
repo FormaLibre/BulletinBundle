@@ -7,7 +7,14 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="FormaLibre\BulletinBundle\Repository\PeriodeEleveMatierePointRepository")
- * @ORM\Table(name="formalibre_bulletin_periode_eleve_matiere_point")
+ * @ORM\Table(
+ *     name="formalibre_bulletin_periode_eleve_matiere_point",
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(
+ *             name="pemp_unique_periode_user_session",
+ *             columns={"periode_id", "eleve_id", "matiere_id"}
+ *         )
+ *     })
  */
 class PeriodeEleveMatierePoint
 {

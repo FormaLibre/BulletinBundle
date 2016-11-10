@@ -114,6 +114,29 @@ class BulletinController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
+    public function putMatierePointsAction()
+    {
+        $this->checkBulletinAccess();
+        $pempsData = [];
+        $pointsData = $this->request->request->get('points', false);
+        $pemps = $this->bulletinManager->updateMatierePoints($pointsData);
+
+        foreach ($pemps as $pemp) {
+            $pempsData[] = [
+                'id' => $pemp->getId(),
+                'point' => $pemp->getPoint(),
+                'presence' => $pemp->getPresence(),
+                'comportement' => $pemp->getComportement(),
+                'eleveId' => $pemp->getEleve()->getId(),
+            ];
+        }
+
+        return $pempsData;
+    }
+
+    /**
+     * @View(serializerGroups={"api_bulletin"})
+     */
     public function getPointCodesAction()
     {
         $codes = array();
@@ -151,6 +174,13 @@ class BulletinController extends FOSRestController
     {
         if (!$this->authorization->isGranted('ROLE_BULLETIN_ADMIN')) {
 
+            throw new AccessDeniedException();
+        }
+    }
+
+    private function checkBulletinAccess()
+    {
+        if (!$this->authorization->isGranted('ROLE_BULLETIN_ADMIN') && !$this->authorization->isGranted('ROLE_PROF')) {
             throw new AccessDeniedException();
         }
     }

@@ -1,0 +1,124 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="$close()">&times;</button>
+        <h4>
+            {{ mpc.periodeName }}
+            <br>
+            {{ mpc.courseTitle }} [{{ mpc.sessionName }}]
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div ng-if="mpc.toDefault.length > 0">
+            <div class="alert alert-danger">
+                {{ 'convert_to_default_code_msg'|trans:{}:'bulletin' }} [<b>{{ mpc.defaultCode }}</b>]
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <th>{{ 'student'|trans:{}:'bulletin' }}</th>
+                        <th class="text-center">{{ 'point'|trans:{}:'bulletin' }}</th>
+                        <th class="text-center" ng-if="mpc.hasSecond">{{ mpc.secondName }} ( % )</th>
+                        <th class="text-center" ng-if="mpc.hasThird">{{ mpc.thirdName }} ( / 10 )</th>
+                    </tr>
+                    <tr ng-repeat="td in mpc.toDefault">
+                        <td>{{ td['name'] }}</td>
+                        <td class="text-center">
+                            <span ng-if="td['isPoint']">
+                                {{ td['point'] }}
+                            </span>
+                            <span class="point-error" ng-if="!td['isPoint']">
+                                <b>{{ mpc.defaultCode }}</b>
+                            </span>
+                        </td>
+                        <td class="text-center" ng-if="mpc.hasSecond">
+                            <span ng-if="td['isPresence']">
+                                {{ td['presence'] }}
+                            </span>
+                            <span class="point-error" ng-if="!td['isPresence']">
+                                <b>{{ mpc.defaultCode }}</b>
+                            </span>
+                        </td>
+                        <td class="text-center" ng-if="mpc.hasThird">
+                            <span ng-if="td['isComportement']">
+                                {{ td['comportement'] }}
+                            </span>
+                            <span class="point-error" ng-if="!td['isComportement']">
+                                <b>{{ mpc.defaultCode }}</b>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div ng-if="mpc.toTruncate.length > 0">
+            <hr ng-if="mpc.toDefault.length > 0">
+            <div class="alert alert-danger">
+                {{ 'to_truncate_msg'|trans:{}:'bulletin' }}
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <th>{{ 'student'|trans:{}:'bulletin' }}</th>
+                        <th class="text-center">{{ 'point'|trans:{}:'bulletin' }}</th>
+                        <th class="text-center" ng-if="mpc.hasSecond">{{ mpc.secondName }} ( % )</th>
+                        <th class="text-center" ng-if="mpc.hasThird">{{ mpc.thirdName }} ( / 10 )</th>
+                    </tr>
+                    <tr ng-repeat="tt in mpc.toTruncate">
+                        <td>{{ tt['name'] }}</td>
+                        <td class="text-center">
+                            <span class="point-error" ng-if="!tt['isPoint']"><b>{{ tt['point'] }}</b></span>
+                            <span ng-if="tt['isPoint']">{{ tt['point'] }}</span>
+                        </td>
+                        <td class="text-center" ng-if="mpc.hasSecond">
+                            <span class="point-error" ng-if="!tt['isPresence']"><b>{{ tt['presence'] }}</b></span>
+                            <span ng-if="tt['isPresence']">{{ tt['presence'] }}</span>
+                        </td>
+                        <td class="text-center" ng-if="mpc.hasThird">
+                            <span class="point-error" ng-if="!tt['isComportement']"><b>{{ tt['comportement'] }}</b></span>
+                            <span ng-if="tt['isComportement']">{{ tt['comportement'] }}</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div ng-if="mpc.outOfBounds.length > 0">
+            <hr ng-if="mpc.toDefault.length > 0 || mpc.toTruncate.length > 0">
+            <div class="alert alert-warning">
+                {{ 'out_of_bounds_msg'|trans:{}:'bulletin' }}
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <th>{{ 'student'|trans:{}:'bulletin' }}</th>
+                        <th class="text-center">{{ 'point'|trans:{}:'bulletin' }}</th>
+                        <th class="text-center" ng-if="mpc.hasSecond">{{ mpc.secondName }} ( % )</th>
+                        <th class="text-center" ng-if="mpc.hasThird">{{ mpc.thirdName }} ( / 10 )</th>
+                    </tr>
+                    <tr ng-repeat="oob in mpc.outOfBounds">
+                        <td>{{ oob['name'] }}</td>
+                        <td class="text-center">
+                            <span class="point-error" ng-if="!oob['isPoint']"><b>{{ oob['point'] }}</b></span>
+                            <span ng-if="oob['isPoint']">{{ oob['point'] }}</span>
+                        </td>
+                        <td class="text-center" ng-if="mpc.hasSecond">
+                            <span class="point-error" ng-if="!oob['isPresence']"><b>{{ oob['presence'] }}</b></span>
+                            <span ng-if="oob['isPresence']">{{ oob['presence'] }}</span>
+                        </td>
+                        <td class="text-center" ng-if="mpc.hasThird">
+                            <span class="point-error" ng-if="!oob['isComportement']"><b>{{ oob['comportement'] }}</b></span>
+                            <span ng-if="oob['isComportement']">{{ oob['comportement'] }}</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal" ng-click="$close()">
+            {{ 'cancel'|trans:{}:'platform' }}
+        </button>
+        <button class="btn btn-primary" ng-click="mpc.confirm()">
+            {{ 'save_anyway'|trans:{}:'bulletin' }}
+        </button>
+    </div>
+</div>

@@ -34,3 +34,16 @@
 .has-error .form-control-feedback {
     color: #a94442;
 }
+
+.point-error {
+    color: #c9302c;
+}
+
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}

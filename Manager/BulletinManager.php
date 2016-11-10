@@ -874,6 +874,59 @@ class BulletinManager
         return count($ids) > 0 ? $this->eleveMatiereOptionsRepo->findEleveMatiereOptionsByUserAndIds($user, $ids) : array();
     }
 
+    public function getDefaultCode()
+    {
+        $defaultCodes = $this->pointCodeRepo->findBy(['isDefaultValue' => true]);
+
+        return count($defaultCodes) > 0 ? $defaultCodes[0]->getCode() : null;
+    }
+
+    public function truncate($value, $nbDecimals = 2)
+    {
+        $strValue = strval($value);
+        $parts = explode('.', $strValue);
+
+        if (count($parts) < 2 || strlen($parts[1]) <= $nbDecimals) {
+            return $value;
+        } else {
+            $newDecimalPart = substr($parts[1], 0, $nbDecimals);
+
+            return floatval($parts[0].'.'.$newDecimalPart);
+        }
+    }
+
+    public function updateMatierePoints(array $pointsData)
+    {
+        $pemps = [];
+        $defaultCode = $this->getDefaultCode();
+        $this->om->startFlushSuite();
+
+        foreach ($pointsData as $pointData) {
+            $pemp = $this->pempRepo->findOneById($pointData['id']);
+            $periode = $pemp->getPeriode();
+            $point = isset($pointData['point']) && (is_int($pointData['point']) || is_float($pointData['point'])) ?
+                $this->truncate($pointData['point']) :
+                $defaultCode;
+            $pemp->setPoint($point);
+
+            if (!$periode->getOnlyPoint()) {
+                $presence = isset($pointData['presence']) && (is_int($pointData['presence']) || is_float($pointData['presence'])) ?
+                    $this->truncate($pointData['presence']) :
+                    $defaultCode;
+                $comportement = isset($pointData['comportement']) && (is_int($pointData['comportement']) || is_float($pointData['comportement'])) ?
+                    $this->truncate($pointData['comportement']) :
+                    $defaultCode;
+                $pemp->setPresence($presence);
+                $pemp->setComportement($comportement);
+            }
+            $this->om->persist($pemp);
+            $pemps[] = $pemp;
+        }
+        $this->om->endFlushSuite();
+
+        return $pemps;
+    }
+
     public function updatePoints(array $pemps, array $pepdps, array $eleveMatieresOptions, array $pointsDatas, array $pointsDiversDatas, array $delibaratedDatas)
     {
         $this->om->startFlushSuite();
@@ -888,7 +941,6 @@ class BulletinManager
                 $points[$id] = $pemp->getPoint();
             }
         }
-
         foreach ($pepdps as $pepdp) {
             $id = $pepdp->getId();
 
@@ -897,7 +949,6 @@ class BulletinManager
                 $pointsDivers[$id] = $pepdp->getPoint();
             }
         }
-
         foreach ($eleveMatieresOptions as $emo) {
             $id = $emo->getId();
 
