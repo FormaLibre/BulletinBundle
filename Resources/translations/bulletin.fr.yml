@@ -2,10 +2,18 @@ add_class: Ajouter une classe
 class: Classe
 class_council: Conseil de classe
 class_management: Gestion des classes
+convert_to_default_code_msg: Certaines valeurs ne sont pas valides et vont être remplacées par le code par défaut.
+invalid_value_msg: Certaines valeurs ne sont pas valides.
 medical_certificate: Certificat médical
 no_class: Aucune classe
 no_set_point: Pas de points mis
 not_evaluated: Non évalué
+out_of_bounds_msg: Certaines valeurs sont hors limites.
+point: Point
 remove_class: Retirer la classe
 remove_class_confirm_message: Êtes-vous sûr de vouloir retirer cette classe ?
+save_anyway: Enregistrer quand même
+save_and_lock: Enregistrer and verrouiller
+student: Élève
+to_truncate_msg: Seulement deux chiffres sont autorisés après la virgule. Une troncature sera appliquée.
 various_points: Points divers

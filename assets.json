@@ -4,7 +4,8 @@
       "session-management": "session/module",
       "course-management": "course/module",
       "all-periodes-points": "allPeriodesPoints/allPeriodesPoints",
-      "groups": "groups/groups"
+      "groups": "groups/groups",
+      "matiere-points": "matierePoints/matierePoints"
     }
   }
 }

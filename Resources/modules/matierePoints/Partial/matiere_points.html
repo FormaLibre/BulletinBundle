@@ -1,0 +1,39 @@
+<div class="table-responsive">
+    <table class="table">
+        <tr>
+            <th>{{ 'student'|trans:{}:'bulletin' }}</th>
+            <th>{{ 'point'|trans:{}:'bulletin' }}</th>
+            <th>{{ 'total'|trans:{}:'platform' }}</th>
+            <th ng-if="!mpc.isPointOnly && mpc.hasSecondPoint">{{ mpc.secondPointName }} ( % )</th>
+            <th ng-if="!mpc.isPointOnly && mpc.hasThirdPoint">{{ mpc.thirdPointName }} ( / 10 )</th>
+        </tr>
+        <tr ng-repeat="user in mpc.users">
+            <td>{{ user['firstName'] }} {{ user['lastName'] }}</td>
+            <td class="has-feedback" ng-class="mpc.isValidPoint(user['id']) ? 'has-success' : 'has-error'">
+                <input type="number" class="form-control" ng-model="mpc.pemps[user['id']]['point']" ng-disabled="mpc.isLocked">
+                <span class="fa fa-check form-control-feedback" ng-if="mpc.isValidPoint(user['id'])"></span>
+                <span class="fa fa-close form-control-feedback" ng-if="!mpc.isValidPoint(user['id'])"></span>
+            </td>
+            <td>
+                <input type="number" class="form-control" ng-model="mpc.pemps[user['id']]['total']" ng-disabled="true">
+            </td>
+            <td class="has-feedback" ng-class="mpc.isValidPresence(user['id']) ? 'has-success' : 'has-error'" ng-if="!mpc.isPointOnly && mpc.hasSecondPoint">
+                <input type="number" class="form-control" ng-model="mpc.pemps[user['id']]['presence']" ng-disabled="mpc.isLocked">
+                <span class="fa fa-check form-control-feedback" ng-if="mpc.isValidPresence(user['id'])"></span>
+                <span class="fa fa-close form-control-feedback" ng-if="!mpc.isValidPresence(user['id'])"></span>
+            </td>
+            <td class="has-feedback" ng-class="mpc.isValidComportement(user['id']) ? 'has-success' : 'has-error'" ng-if="!mpc.isPointOnly && mpc.hasThirdPoint">
+                <input type="number" class="form-control" ng-model="mpc.pemps[user['id']]['comportement']" ng-disabled="mpc.isLocked">
+                <span class="fa fa-check form-control-feedback" ng-if="mpc.isValidComportement(user['id'])"></span>
+                <span class="fa fa-close form-control-feedback" ng-if="!mpc.isValidComportement(user['id'])"></span>
+            </td>
+        </tr>
+    </table>
+</div>
+<br>
+<button class="btn btn-warning" ng-if="mpc.isLocked" ng-click="mpc.unlock()">
+    {{ 'edit'|trans:{}:'platform' }}
+</button>
+<button class="btn btn-primary" ng-if="!mpc.isLocked" ng-click="mpc.validate()">
+    {{ 'save_and_lock'|trans:{}:'bulletin' }}
+</button>

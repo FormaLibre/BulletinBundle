@@ -398,58 +398,54 @@ class BulletinController extends Controller
      *
      * @return array|Response
      */
-    public function editMatiereAction(User $user, Request $request, Periode $periode, CourseSession $matiere)
+    public function editMatiereAction(User $user, Periode $periode, CourseSession $matiere)
     {
         $this->checkOpen();
+        $users = [];
+        $pemps = [];
+        $codes = [];
         $eleves = $this->cursusManager->getUsersBySessionAndType($matiere, 0);
-        $pempCollection = new Pemps;
-
-        foreach ( $eleves as $eleve){
-            $pempCollection->getPemps()->add(
-                $this->bulletinManager->getPempByPeriodeAndUserAndMatiere(
-                    $periode,
-                    $eleve,
-                    $matiere
-                )
-            );
-        }
-        $lock = $this->bulletinManager->checkLockStatus($user, $matiere, $periode);
-        $form = $this->createForm(new MatiereType($lock) , $pempCollection);
-
-        if ($request->isMethod('POST')) {
-            $form->handleRequest($request);
-
-            foreach ($pempCollection->getPemps() as $pemp){
-                $this->em->persist($pemp);
-            }
-            $this->bulletinManager->editlockStatus($matiere, $periode, true);
-
-            return $this->redirect($this->generateUrl(
-                'formalibreBulletinEditMatiere',
-                array(
-                    'periode' => $periode->getId(),
-                    'matiere' => $matiere->getId()
-                )
-            ));
-        }
         $hasSecondPoint = $this->bulletinManager->hasSecondPoint();
         $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
         $secondPointName = $this->bulletinManager->getSecondPointName();
         $thirdPointName = $this->bulletinManager->getThirdPointName();
         $pointCodes = $this->bulletinManager->getAllPointCodes();
+        $defaultCode = $this->bulletinManager->getDefaultCode();
+        $coefficient = $periode->getCoefficient();
+        $totalMatiere = $matiere->getTotal();
+        $total = empty($totalMatiere) ? null : ceil($coefficient * $totalMatiere);
 
-        return array(
-            'form' => $form->createView(),
+        foreach ($eleves as $eleve) {
+            $users[] = ['id' => $eleve->getId(), 'firstName' => $eleve->getFirstName(), 'lastName' => $eleve->getLastName()];
+            $pemp =  $this->bulletinManager->getPempByPeriodeAndUserAndMatiere(
+                $periode,
+                $eleve,
+                $matiere
+            );
+            $pemps[$eleve->getId()] = [
+                'id' => $pemp->getId(),
+                'point' => $pemp->getPoint(),
+                'total' => $total,
+                'comportement' => $pemp->getComportement(),
+                'presence' => $pemp->getPresence(),
+            ];
+        }
+        foreach ($pointCodes as $pc) {
+            $codes[] = ['id' => $pc->getId(), 'code' => $pc->getCode(), 'info' => $pc->getInfo()];
+        }
+
+        return [
             'matiere' => $matiere,
             'periode' => $periode,
             'hasSecondPoint' => $hasSecondPoint,
             'hasThirdPoint' => $hasThirdPoint,
             'secondPointName' => $secondPointName,
             'thirdPointName' => $thirdPointName,
-            'eleves' => $eleves,
-            'lock' => $lock,
-            'pointCodes' => $pointCodes
-        );
+            'users' => $users,
+            'pemps' => $pemps,
+            'codes' => $codes,
+            'defaultCode' => $defaultCode,
+        ];
     }
 
     /**
