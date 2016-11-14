@@ -153,19 +153,21 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/periode/{periode}/{group}/list/",
+     *     "/periode/{periode}/{group}/list/{type}",
      *     name="formalibreBulletinListEleve",
+     *     defaults={"type"=0},
      *     options = {"expose"=true}
      * )
      *
      * @param Periode $periode
      * @param Group $group
+     * @param int $type
      *
      *@EXT\Template("FormaLibreBulletinBundle::BulletinListEleves.html.twig")
      *
      * @return array|Response
      */
-    public function listEleveAction(Periode $periode, Group $group)
+    public function listEleveAction(Periode $periode, Group $group, $type = 0)
     {
         $this->checkOpen();
         $eleves = $this->userRepo->findByGroup($group,true,'lastName','ASC');
@@ -184,12 +186,14 @@ class BulletinController extends Controller
                 $decisions[$userId]++;
             }
         }
+        $viewOnly = intval($type) === 1;
 
         return array(
             'periode' => $periode,
             'eleves' => $eleves,
             'group' => $group,
-            'decisions' => $decisions
+            'decisions' => $decisions,
+            'viewOnly' => $viewOnly
         );
     }
 
@@ -245,12 +249,11 @@ class BulletinController extends Controller
      *     name="formalibreBulletinListMyGroup",
      *     options = {"expose"=true}
      * )
-     *
      * @param Periode $periode
+     * @param User    $user         the user
      *
      * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
-     * @param User         $user         the user
-     *
+     * @EXT\Template("FormaLibreBulletinBundle::BulletinListGroups.html.twig")
      *
      * @return array|Response
      */
@@ -258,19 +261,15 @@ class BulletinController extends Controller
     {
         $this->checkOpen();
         $this->bulletinManager->refresh($periode);
-        if ($this->authorization->isGranted('ROLE_PROF')){
-            $myGroups = $this->bulletinManager->getGroupsByTitulaire($user);
-            $matieres = $this->bulletinManager->getMatieresByProf($user, $periode);
-            $content = $this->renderView(
-                'FormaLibreBulletinBundle::BulletinListGroups.html.twig',
-                array('periode' => $periode, 'matieres' => $matieres, 'myGroups' => $myGroups)
-            );
-            return new Response($content);
+
+        if (!$this->authorization->isGranted('ROLE_PROF')){
+            throw new AccessDeniedException();
         }
+        $groups = $this->bulletinManager->getGroupsByPeriode($periode);
+        $myGroups = $this->bulletinManager->getGroupsByTitulaire($user);
+        $matieres = $this->bulletinManager->getMatieresByProf($user, $periode);
 
-        throw new AccessDeniedException();
-
-
+        return ['periode' => $periode, 'matieres' => $matieres, 'myGroups' => $myGroups, 'groups' => $groups];
     }
 
     /**

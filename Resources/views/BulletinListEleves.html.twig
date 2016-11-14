@@ -11,41 +11,52 @@
             
         {% for eleve in eleves %}
             {% set eleveId = eleve.getId() %}
-            <tr>
-                <td>
-                    {% if not locked %}
-                    <a href="{{ path ('formalibreBulletinEditEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
-                    {% endif %}
-                        {% if locked %}
-                            <i class="fa fa-lock"></i>
-                        {% endif %}
-                         {{ eleve.getLastName() }} {{ eleve.getFirstName() }}
-                    {% if not locked %}
-                    </a>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{{ path ('formalibreBulletinPrintEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
-                        Voir Bulletin officiel
-                    </a>
-                </td>
-                <td>
-                    <a href="{{ path('formalibreBulletinPrintElevePdf', {'periode' : periodeId, 'user' : eleveId}) }}">
-                        Imprimer le bulletin
-                    </a>
-                </td>
-                
-                {% if periode.getOnlyPoint() %}
+
+            {% if viewOnly %}
+                <tr>
                     <td>
-                        <a href="{{ path ('formalibreBulletinUserDecisionsList', {'user' : eleveId, 'periode': periodeId}) }}">
-                            Décisions
-                            {% if decisions[eleveId] is defined %}
-                                <span class="badge">{{ decisions[eleveId] }}</span>
-                            {% endif %}
+                        <a href="{{ path ('formalibreBulletinPrintEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
+                            {{ eleve.getLastName() }} {{ eleve.getFirstName() }}
                         </a>
                     </td>
-                {% endif %}
-            </tr>
+                </tr>
+            {% else %}
+                <tr>
+                    <td>
+                        {% if not locked %}
+                        <a href="{{ path ('formalibreBulletinEditEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
+                        {% endif %}
+                            {% if locked %}
+                                <i class="fa fa-lock"></i>
+                            {% endif %}
+                            {{ eleve.getLastName() }} {{ eleve.getFirstName() }}
+                        {% if not locked %}
+                        </a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ path ('formalibreBulletinPrintEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
+                            Voir Bulletin officiel
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ path('formalibreBulletinPrintElevePdf', {'periode' : periodeId, 'user' : eleveId}) }}">
+                            Imprimer le bulletin
+                        </a>
+                    </td>
+
+                    {% if periode.getOnlyPoint() %}
+                        <td>
+                            <a href="{{ path ('formalibreBulletinUserDecisionsList', {'user' : eleveId, 'periode': periodeId}) }}">
+                                Décisions
+                                {% if decisions[eleveId] is defined %}
+                                    <span class="badge">{{ decisions[eleveId] }}</span>
+                                {% endif %}
+                            </a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endif %}
         {% endfor %}
         </table>
     </div>
