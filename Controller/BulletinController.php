@@ -11,6 +11,7 @@ use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CursusBundle\Entity\CourseSession;
 use Claroline\CursusBundle\Manager\CursusManager;
 use Doctrine\ORM\EntityManager;
+use FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use FormaLibre\BulletinBundle\Form\Type\MatiereType;
 use FormaLibre\BulletinBundle\Form\Type\PempsType;
 use FormaLibre\BulletinBundle\Entity\Pemps;
@@ -316,73 +317,77 @@ class BulletinController extends Controller
      *
      * @return array|Response
      */
-    public function editEleveAction(Request $request, Periode $periode, User $eleve, User $user)
+    public function editEleveAction(Periode $periode, User $eleve, User $user)
     {
-        $allLockStatus = [];
-        $matiere = $this->bulletinManager->getMatieresByEleveAndPeriode($eleve, $periode);
         $this->checkOpen();
-        $isBulletinAdmin = $this->authorization->isGranted('ROLE_BULLETIN_ADMIN') ||
-            $this->authorization->isGranted('ROLE_ADMIN');
-        $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
-        $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode); 
-        $pempCollection = new Pemps();
-        
-        foreach ($pemps as $pemp) {
-            $lock = $this->bulletinManager->checkLockStatus($user, $pemp->getMatiere(), $pemp->getPeriode());
-            $pemp->setLocked($lock);
-            $pempCollection->getPemps()->add($pemp);
-            $allLockStatus[$pemp->getMatiere()->getId()] = $lock;
-        }
-
-        foreach ($pemds as $pemd) {
-           $pempCollection->getPemds()->add($pemd);
-         }
-
-        $form = $this->createForm(new PempsType(), $pempCollection);
-
-        if ($request->isMethod('POST')) {
-            $form->handleRequest($request);
-                
-            $list=$form->get('pemps')->getData();
-            foreach ($list as $eleveMatierePoint){
-                $actualLockStatus = $this->bulletinManager->checkLockStatus(
-                    $user,
-                    $eleveMatierePoint->getMatiere(),
-                    $eleveMatierePoint->getPeriode()
-                );
-                
-                if ($actualLockStatus){
-                    $this->em->refresh($eleveMatierePoint);
-                }
-                $this->bulletinManager->editlockStatus($eleveMatierePoint->getMatiere(), $eleveMatierePoint->getPeriode(), true);
-            }
-            $this->em->flush();
-
-            $nextAction = $form->get('saveAndAdd')->isClicked()
-                ? 'task_new'
-                : $this->generateUrl('formalibreBulletinEditEleve', array('periode' => $periode->getId(), 'eleve' => $eleve->getId()));
-
-                return $this->redirect($nextAction);
-        }
+        $isBulletinAdmin = $this->authorization->isGranted('ROLE_BULLETIN_ADMIN') || $this->authorization->isGranted('ROLE_ADMIN');
+        $sessions = [];
+        $codes = [];
+        $pemps = [];
+        $pepdps = [];
+        $matieres = $this->bulletinManager->getMatieresByEleveAndPeriode($eleve, $periode);
+        $matieresPoints = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+        $diversPoints = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
         $hasSecondPoint = $this->bulletinManager->hasSecondPoint();
         $hasThirdPoint = $this->bulletinManager->hasThirdPoint();
         $secondPointName = $this->bulletinManager->getSecondPointName();
         $thirdPointName = $this->bulletinManager->getThirdPointName();
         $pointCodes = $this->bulletinManager->getAllPointCodes();
+        $defaultCode = $this->bulletinManager->getDefaultCode();
+        $coefficient = $periode->getCoefficient();
 
-        return array(
-            'form' => $form->createView(),
+        foreach ($matieres as $matiere) {
+            $course = $matiere->getCourse();
+            $sessions[] = [
+                'id' => $matiere->getId(),
+                'name' => $matiere->getName(),
+                'courseTitle' => $course->getTitle(),
+                'courseCode' => $course->getCode(),
+            ];
+        }
+        foreach ($matieresPoints as $pemp) {
+            $matiere = $pemp->getMatiere();
+            $totalMatiere = $matiere->getTotal();
+            $total = empty($totalMatiere) ? null : ceil($coefficient * $totalMatiere);
+            $pemps[$matiere->getId()] = [
+                'id' => $pemp->getId(),
+                'point' => $pemp->getPoint(),
+                'total' => $total,
+                'comportement' => $pemp->getComportement(),
+                'presence' => $pemp->getPresence(),
+            ];
+        }
+        foreach ($diversPoints as $pepdp) {
+            $pd = $pepdp->getDivers();
+            $totalPd = $pd->getWithTotal() ? $pd->getTotal() : null;
+            $total = empty($totalPd) ? null : ceil($coefficient * $totalPd);
+            $pepdps[] = [
+                'id' => $pepdp->getId(),
+                'name' => $pd->getName(),
+                'officialName' => $pd->getOfficialName(),
+                'withTotal' => $pd->getWithTotal(),
+                'point' => $pepdp->getPoint(),
+                'total' => $total,
+            ];
+        }
+        foreach ($pointCodes as $pc) {
+            $codes[] = ['id' => $pc->getId(), 'code' => $pc->getCode(), 'info' => $pc->getInfo()];
+        }
+
+        return [
+            'sessions' => $sessions,
+            'isBulletinAdmin' => $isBulletinAdmin,
             'eleve' => $eleve,
             'periode' => $periode,
             'hasSecondPoint' => $hasSecondPoint,
             'hasThirdPoint' => $hasThirdPoint,
             'secondPointName' => $secondPointName,
             'thirdPointName' => $thirdPointName,
-            'isBulletinAdmin' => $isBulletinAdmin,
-            'matieres'=> $matiere,
-            'allLockStatus'=> $allLockStatus,
-            'pointCodes' => $pointCodes
-        );
+            'pemps' => $pemps,
+            'pepdps' => $pepdps,
+            'codes' => $codes,
+            'defaultCode' => $defaultCode,
+        ];
     }
 
     /**
@@ -684,33 +689,24 @@ class BulletinController extends Controller
         return $this->render($template, $params);
     }
 
-
     /**
      * @EXT\Route(
-     *     "/periode/{periode}/eleve/{eleve}/matiere/{matiere}/delete",
+     *     "/pemp/{pemp}/delete",
      *     name="formalibre_bulletin_pemp_delete",
      *     options = {"expose"=true}
      * )
-     * @param Periode $periode
-     * @param User $eleve
-     * @param CourseSession $matiere
+     * @param PeriodeEleveMatierePoint $pemp
      *
      * @return JsonResponse
      */
-    public function deletePempAction(Periode $periode, User $eleve, CourseSession $matiere)
+    public function deletePempAction(PeriodeEleveMatierePoint $pemp)
     {
-        if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN') ||
-            $this->authorization->isGranted('ROLE_ADMIN')) {
-
-            $pemp = $this->bulletinManager->getPempByPeriodeAndUserAndMatiere(
-                $periode,
-                $eleve,
-                $matiere
-            );
+        if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN') || $this->authorization->isGranted('ROLE_ADMIN')) {
+            $data = ['id' => $pemp->getId(), 'sessionId' => $pemp->getMatiere()->getId()];
             $this->bulletinManager->deletePemp($pemp);
         }
 
-        return new JsonResponse('success', 200);
+        return new JsonResponse($data, 200);
     }
 
     /**

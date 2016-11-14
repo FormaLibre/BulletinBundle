@@ -1,0 +1,62 @@
+<div class="table-responsive">
+    <table class="table">
+        <tr>
+            <th>{{ 'course'|trans:{}:'bulletin' }}</th>
+            <th>{{ 'point'|trans:{}:'bulletin' }}</th>
+            <th>{{ 'total'|trans:{}:'platform' }}</th>
+            <th ng-if="!epc.isPointOnly && epc.hasSecondPoint">{{ epc.secondPointName }} ( % )</th>
+            <th ng-if="!epc.isPointOnly && epc.hasThirdPoint">{{ epc.thirdPointName }} ( / 10 )</th>
+            <th></th>
+        </tr>
+        <tr ng-repeat="session in epc.sessions">
+            <td>{{ session['courseTitle'] }}</td>
+            <td class="has-feedback" ng-class="epc.isValidPoint(session['id']) ? 'has-success' : 'has-error'">
+                <input type="number" class="form-control" ng-model="epc.pemps[session['id']]['point']" ng-disabled="epc.isLocked[session['id']]">
+                <span class="fa fa-check form-control-feedback" ng-if="epc.isValidPoint(session['id'])"></span>
+                <span class="fa fa-close form-control-feedback" ng-if="!epc.isValidPoint(session['id'])"></span>
+            </td>
+            <td>
+                <input type="number" class="form-control" ng-model="epc.pemps[session['id']]['total']" ng-disabled="true">
+            </td>
+            <td class="has-feedback" ng-class="epc.isValidPresence(session['id']) ? 'has-success' : 'has-error'" ng-if="!epc.isPointOnly && epc.hasSecondPoint">
+                <input type="number" class="form-control" ng-model="epc.pemps[session['id']]['presence']" ng-disabled="epc.isLocked[session['id']]">
+                <span class="fa fa-check form-control-feedback" ng-if="epc.isValidPresence(session['id'])"></span>
+                <span class="fa fa-close form-control-feedback" ng-if="!epc.isValidPresence(session['id'])"></span>
+            </td>
+            <td class="has-feedback" ng-class="epc.isValidComportement(session['id']) ? 'has-success' : 'has-error'" ng-if="!epc.isPointOnly && epc.hasThirdPoint">
+                <input type="number" class="form-control" ng-model="epc.pemps[session['id']]['comportement']" ng-disabled="epc.isLocked[session['id']]">
+                <span class="fa fa-check form-control-feedback" ng-if="epc.isValidComportement(session['id'])"></span>
+                <span class="fa fa-close form-control-feedback" ng-if="!epc.isValidComportement(session['id'])"></span>
+            </td>
+            <td>
+                <button class="btn btn-danger" ng-click="epc.deletePoint(epc.pemps[session['id']]['id'])" ng-if="epc.isBulletinAdmin">
+                    <i class="fa fa-trash"></i>
+                </button>
+                <button class="btn btn-warning" ng-click="epc.switchLock(session['id'])">
+                    <i class="fa fa-lock" ng-if="epc.isLocked[session['id']]"></i>
+                    <i class="fa fa-unlock" ng-if="!epc.isLocked[session['id']]"></i>
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="row" ng-if="epc.pepdps.length > 0">
+    <br>
+    <div class="table-responsive">
+        <table class="table pepdps-table">
+            <tr ng-repeat="pepdp in epc.pepdps">
+                <td>{{ pepdp['name'] }}</td>
+                <td>
+                    <input type="number" class="form-control col-md-2" ng-model="pepdp['point']">
+                </td>
+                <td>
+                    <input type="number" class="form-control col-md-2" ng-model="pepdp['total']" ng-disabled="true">
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<br>
+<button class="btn btn-primary" ng-click="epc.validate()">
+    {{ 'save'|trans:{}:'bulletin' }}
+</button>

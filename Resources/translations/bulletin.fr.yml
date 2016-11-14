@@ -3,6 +3,7 @@ class: Classe
 class_council: Conseil de classe
 class_management: Gestion des classes
 convert_to_default_code_msg: Certaines valeurs ne sont pas valides et vont être remplacées par le code par défaut.
+course: Matière
 invalid_value_msg: Certaines valeurs ne sont pas valides.
 medical_certificate: Certificat médical
 no_class: Aucune classe
@@ -12,6 +13,9 @@ out_of_bounds_msg: Certaines valeurs sont hors limites.
 point: Point
 remove_class: Retirer la classe
 remove_class_confirm_message: Êtes-vous sûr de vouloir retirer cette classe ?
+remove_course: Retirer la matière
+remove_course_confirm_message: Êtes-vous sûr de vouloir retirer cette matière ?
+save: Enregistrer
 save_anyway: Enregistrer quand même
 save_and_lock: Enregistrer and verrouiller
 student: Élève

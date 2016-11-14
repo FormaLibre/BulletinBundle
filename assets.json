@@ -5,7 +5,8 @@
       "course-management": "course/module",
       "all-periodes-points": "allPeriodesPoints/allPeriodesPoints",
       "groups": "groups/groups",
-      "matiere-points": "matierePoints/matierePoints"
+      "matiere-points": "matierePoints/matierePoints",
+      "eleve-points": "elevePoints/elevePoints"
     }
   }
 }

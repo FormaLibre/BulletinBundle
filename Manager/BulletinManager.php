@@ -504,12 +504,14 @@ class BulletinManager
             $qb = $this->em->createQueryBuilder();
             $qb->select('csu')
                 ->from('Claroline\CursusBundle\Entity\CourseSessionUser', 'csu')
+                ->join('csu.session', 's')
                 ->where('csu.user = :user')
                 ->andWhere('csu.userType = :userType')
-                ->andWhere('csu.session IN (:sessions)')
+                ->andWhere('s IN (:sessions)')
                 ->setParameter('user', $eleve)
                 ->setParameter('userType', 0)
-                ->setParameter('sessions', $matieres);
+                ->setParameter('sessions', $matieres)
+                ->orderBy('s.displayOrder', 'ASC');
             $query = $qb->getQuery();
             $sessionUsers = $query->getResult();
 
@@ -925,6 +927,25 @@ class BulletinManager
         $this->om->endFlushSuite();
 
         return $pemps;
+    }
+
+    public function updatePointDiversPoints(array $pointsData)
+    {
+        $pepdps = [];
+        $this->om->startFlushSuite();
+
+        foreach ($pointsData as $pointData) {
+            $pepdp = $this->pepdpRepo->findOneById($pointData['id']);
+            $point = isset($pointData['point']) && (is_int($pointData['point']) || is_float($pointData['point'])) ?
+                $this->truncate($pointData['point']) :
+                null;
+            $pepdp->setPoint($point);
+            $this->om->persist($pepdp);
+            $pepdps[] = $pepdp;
+        }
+        $this->om->endFlushSuite();
+
+        return $pepdps;
     }
 
     public function updatePoints(array $pemps, array $pepdps, array $eleveMatieresOptions, array $pointsDatas, array $pointsDiversDatas, array $delibaratedDatas)

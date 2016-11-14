@@ -70,7 +70,6 @@ export default class CourseController {
       s['total'] = s['details']['total'] ? parseInt(s['details']['total']) : null
       s['displayOrder'] = parseInt(s['displayOrder'])
     })
-    console.log(sessions)
 
 		for (var i = 0; i < offset * size; i++) {
       sessions.unshift({})

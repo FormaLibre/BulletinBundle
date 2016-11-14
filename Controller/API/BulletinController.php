@@ -137,6 +137,37 @@ class BulletinController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
+    public function putElevePointsAction()
+    {
+        $this->checkBulletinAccess();
+        $results = ['pemps' => [], 'pepdps' => []];
+        $pointsData = $this->request->request->get('pemps', false);
+        $pointsDiversData = $this->request->request->get('pepdps', false);
+        $pemps = $this->bulletinManager->updateMatierePoints($pointsData);
+        $pepdps = $this->bulletinManager->updatePointDiversPoints($pointsDiversData);
+
+        foreach ($pemps as $pemp) {
+            $results['pemps'][] = [
+                'id' => $pemp->getId(),
+                'point' => $pemp->getPoint(),
+                'presence' => $pemp->getPresence(),
+                'comportement' => $pemp->getComportement(),
+                'sessionId' => $pemp->getMatiere()->getId(),
+            ];
+        }
+        foreach ($pepdps as $pepdp) {
+            $results['pepdps'][] = [
+                'id' => $pepdp->getId(),
+                'point' => $pepdp->getPoint(),
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * @View(serializerGroups={"api_bulletin"})
+     */
     public function getPointCodesAction()
     {
         $codes = array();
