@@ -230,8 +230,10 @@ class TotauxManager
         $data->datasets = array();
 
         //créons les matières avec les moyens du bord !
-        $periode = $this->periodeRepo->findOneById(1);
-        $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+//        $periode = $this->periodeRepo->findOneById(1);
+        $periodes = $this->periodeRepo->findAll();
+        $periode = count($periodes) > 0 ? $periodes[0] : null;
+        $pemps = is_null($periode) ? [] : $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
 
         foreach ($pemps as $pemp) {
             $matiere = $pemp->getMatiere();
