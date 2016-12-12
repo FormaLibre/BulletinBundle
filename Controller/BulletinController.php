@@ -481,7 +481,17 @@ class BulletinController extends Controller
         $recap = 0;
 
         if ($periode->getTemplate() === 'PeriodePrint'){
-            $pemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+            $pemps = [];
+            $matieres = $this->bulletinManager->getMatieresByEleveAndPeriode($eleve, $periode);
+            $allPemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+
+            foreach ($allPemps as $pemp) {
+                $matiere = $pemp->getMatiere();
+
+                if (in_array($matiere, $matieres)) {
+                    $pemps[] = $pemp;
+                }
+            }
             $pemds = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
             $totaux = $this->totauxManager->getTotalPeriode($periode, $eleve);
             $recap += $totaux['totalPourcentage']/ $periode->getCoefficient();
@@ -496,7 +506,18 @@ class BulletinController extends Controller
 
             foreach ($periodes as $per){
                 $periode = $this->periodeRepo->findOneById($per);
-                $pemps[] = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+                $matieres = $this->bulletinManager->getMatieresByEleveAndPeriode($eleve, $periode);
+                $allPemps = $this->bulletinManager->getPempsByEleveAndPeriode($eleve, $periode);
+                $tempPemps = [];
+
+                foreach ($allPemps as $pemp) {
+                    $matiere = $pemp->getMatiere();
+
+                    if (in_array($matiere, $matieres)) {
+                        $tempPemps[] = $pemp;
+                    }
+                }
+                $pemps[] = $tempPemps;
                 $pemds[] = $this->bulletinManager->getPepdpsByEleveAndPeriode($eleve, $periode);
 
                 $totaux[] = $this->totauxManager->getTotalPeriode($periode, $eleve);
