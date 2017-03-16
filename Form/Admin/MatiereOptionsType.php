@@ -22,6 +22,14 @@ class MatiereOptionsType extends AbstractType
             )
         );
         $builder->add(
+            'certificated',
+            'checkbox',
+            [
+                'required' => false,
+                'label' => 'Certifié',
+            ]
+        );
+        $builder->add(
             'total',
             'integer',
             array(

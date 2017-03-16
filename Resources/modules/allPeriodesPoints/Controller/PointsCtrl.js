@@ -123,7 +123,8 @@ export default class PointsCtrl {
     for (let matiereId in this.pointsDatas) {
       if (this.pointsDatas[matiereId]['periodes'][periodeId] &&
         this.pointsDatas[matiereId]['periodes'][periodeId]['pempId'] &&
-        this.pointsDatas[matiereId]['periodes'][periodeId]['total']) {
+        this.pointsDatas[matiereId]['periodes'][periodeId]['total'] &&
+        this.pointsDatas[matiereId]['periodes'][periodeId]['certificated']) {
 
         const pempId = this.pointsDatas[matiereId]['periodes'][periodeId]['pempId']
         const isCode = this.pemps[pempId] && this.codes[parseFloat(this.pemps[pempId])] ? true : false
@@ -159,7 +160,8 @@ export default class PointsCtrl {
       for (let periodeId in this.pointsDatas[matiereId]['periodes']) {
         if (this.pointsDatas[matiereId]['periodes'][periodeId] &&
           this.pointsDatas[matiereId]['periodes'][periodeId]['pempId'] &&
-          this.pointsDatas[matiereId]['periodes'][periodeId]['total']) {
+          this.pointsDatas[matiereId]['periodes'][periodeId]['total'] &&
+          this.pointsDatas[matiereId]['periodes'][periodeId]['certificated']) {
 
           const pempId = this.pointsDatas[matiereId]['periodes'][periodeId]['pempId']
           const isCode = this.codes[parseFloat(this.pemps[pempId])] ? true : false

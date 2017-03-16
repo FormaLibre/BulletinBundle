@@ -114,6 +114,20 @@ class MatiereController extends FOSRestController
     /**
      * @View(serializerGroups={"api_bulletin"})
      */
+    public function putSessionCertificatedAction(CourseSession $session, $certificated)
+    {
+        $this->throwExceptionIfNotBulletinAdmin();
+        $isCertificated = !empty($certificated);
+        $session->setCertificated($isCertificated);
+        $this->om->persist($session);
+        $this->om->flush();
+
+        return $session;
+    }
+
+    /**
+     * @View(serializerGroups={"api_bulletin"})
+     */
     public function putSessionColorAction(CourseSession $session, $color)
     {
         $this->throwExceptionIfNotBulletinAdmin();

@@ -13,6 +13,11 @@ export default class CourseAPIService {
 		this.$http.put(route)
 	}
 
+	editCertificated(id, certificated) {
+    const route = Routing.generate('api_put_session_certificated', {'session': id, 'certificated': certificated})
+		this.$http.put(route)
+	}
+
 	editColor(id, color) {
     const route = Routing.generate('api_put_session_color', {'session': id, 'color': color})
 		this.$http.put(route)

@@ -51,9 +51,10 @@ class TotauxManager
         $totalTotal = 0;
 
         foreach ($pemps as $pemp) {
-            if ($pemp->getPoint() < 850){
+            $matiere = $pemp->getMatiere();
+
+            if ($pemp->getPoint() < 850 && $matiere->getCertificated()){
                 $totalPoint += $pemp->getPoint();
-                $matiere = $pemp->getMatiere();
                 $matiereTotal = $matiere->getTotal();
                 $total = !is_null($matiereTotal) ? $matiereTotal * $periode->getCoefficient() : 0;
                 $totalTotal += $total;

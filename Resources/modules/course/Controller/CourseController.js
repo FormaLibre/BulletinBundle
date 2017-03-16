@@ -37,6 +37,13 @@ export default class CourseController {
 		 			prop: "name"
 	 			},
 	 			{
+	 				name: this.translate('certificated', {}, 'platform'),
+	 				prop:'certificated',
+          cellRenderer: function() {
+            return '<input type="checkbox" value="{{ $row.certificated }}" ng-model=$row.certificated ng-model-options="{ debounce: 1000 }" ng-change="cmc.editCertificated($row)"></input>';
+          }
+	 			},
+	 			{
 	 				name: this.translate('total', {}, 'platform'),
 	 				prop:'total',
           cellRenderer: function() {
@@ -68,6 +75,7 @@ export default class CourseController {
     sessions.forEach(s => {
       s['color'] = s['details']['color'] ? s['details']['color'] : null
       s['total'] = s['details']['total'] ? parseInt(s['details']['total']) : null
+      s['certificated'] = s['details']['certificated'] !== undefined ? s['details']['certificated'] : true
       s['displayOrder'] = parseInt(s['displayOrder'])
     })
 
@@ -89,6 +97,11 @@ export default class CourseController {
 		this.CourseAPIService.editTotal($row.id, $row.total)
 	}
 
+	editCertificated($row) {
+    const certificated = $row.certificated ? 1 : 0
+		this.CourseAPIService.editCertificated($row.id, certificated)
+	}
+
 	editPosition($row) {
 		this.CourseAPIService.editPosition($row.id, $row.displayOrder)
 	}
@@ -97,8 +110,8 @@ export default class CourseController {
 		this.CourseAPIService.editColor($row.id, $row.color)
 	}
 
-    translate(key, data = {}) {
-        return window.Translator.trans(key, data, 'platform');
+    translate(key, data = {}, domain = 'platform') {
+        return window.Translator.trans(key, data, domain);
     }
 
 	_onSearch(searches) {

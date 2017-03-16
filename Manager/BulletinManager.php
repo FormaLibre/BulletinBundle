@@ -1125,6 +1125,7 @@ class BulletinManager
                 $matiereTotal = $matiere->getTotal();
                 $total = !empty($matiereTotal) ? $matiereTotal * $periode->getCoefficient() : null;
                 $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $total;
+                $userMatieresDatas[$matiereId]['periodes'][$periodeId]['certificated'] = $matiere->getCertificated();
                 $pempsDatas[$pempId] = $point;
             }
         }
@@ -1158,6 +1159,7 @@ class BulletinManager
             $matiereTotal = $matiere->getTotal();
             $total = !empty($matiereTotal) ? $matiereTotal * $periode->getCoefficient() : null;
             $userMatieresDatas[$matiereId]['periodes'][$periodeId]['total'] = $total;
+            $userMatieresDatas[$matiereId]['periodes'][$periodeId]['certificated'] = $matiere->getCertificated();
             $pempsDatas[$pempId] = $point;
         }
 
@@ -1200,7 +1202,7 @@ class BulletinManager
                     $totalPeriodeSets[$periodeSet] = array('point' => 0, 'total' => 0);
                 }
 
-                if (isset($datas['point']) && isset($datas['total'])) {
+                if (isset($datas['point']) && isset($datas['total']) && isset($datas['certificated']) && $datas['certificated']) {
                     $ignored = isset($codes[$datas['point']]) && $codes[$datas['point']]['ignored'];
 
                     if (!$ignored) {
@@ -1256,7 +1258,8 @@ class BulletinManager
                 foreach ($userMatieresDatas as $matiereDatas) {
                     if (isset($matiereDatas['periodes'][$periodeId]) &&
                         isset($matiereDatas['periodes'][$periodeId]['point']) &&
-                        isset($matiereDatas['periodes'][$periodeId]['total'])) {
+                        isset($matiereDatas['periodes'][$periodeId]['total']) &&
+                        $matiereDatas['periodes'][$periodeId]['certificated']) {
 
                         $point = $matiereDatas['periodes'][$periodeId]['point'];
                         $ignored = isset($codes[$point]) && $codes[$point]['ignored'];
