@@ -734,6 +734,7 @@ class BulletinManager
             $datas = array(
                 'matiereId' => $matiereId,
                 'matiereName' => $matiereName,
+                'certificated' => $matiere->getCertificated(),
                 'total' => $total,
                 'position' => $position,
                 'optionsId' => $eleveMatiereOptions->getId(),
