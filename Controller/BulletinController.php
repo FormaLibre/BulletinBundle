@@ -476,6 +476,7 @@ class BulletinController extends Controller
 
             return $this->printComplete($eleve, $periode->getTemplate());
         }
+
         $totaux = [];
         $totauxMatieres = [];
         $recap = 0;
@@ -957,6 +958,8 @@ class BulletinController extends Controller
         $params['eleve'] = $eleve;
         $params['classe'] = $this->bulletinManager->getClasseByEleve($eleve);
         $params['isBulletinAdmin'] = $this->isBulletinAdmin();
+
+        //throw new \Exception('here');
 
         return $this->render('FormaLibreBulletinBundle::Templates/'.$template.'.html.twig', $params);
     }

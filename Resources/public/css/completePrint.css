@@ -21,13 +21,20 @@
         margin:0px;
     }
 
-   .table
+}
 
+body{
+    font-size:9.5px;
+}
+
+#pointDivers {
+    font-size:6px;
 }
 
 .firstcolumn{
-    width: 40%;
+    width: 22%;
 }
+
 .page-break-element {
     page-break-before: always;
 }
@@ -37,13 +44,13 @@
 }
 
 #title-box h1{
-    font-size: 40px;
+    font-size: 30px;
     margin:0px;
 }
 
 #NomEleve{
     text-align: right;
-    font-size: 20px;
+    font-size: 14px;
 }
 
 .center{
@@ -81,17 +88,19 @@
 }
 
 .signature{
-    height: 100px;
     font-size:8px;
     text-align: center;
 }
 
 .signature .panel{
-    height: 100%;
+    border:0px;
 }
 
-#signature-directeur {
-    height: 50px;
+.signature .panel-body{
+    height:1px;
+    line-height:1px;
+    font-size:1px;
+    padding:0px;
 }
 
 .echec{
