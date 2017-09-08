@@ -411,23 +411,23 @@ class Periode
      * 
      * @param \FormaLibre\BulletinBundle\Entity\Periode $oldPeriode1
      */
-    function setOldPeriode1(Periode $oldPeriode1) {
+    function setOldPeriode1(Periode $oldPeriode1 = null) {
         $this->oldPeriode1 = $oldPeriode1;
     }
 
-    function setOldPeriode2($oldPeriode2) {
+    function setOldPeriode2($oldPeriode2 = null) {
         $this->oldPeriode2 = $oldPeriode2;
     }
 
-    function setOldPeriode3($oldPeriode3) {
+    function setOldPeriode3($oldPeriode3 = null) {
         $this->oldPeriode3 = $oldPeriode3;
     }
 
-    function setOldPeriode4($oldPeriode4) {
+    function setOldPeriode4($oldPeriode4 = null) {
         $this->oldPeriode4 = $oldPeriode4;
     }
 
-    function setOldPeriode5($oldPeriode5) {
+    function setOldPeriode5($oldPeriode5 = null) {
         $this->oldPeriode5 = $oldPeriode5;
     }
 

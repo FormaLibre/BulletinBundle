@@ -18,6 +18,7 @@ use FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use JMS\DiExtraBundle\Annotation as DI;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -28,6 +29,7 @@ class BulletinManager
 {
     use LoggableTrait;
 
+    private $container;
     private $em;
     private $eventDispatcher;
     private $fileSystem;
@@ -52,6 +54,7 @@ class BulletinManager
 
     /**
      * @DI\InjectParams({
+     *     "container"             = @DI\Inject("service_container"),
      *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
      *     "eventDispatcher"       = @DI\Inject("claroline.event.event_dispatcher"),
      *     "fileSystem"            = @DI\Inject("filesystem"),
@@ -64,6 +67,7 @@ class BulletinManager
      * })
      */
     public function __construct(
+        ContainerInterface $container,
         EntityManager $em,
         StrictDispatcher $eventDispatcher,
         Filesystem $fileSystem,
@@ -75,6 +79,7 @@ class BulletinManager
         RouterInterface $router
     )
     {
+        $this->container = $container;
         $this->em = $em;
         $this->eventDispatcher = $eventDispatcher;
         $this->fileSystem = $fileSystem;
@@ -1469,7 +1474,29 @@ class BulletinManager
             $this->log('Checking directories permissions...');
             $this->fileSystem->chmod($archivesDir, 0775, 0000, true);
         }
-        $this->log('Done.');
+        $this->log('All bulletins have been archived.');
+    }
+
+    public function deleteAllPeriodes()
+    {
+        $this->log('Deleting all periodes...');
+        $periodes = $this->periodeRepo->findAll();
+        $this->om->startFlushSuite();
+
+        foreach ($periodes as $periode) {
+            $periode->setOldPeriode1(null);
+            $periode->setOldPeriode2(null);
+            $periode->setOldPeriode3(null);
+            $periode->setOldPeriode4(null);
+            $periode->setOldPeriode5(null);
+        }
+        $this->om->forceFlush();
+
+        foreach ($periodes as $periode) {
+            $this->om->remove($periode);
+        }
+        $this->om->endFlushSuite();
+        $this->log('All periodes have been deleted.');
     }
 
     public function setLogger(LoggerInterface $logger)
