@@ -1434,6 +1434,7 @@ class BulletinManager
         $year = $now->format('Y');
         $archivesDir = $this->pdfDir.'archives';
         $baseDir = $archivesDir.$ds.$year.$ds;
+        $errors = [];
 
         $periodes = $periodeId ? $this->periodeRepo->findBy(['id' => $periodeId]) : $this->periodeRepo->findAll();
 
@@ -1462,6 +1463,7 @@ class BulletinManager
                 try {
                     $this->pdfGenerator->generate($elevesUrl, $dir, $options, true);
                 } catch (\Exception $e) {
+                    $errors[] = ['group' => $group->getId(), 'periode' => $periode->getId()];
                     $this->log(
                         'ERROR : [GROUP] '.$group->getName().' ('.$group->getId().') => [PERIODE] '.$periode->getName().' ('.$periode->getId().')',
                         LogLevel::ERROR
@@ -1475,6 +1477,14 @@ class BulletinManager
             $this->fileSystem->chmod($archivesDir, 0775, 0000, true);
         }
         $this->log('All bulletins have been archived.');
+
+        if (count($errors) > 0) {
+            $this->log('The generation of the PDF for the following Group-Periode pairs has failed :', LogLevel::ERROR);
+
+            foreach ($errors as $error) {
+                $this->log($error['group'].' - '.$error['periode'], LogLevel::ERROR);
+            }
+        }
     }
 
     public function deleteAllPeriodes()
