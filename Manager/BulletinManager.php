@@ -187,11 +187,11 @@ class BulletinManager
         return $matieres;
     }
 
-    public function getGroupsByPeriode(Periode $periode)
+    public function getGroupsByPeriode(Periode $periode, $groupId = null)
     {
         $matieres = $periode->getMatieres();
 
-        return $this->getGroupsByMatieres($matieres);
+        return $this->getGroupsByMatieres($matieres, $groupId);
     }
 
     public function getGroupsByMatiere(CourseSession $matiere)
@@ -225,7 +225,7 @@ class BulletinManager
         return $groups;
     }
 
-    public function getGroupsByMatieres(array $matieres)
+    public function getGroupsByMatieres(array $matieres, $filteredGroupId = null)
     {
         $groups = array();
 
@@ -249,7 +249,7 @@ class BulletinManager
                     $group = $sessionGroup->getGroup();
                     $groupId = $group->getId();
 
-                    if (!isset($groups[$groupId])) {
+                    if (!isset($groups[$groupId]) && (!$filteredGroupId || intval($filteredGroupId) === $groupId)) {
                         $groups[$groupId] = $group;
                     }
                 }
@@ -1421,7 +1421,7 @@ class BulletinManager
         }
     }
 
-    public function archiveAllBulletins()
+    public function archiveAllBulletins($groupId = null, $periodeId = null)
     {
         $ds = DIRECTORY_SEPARATOR;
         $this->log('Archiving all bulletins...');
@@ -1430,10 +1430,10 @@ class BulletinManager
         $archivesDir = $this->pdfDir.'archives';
         $baseDir = $archivesDir.$ds.$year.$ds;
 
-        $periodes = $this->periodeRepo->findAll();
+        $periodes = $periodeId ? $this->periodeRepo->findBy(['id' => $periodeId]) : $this->periodeRepo->findAll();
 
         foreach ($periodes as $periode) {
-            $groups = $this->getGroupsByPeriode($periode);
+            $groups = $this->getGroupsByPeriode($periode, $groupId);
 
             foreach ($groups as $group) {
                 $this->log('Generating PDF for Group ['.$group->getName().'] and Periode ['.$periode->getName().']...');
@@ -1457,6 +1457,10 @@ class BulletinManager
                 try {
                     $this->pdfGenerator->generate($elevesUrl, $dir, $options, true);
                 } catch (\Exception $e) {
+                    $this->log(
+                        'ERROR : [GROUP] '.$group->getName().' ('.$group->getId().') => [PERIODE] '.$periode->getName().' ('.$periode->getId().')',
+                        LogLevel::ERROR
+                    );
                     $this->log($e->getMessage(), LogLevel::ERROR);
                 }
             }
