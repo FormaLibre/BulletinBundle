@@ -2,6 +2,7 @@
 
 namespace FormaLibre\BulletinBundle\Manager;
 
+use Claroline\BundleRecorder\Log\LoggableTrait;
 use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Event\StrictDispatcher;
 use Claroline\CoreBundle\Library\Configuration\PlatformConfigurationHandler;
@@ -10,23 +11,32 @@ use Claroline\CoreBundle\Persistence\ObjectManager;
 use Claroline\CursusBundle\Entity\CourseSession;
 use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Entity\EleveMatiereOptions;
-use FormaLibre\BulletinBundle\Entity\MatiereOptions;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\LockStatus;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use FormaLibre\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use JMS\DiExtraBundle\Annotation as DI;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @DI\Service("formalibre.manager.bulletin_manager")
  */
 class BulletinManager
 {
+    use LoggableTrait;
+
     private $em;
     private $eventDispatcher;
+    private $fileSystem;
     private $om;
     private $pagerFactory;
     private $platformConfigHandler;
+    private $pdfDir;
+    private $pdfGenerator;
+    private $router;
 
     private $groupeTitulaireRepo;
     private $groupRepo;
@@ -38,29 +48,42 @@ class BulletinManager
     private $pointCodeRepo;
     private $eleveMatiereOptionsRepo;
     private $sessionRepo;
+    private $userRepo;
 
     /**
      * @DI\InjectParams({
      *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
      *     "eventDispatcher"       = @DI\Inject("claroline.event.event_dispatcher"),
+     *     "fileSystem"            = @DI\Inject("filesystem"),
      *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
      *     "pagerFactory"          = @DI\Inject("claroline.pager.pager_factory"),
-     *     "platformConfigHandler" = @DI\Inject("claroline.config.platform_config_handler")
+     *     "platformConfigHandler" = @DI\Inject("claroline.config.platform_config_handler"),
+     *     "pdfDir"                = @DI\Inject("%formalibre.directories.pdf%"),
+     *     "pdfGenerator"          = @DI\Inject("knp_snappy.pdf"),
+     *     "router"                = @DI\Inject("router")
      * })
      */
     public function __construct(
         EntityManager $em,
         StrictDispatcher $eventDispatcher,
+        Filesystem $fileSystem,
         ObjectManager $om,
         PagerFactory $pagerFactory,
-        PlatformConfigurationHandler $platformConfigHandler
+        PlatformConfigurationHandler $platformConfigHandler,
+        $pdfDir,
+        $pdfGenerator,
+        RouterInterface $router
     )
     {
         $this->em = $em;
         $this->eventDispatcher = $eventDispatcher;
+        $this->fileSystem = $fileSystem;
         $this->om = $om;
         $this->pagerFactory = $pagerFactory;
         $this->platformConfigHandler = $platformConfigHandler;
+        $this->pdfDir = $pdfDir;
+        $this->pdfGenerator = $pdfGenerator;
+        $this->router = $router;
 
         $this->groupeTitulaireRepo = $om->getRepository('FormaLibreBulletinBundle:GroupeTitulaire');
         $this->groupRepo = $om->getRepository('ClarolineCoreBundle:Group');
@@ -73,6 +96,7 @@ class BulletinManager
         $this->pointCodeRepo = $om->getRepository('FormaLibreBulletinBundle:PointCode');
         $this->eleveMatiereOptionsRepo = $om->getRepository('FormaLibreBulletinBundle:EleveMatiereOptions');
         $this->sessionRepo = $om->getRepository('ClarolineCursusBundle:CourseSession');
+        $this->userRepo = $om->getRepository('ClarolineCoreBundle:User');
     }
 
     public function getTaggedGroups()
@@ -87,7 +111,7 @@ class BulletinManager
         );
         $event = $this->eventDispatcher->dispatch(
             'claroline_retrieve_tagged_objects',
-            'GenericDatas',
+            'GenericData',
             array($params)
         );
         $taggedGroups = $event->getResponse();
@@ -1395,5 +1419,62 @@ class BulletinManager
             }
             $this->om->endFlushSuite();
         }
+    }
+
+    public function archiveAllBulletins()
+    {
+        $ds = DIRECTORY_SEPARATOR;
+        $this->log('Archiving all bulletins...');
+        $now = new \DateTime();
+        $year = $now->format('Y');
+        $archivesDir = $this->pdfDir.'archives';
+        $baseDir = $archivesDir.$ds.$year.$ds;
+
+        $periodes = $this->periodeRepo->findAll();
+
+        foreach ($periodes as $periode) {
+            $groups = $this->getGroupsByPeriode($periode);
+
+            foreach ($groups as $group) {
+                $this->log('Generating PDF for Group ['.$group->getName().'] and Periode ['.$periode->getName().']...');
+                $fileName = $group->getName().'-'.$periode->getName().'.pdf';
+                $dir = $baseDir.$group->getName().$ds.$fileName;
+                $eleves = $this->userRepo->findByGroup($group);
+                $elevesUrl = [];
+
+                foreach ($eleves as $eleve){
+                    $elevesUrl[] = $this->router->generate(
+                        'formalibreBulletinPrintEleve',
+                        ['periode' => $periode->getId(), 'eleve' => $eleve->getId()],
+                        true
+                    );
+                }
+                $template = $periode->getTemplate();
+                $options = ($template === 'CompletePrint' || $template === 'CompletePrintLarge') ?
+                    ['orientation' => 'landscape', 'page-size' => 'A3'] :
+                    [];
+
+                try {
+                    $this->pdfGenerator->generate($elevesUrl, $dir, $options, true);
+                } catch (\Exception $e) {
+                    $this->log($e->getMessage(), LogLevel::ERROR);
+                }
+            }
+        }
+        if (is_dir($archivesDir)) {
+            $this->log('Checking directories permissions...');
+            $this->fileSystem->chmod($archivesDir, 0775, 0000, true);
+        }
+        $this->log('Done.');
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function getLogger()
+    {
+        return $this->logger;
     }
 }

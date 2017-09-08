@@ -4,7 +4,7 @@ namespace FormaLibre\BulletinBundle\Controller;
 
 use Claroline\CoreBundle\Entity\Group;
 use Claroline\CoreBundle\Entity\User;
-use Claroline\CursusBundle\Entity\CourseSession;
+use Claroline\CoreBundle\Library\Configuration\PlatformConfigurationHandler;
 use Claroline\CoreBundle\Manager\RoleManager;
 use Claroline\CoreBundle\Manager\ToolManager;
 use Claroline\CoreBundle\Manager\UserManager;
@@ -14,15 +14,12 @@ use Doctrine\ORM\EntityManager;
 use FormaLibre\BulletinBundle\Entity\Decision;
 use FormaLibre\BulletinBundle\Entity\PeriodesGroup;
 use FormaLibre\BulletinBundle\Entity\GroupeTitulaire;
-use FormaLibre\BulletinBundle\Entity\Pemps;
 use FormaLibre\BulletinBundle\Entity\Periode;
 use FormaLibre\BulletinBundle\Entity\PeriodeEleveDecision;
 use FormaLibre\BulletinBundle\Entity\PointDivers;
-use FormaLibre\BulletinBundle\Entity\MatiereOptions;
 use FormaLibre\BulletinBundle\Form\Admin\BulletinConfigurationType;
 use FormaLibre\BulletinBundle\Form\Admin\DecisionType;
 use FormaLibre\BulletinBundle\Form\Admin\GroupeTitulaireType;
-use FormaLibre\BulletinBundle\Form\Admin\MatiereOptionsCollectionType;
 use FormaLibre\BulletinBundle\Form\Admin\PeriodeType;
 use FormaLibre\BulletinBundle\Form\Admin\PeriodeOptionsType;
 use FormaLibre\BulletinBundle\Form\Admin\PointDiversType;
@@ -31,6 +28,7 @@ use FormaLibre\BulletinBundle\Form\Admin\UserDecisionEditType;
 use FormaLibre\BulletinBundle\Form\Admin\PeriodesGroupType;
 use FormaLibre\BulletinBundle\Manager\BulletinManager;
 use JMS\DiExtraBundle\Annotation as DI;
+use Ramsey\Uuid\Uuid;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\FormFactory;
@@ -42,12 +40,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use JMS\Serializer\SerializationContext;
 
 class BulletinAdminController extends Controller
 {
     private $authorization;
     private $bulletinManager;
+    private $configHandler;
     private $em;
     private $formFactory;
     private $om;
@@ -81,6 +79,7 @@ class BulletinAdminController extends Controller
      * @DI\InjectParams({
      *     "authorization"         = @DI\Inject("security.authorization_checker"),
      *     "bulletinManager"       = @DI\Inject("formalibre.manager.bulletin_manager"),
+     *     "configHandler"         = @DI\Inject("claroline.config.platform_config_handler"),
      *     "em"                    = @DI\Inject("doctrine.orm.entity_manager"),
      *     "formFactory"           = @DI\Inject("form.factory"),
      *     "om"                    = @DI\Inject("claroline.persistence.object_manager"),
@@ -96,6 +95,7 @@ class BulletinAdminController extends Controller
     public function __construct(
         AuthorizationCheckerInterface $authorization,
         BulletinManager $bulletinManager,
+        PlatformConfigurationHandler $configHandler,
         EntityManager $em,
         FormFactory $formFactory,
         ObjectManager $om,
@@ -110,6 +110,7 @@ class BulletinAdminController extends Controller
     {
         $this->authorization = $authorization;
         $this->bulletinManager = $bulletinManager;
+        $this->configHandler = $configHandler;
         $this->em = $em;
         $this->formFactory = $formFactory;
         $this->om = $om;
@@ -1247,5 +1248,59 @@ class BulletinAdminController extends Controller
         );
 
         return new JsonResponse(['id' => $group->getId()], 200);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/archives/download",
+     *     name="formalibre_bulletin_archives_download",
+     *     options = {"expose"=true}
+     * )
+     */
+    public function archivesDownloadAction()
+    {
+        $this->checkOpen();
+        $archivesDir = $this->pdfDir.'archives'.DIRECTORY_SEPARATOR;
+        $archivesDir = str_replace('\\', '/', realpath($archivesDir));
+        $tempDir = $this->configHandler->getParameter('tmp_dir');
+        $hashName = Uuid::uuid4()->toString();
+        $archivePath = $tempDir.DIRECTORY_SEPARATOR.$hashName.'.zip';
+        $archive = new \ZipArchive();
+        $archive->open($archivePath, \ZipArchive::CREATE);
+        $nbFiles = 0;
+
+        if (is_dir($archivesDir)) {
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($archivesDir),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+
+            foreach ($files as $file) {
+                $file = str_replace('\\', '/', $file);
+
+                if (in_array(substr($file, strrpos($file, '/') + 1), ['.', '..'])) {
+                    continue;
+                }
+                if (is_dir($file)) {
+                    $archive->addEmptyDir(str_replace($archivesDir . '/', '', $file));
+                    ++$nbFiles;
+                } elseif (is_file($file)) {
+                    $str = str_replace($archivesDir . '/', '', '/' . $file);
+                    $archive->addFromString($str, file_get_contents($file));
+                    ++$nbFiles;
+                }
+            }
+        }
+        if ($nbFiles === 0) {
+            $archive->addFromString('empty', '');
+        }
+        $archive->close();
+
+        $headers = array(
+            'Content-Type'          => 'application/pdf',
+            'Content-Disposition'   => 'attachment; filename="archives.zip"'
+        );
+
+        return new Response(file_get_contents($archivePath), 200, $headers);
     }
 }
